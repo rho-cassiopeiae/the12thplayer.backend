@@ -1,9 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Mvc;
+
+using MediatR;
+
+using Identity.Application.Account.Commands.SignUp;
+using Identity.Application.Common.Results;
 
 namespace Identity.Api.Controllers {
-    public class AccountController {
+    [Route("[controller]")]
+    public class AccountController : ControllerBase {
+        private readonly ISender _mediator;
+
+        public AccountController(ISender mediator) {
+            _mediator = mediator;
+        }
+
+        [HttpPost("sign-up")]
+        public Task<VoidResult> SignUp([FromBody] SignUpCommand command)
+            => _mediator.Send(command);
     }
 }
