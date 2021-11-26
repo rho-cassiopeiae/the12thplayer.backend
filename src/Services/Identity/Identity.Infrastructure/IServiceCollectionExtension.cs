@@ -52,6 +52,7 @@ namespace Identity.Infrastructure {
             services.TryAddScoped<SignInManager<User>>();
 
             services.AddScoped<IUserService, UserService>();
+            services.AddSingleton<ISecurityTokenProvider, SecurityTokenProvider>();
 
             return services;
         }

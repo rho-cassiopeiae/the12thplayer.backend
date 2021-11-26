@@ -17,8 +17,8 @@ namespace Identity.Application.Account.Commands.SignUp {
     }
 
     public class SignUpCommandHandler : IRequestHandler<SignUpCommand, VoidResult> {
-        private ILogger<SignUpCommandHandler> _logger;
-        private IUserService _userService;
+        private readonly ILogger<SignUpCommandHandler> _logger;
+        private readonly IUserService _userService;
 
         public SignUpCommandHandler(
             ILogger<SignUpCommandHandler> logger,
@@ -46,6 +46,10 @@ namespace Identity.Application.Account.Commands.SignUp {
             }
 
             _logger.LogInformation("User {Email} signed up successfully", user.Email);
+            _logger.LogTrace(
+                "User {Email} confirmation code: {Code}",
+                user.Email, outcome.Data
+            );
 
             return VoidResult.Instance;
         }

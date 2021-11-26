@@ -1,5 +1,5 @@
 ﻿namespace Identity.Application.Common.Results {
-    public class Maybe<T> where T : class {
+    public struct Maybe<T> where T : class {
         public T Error { get; }
 
         public bool IsError => Error != null;
