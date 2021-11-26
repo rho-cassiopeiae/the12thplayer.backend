@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Identity.Infrastructure.Account.Persistence.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20211126112332_Create_Integration_Event_Trigger")]
-    partial class Create_Integration_Event_Trigger
+    [Migration("20211126142239_Create_New_Integration_Event_Trigger")]
+    partial class Create_New_Integration_Event_Trigger
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

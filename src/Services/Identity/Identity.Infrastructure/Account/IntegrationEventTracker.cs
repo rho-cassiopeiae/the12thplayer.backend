@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Identity.Infrastructure.Account.Persistence.Models;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -76,25 +72,12 @@ namespace Identity.Infrastructure.Account {
             }
 
             while (true) {
-                try {
-                    await _connection.WaitAsync(cts.Token);
-                } catch (OperationCanceledException e) {
-                    _logger.LogWarning(
-                        e,
-                        "Error listening for new notifications; Connection closed or broken"
-                    );
-
-                    return;
-                }
+                await _connection.WaitAsync(cts.Token);
             }
         }
 
         private async void _fetchAndPublishEvent(string payload) {
-            var eventId = JsonSerializer
-                .Deserialize<Dictionary<string, JsonElement>>(payload)
-                [nameof(IntegrationEvent.Id)]
-                .GetInt32();
-
+            var eventId = int.Parse(payload);
             try {
                 await using var publisher =
                     _serviceProvider.GetRequiredService<IIntegrationEventPublisher>();
