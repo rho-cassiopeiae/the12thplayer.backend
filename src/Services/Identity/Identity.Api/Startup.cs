@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Identity.Application;
 using Identity.Infrastructure;
 using Identity.Api.Controllers.Filters;
+using Identity.Api.HostedServices;
 
 namespace Identity.Api {
     public class Startup {
@@ -31,6 +32,8 @@ namespace Identity.Api {
                     options.JsonSerializerOptions.PropertyNamingPolicy =
                         JsonNamingPolicy.CamelCase;
                 });
+
+            services.AddHostedService<IntegrationEventDispatcher>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {

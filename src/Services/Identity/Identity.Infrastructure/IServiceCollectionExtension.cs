@@ -54,6 +54,13 @@ namespace Identity.Infrastructure {
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<ISecurityTokenProvider, SecurityTokenProvider>();
 
+            services.AddTransient<
+                IIntegrationEventPublisher, IntegrationEventPublisher
+            >();
+            services.AddTransient<
+                IIntegrationEventTracker, IntegrationEventTracker
+            >();
+
             return services;
         }
     }
