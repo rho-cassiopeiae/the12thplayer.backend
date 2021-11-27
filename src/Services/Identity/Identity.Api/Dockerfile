@@ -13,10 +13,16 @@ COPY ["Services/Identity/Identity.Api/Identity.Api.csproj", "Services/Identity/I
 COPY ["Services/Identity/Identity.Application/Identity.Application.csproj", "Services/Identity/Identity.Application/"]
 COPY ["Services/Identity/Identity.Domain/Identity.Domain.csproj", "Services/Identity/Identity.Domain/"]
 COPY ["Services/Identity/Identity.Infrastructure/Identity.Infrastructure.csproj", "Services/Identity/Identity.Infrastructure/"]
-COPY ["Services/Identity/Identity.Migrator/Identity.Migrator.csproj", "Services/Identity/Identity.Migrator/"]
+
+COPY ["Services/Profile/Profile.Api/Profile.Api.csproj", "Services/Profile/Profile.Api/"]
+COPY ["Services/Profile/Profile.Application/Profile.Application.csproj", "Services/Profile/Profile.Application/"]
+COPY ["Services/Profile/Profile.Domain/Profile.Domain.csproj", "Services/Profile/Profile.Domain/"]
+COPY ["Services/Profile/Profile.Infrastructure/Profile.Infrastructure.csproj", "Services/Profile/Profile.Infrastructure/"]
 
 COPY ["Services/Notification/Notification.Host/Notification.Host.csproj", "Services/Notification/Notification.Host/"]
 COPY ["Services/Notification/Notification.Application/Notification.Application.csproj", "Services/Notification/Notification.Application/"]
+
+COPY ["Deploy/Migrator/Migrator.csproj", "Deploy/Migrator/"]
 
 COPY "docker-compose.dcproj" "docker-compose.dcproj"
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using HostBuilder = Microsoft.Extensions.Hosting.Host;
 
 using MassTransit;
+using MassTransit.Definition;
 
 using MessageBus.Components.HostedServices;
 
@@ -26,7 +27,12 @@ namespace Notification.Host {
                         busCfg.UsingRabbitMq((context, rabbitCfg) => {
                             rabbitCfg.Host("rabbit");
 
-                            rabbitCfg.ConfigureEndpoints(context);
+                            rabbitCfg.ConfigureEndpoints(
+                                context,
+                                new KebabCaseEndpointNameFormatter(
+                                    "notification", false
+                                )
+                            );
                         });
                     });
 

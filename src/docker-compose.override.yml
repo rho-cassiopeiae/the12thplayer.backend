@@ -4,10 +4,10 @@ services:
   postgres:
     image: bitnami/postgresql:13.3.0
     environment:
-    - POSTGRESQL_DATABASE=Identity
+    - POSTGRESQL_DATABASE=The12thPlayerDev
     - POSTGRESQL_POSTGRES_PASSWORD=postgres
-    - POSTGRESQL_USERNAME=IdentityUser
-    - POSTGRESQL_PASSWORD=IdentityPassword
+    - POSTGRESQL_USERNAME=The12thPlayerUser
+    - POSTGRESQL_PASSWORD=The12thPlayerPassword
     - POSTGRESQL_SHARED_PRELOAD_LIBRARIES=pgaudit,pg_stat_statements
     ports:
     - "5432:5432"
@@ -18,6 +18,12 @@ services:
     - "15672:15672"
     - "5672"
 
+  migrator:
+    environment:
+    - DOTNET_ENVIRONMENT=Development
+    depends_on:
+    - postgres
+
   identity:
     environment:
     - ASPNETCORE_ENVIRONMENT=Development
@@ -25,14 +31,18 @@ services:
     ports:
     - "5000:80"
     depends_on:
-    - identity-migrator
+    - migrator
     - rabbit
 
-  identity-migrator:
+  profile:
     environment:
-    - DOTNET_ENVIRONMENT=Development
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://0.0.0.0:80
+    ports:
+    - "6000:80"
     depends_on:
-    - postgres
+    - migrator
+    - rabbit
 
   notification:
     environment:

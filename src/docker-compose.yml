@@ -7,14 +7,20 @@ services:
       context: .
       dockerfile: Services/Identity/Identity.Api/Dockerfile
 
-  identity-migrator:
-    image: ${REGISTRY:-the12thplayer}/identity.migrator:${PLATFORM:-linux}-${TAG:-latest}
+  profile:
+    image: ${REGISTRY:-the12thplayer}/profile.api:${PLATFORM:-linux}-${TAG:-latest}
     build:
       context: .
-      dockerfile: Services/Identity/Identity.Migrator/Dockerfile
+      dockerfile: Services/Profile/Profile.Api/Dockerfile
 
   notification:
     image: ${REGISTRY:-the12thplayer}/notification.host:${PLATFORM:-linux}-${TAG:-latest}
     build:
       context: .
       dockerfile: Services/Notification/Notification.Host/Dockerfile
+
+  migrator:
+    image: ${REGISTRY:-the12thplayer}/migrator:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Deploy/Migrator/Dockerfile
