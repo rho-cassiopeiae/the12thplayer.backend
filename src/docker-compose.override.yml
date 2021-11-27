@@ -1,0 +1,41 @@
+version: '3.4'
+
+services:
+  postgres:
+    image: bitnami/postgresql:13.3.0
+    environment:
+    - POSTGRESQL_DATABASE=Identity
+    - POSTGRESQL_POSTGRES_PASSWORD=postgres
+    - POSTGRESQL_USERNAME=IdentityUser
+    - POSTGRESQL_PASSWORD=IdentityPassword
+    - POSTGRESQL_SHARED_PRELOAD_LIBRARIES=pgaudit,pg_stat_statements
+    ports:
+    - "5432:5432"
+  
+  rabbit:
+    image: masstransit/rabbitmq:3.9.7
+    ports:
+    - "15672:15672"
+    - "5672"
+
+  identity:
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://0.0.0.0:80
+    ports:
+    - "5000:80"
+    depends_on:
+    - identity-migrator
+    - rabbit
+
+  identity-migrator:
+    environment:
+    - DOTNET_ENVIRONMENT=Development
+    depends_on:
+    - postgres
+
+  notification:
+    environment:
+    - DOTNET_ENVIRONMENT=Development
+    depends_on:
+    - rabbit

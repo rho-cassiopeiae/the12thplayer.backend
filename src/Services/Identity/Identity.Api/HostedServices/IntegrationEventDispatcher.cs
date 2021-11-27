@@ -37,7 +37,7 @@ namespace Identity.Api.HostedServices {
                     }
                 },
                 null,
-                TimeSpan.Zero,
+                TimeSpan.FromMinutes(1),
                 TimeSpan.FromMinutes(1)
             );
 

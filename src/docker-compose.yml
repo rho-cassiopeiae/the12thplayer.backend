@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  identity:
+    image: ${REGISTRY:-the12thplayer}/identity.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/Identity/Identity.Api/Dockerfile
+
+  identity-migrator:
+    image: ${REGISTRY:-the12thplayer}/identity.migrator:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/Identity/Identity.Migrator/Dockerfile
+
+  notification:
+    image: ${REGISTRY:-the12thplayer}/notification.host:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/Notification/Notification.Host/Dockerfile

@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using MassTransit;
 
+using MessageBus.Components.HostedServices;
+
 using Identity.Infrastructure.Account;
 using Identity.Infrastructure.Account.Persistence;
 using Identity.Infrastructure.Account.Persistence.Models;
@@ -65,8 +67,11 @@ namespace Identity.Infrastructure {
 
             services.AddMassTransit(busCfg => {
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
+                    rabbitCfg.Host("rabbit");
                 });
             });
+
+            services.AddHostedService<MassTransitBusController>();
 
             return services;
         }

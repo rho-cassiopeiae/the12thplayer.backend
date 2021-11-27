@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\BuildingBlocks\MessageBus\MessageBus.Contracts\MessageBus.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\MessageBus\MessageBus.Components\MessageBus.Components.csproj" />
     <ProjectReference Include="..\Identity.Application\Identity.Application.csproj" />
   </ItemGroup>
 
