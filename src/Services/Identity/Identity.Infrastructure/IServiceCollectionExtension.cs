@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
+using MassTransit;
+
 using Identity.Infrastructure.Account;
 using Identity.Infrastructure.Account.Persistence;
 using Identity.Infrastructure.Account.Persistence.Models;
@@ -60,6 +62,11 @@ namespace Identity.Infrastructure {
             services.AddTransient<
                 IIntegrationEventTracker, IntegrationEventTracker
             >();
+
+            services.AddMassTransit(busCfg => {
+                busCfg.UsingRabbitMq((context, rabbitCfg) => {
+                });
+            });
 
             return services;
         }

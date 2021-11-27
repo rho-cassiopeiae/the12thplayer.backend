@@ -4,7 +4,7 @@ using Identity.Infrastructure.Account.Persistence.Migrations.Scripts;
 
 namespace Identity.Infrastructure.Account.Persistence.Migrations
 {
-    public partial class Create_New_Integration_Event_Trigger : Migration
+    public partial class Add_New_Integration_Event_Trigger : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.SqlResource("Identity.Infrastructure.Account.Persistence.Migrations.Scripts.Functions.NotifyAboutIntegrationEvent.NotifyAboutIntegrationEvent.v0.sql");

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Data;
 using System.Linq;
 using System.Text.Json;
@@ -8,6 +9,10 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
 using Npgsql;
+using MassTransit;
+
+using MessageBus.Contracts;
+using MessageBus.Contracts.Events.Identity;
 
 using Identity.Infrastructure.Account.Persistence;
 using Identity.Infrastructure.Account.Persistence.Models;
@@ -17,8 +22,14 @@ namespace Identity.Infrastructure.Account {
         private readonly string _connectionString;
         private NpgsqlConnection _connection;
 
-        public IntegrationEventPublisher(IConfiguration configuration) {
+        private readonly IBus _bus;
+
+        public IntegrationEventPublisher(
+            IConfiguration configuration,
+            IBus bus
+        ) {
             _connectionString = configuration.GetConnectionString("Identity");
+            _bus = bus;
         }
 
         private NpgsqlConnection _ensureConnection() =>
@@ -73,7 +84,7 @@ namespace Identity.Infrastructure.Account {
                     int i = 0;
                     events ??= new List<IntegrationEvent>();
                     events.Add(new IntegrationEvent {
-                        Id = reader.GetInt32(i),
+                        Id = reader.GetGuid(i),
                         Type = (IntegrationEventType) reader.GetInt32(++i),
                         Payload = reader.GetFieldValue<JsonDocument>(++i),
                         Status = IntegrationEventStatus.Pending
@@ -82,7 +93,7 @@ namespace Identity.Infrastructure.Account {
             }
 
             if (events != null) {
-                // ...
+                await _publishEvents(events);
 
                 await using var cmd = new NpgsqlCommand();
                 cmd.Connection = _connection;
@@ -96,7 +107,7 @@ namespace Identity.Infrastructure.Account {
 
                 for (int i = 0; i < events.Count; ++i) {
                     var @event = events[i];
-                    cmd.Parameters.Add(new NpgsqlParameter<int>(
+                    cmd.Parameters.Add(new NpgsqlParameter<Guid>(
                         $"{nameof(IntegrationEvent.Id)}{i}", @event.Id
                     ));
                 }
@@ -125,7 +136,7 @@ namespace Identity.Infrastructure.Account {
             await txn.CommitAsync();
         }
 
-        public async Task FetchAndPublishEventById(int eventId) {
+        public async Task FetchAndPublishEventById(Guid eventId) {
             _ensureConnection();
             await _ensureConnectionOpen();
 
@@ -138,7 +149,7 @@ namespace Identity.Infrastructure.Account {
                 cmd.Connection = _connection;
                 
                 cmd.Parameters.Add(
-                    new NpgsqlParameter<int>(nameof(IntegrationEvent.Id), eventId)
+                    new NpgsqlParameter<Guid>(nameof(IntegrationEvent.Id), eventId)
                 );
                 cmd.Parameters.Add(
                     new NpgsqlParameter<int>(
@@ -177,13 +188,13 @@ namespace Identity.Infrastructure.Account {
             }
 
             if (@event != null) {
-                // ...
+                await _publishEvent(@event);
 
                 await using var cmd = new NpgsqlCommand();
                 cmd.Connection = _connection;
 
                 cmd.Parameters.Add(
-                    new NpgsqlParameter<int>(nameof(IntegrationEvent.Id), eventId)
+                    new NpgsqlParameter<Guid>(nameof(IntegrationEvent.Id), eventId)
                 );
                 cmd.Parameters.Add(
                     new NpgsqlParameter<int>(
@@ -205,6 +216,46 @@ namespace Identity.Infrastructure.Account {
             }
 
             await txn.CommitAsync();
+        }
+
+        private T _convertIntegrationEventTo<T>(IntegrationEvent @event)
+            where T : Message =>
+                Message.FromJson<T>(@event.Payload, @event.Id);
+
+        private async Task _publishEvent(IntegrationEvent @event) {
+            switch (@event.Type) {
+                case IntegrationEventType.UserAccountCreated:
+                    await _bus.Publish(
+                        _convertIntegrationEventTo<UserAccountCreated>(@event)
+                    );
+                    break;
+                case IntegrationEventType.UserAccountConfirmed:
+                    await _bus.Publish(
+                        _convertIntegrationEventTo<UserAccountConfirmed>(@event)
+                    );
+                    break;
+            }
+        }
+
+        private async Task _publishEvents(List<IntegrationEvent> events) {
+            foreach (var group in events.GroupBy(@event => @event.Type)) {
+                switch (group.Key) {
+                    case IntegrationEventType.UserAccountCreated:
+                        await _bus.PublishBatch(
+                            group.Select(@event =>
+                                _convertIntegrationEventTo<UserAccountCreated>(@event)
+                            )
+                        );
+                        break;
+                    case IntegrationEventType.UserAccountConfirmed:
+                        await _bus.PublishBatch(
+                            group.Select(@event =>
+                                _convertIntegrationEventTo<UserAccountConfirmed>(@event)
+                            )
+                        );
+                        break;
+                }
+            }
         }
     }
 }

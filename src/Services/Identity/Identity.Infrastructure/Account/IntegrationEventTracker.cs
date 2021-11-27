@@ -53,7 +53,7 @@ namespace Identity.Infrastructure.Account {
             await _ensureConnectionOpen();
 
             _connection.Notification += (_, eventArgs) =>
-                _fetchAndPublishEvent(eventArgs.Payload);
+                _fetchAndPublishEventById(Guid.Parse(eventArgs.Payload));
 
             _connection.StateChange += (_, eventArgs) => {
                 if (eventArgs.CurrentState is
@@ -76,8 +76,7 @@ namespace Identity.Infrastructure.Account {
             }
         }
 
-        private async void _fetchAndPublishEvent(string payload) {
-            var eventId = int.Parse(payload);
+        private async void _fetchAndPublishEventById(Guid eventId) {
             try {
                 await using var publisher =
                     _serviceProvider.GetRequiredService<IIntegrationEventPublisher>();

@@ -23,10 +23,9 @@ namespace Identity.Infrastructure.Account.Persistence.Migrations
 
             modelBuilder.Entity("Identity.Infrastructure.Account.Persistence.Models.IntegrationEvent", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("uuid");
 
                     b.Property<JsonDocument>("Payload")
                         .IsRequired()

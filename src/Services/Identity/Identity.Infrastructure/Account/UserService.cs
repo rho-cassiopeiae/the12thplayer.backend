@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Identity;
 
+using MassTransit;
+
 using Identity.Application.Common.Interfaces;
 using Identity.Application.Common.Results;
 using Identity.Infrastructure.Account.Persistence;
@@ -46,7 +48,7 @@ namespace Identity.Infrastructure.Account {
             return userDm;
         }
 
-        public async Task<Either<AccountError, string>> Create(
+        public async Task<Maybe<AccountError>> Create(
             UserDm userDm, string password
         ) {
             using var txn = await _userDbContext.Database.BeginTransactionAsync();
@@ -63,15 +65,16 @@ namespace Identity.Infrastructure.Account {
                 return new AccountError(result.ToErrorDictionary());
             }
 
-            var token =
-                await _userManager.GenerateEmailConfirmationTokenAsync(userPm);
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(userPm);
 
             var eventPayload = new Dictionary<string, string> {
-                ["email"] = userPm.Email,
-                ["username"] = userPm.UserName
+                ["Email"] = userPm.Email,
+                ["Username"] = userPm.UserName,
+                ["ConfirmationCode"] = code
             };
 
             using var @event = new IntegrationEvent {
+                Id = NewId.NextGuid(),
                 Type = IntegrationEventType.UserAccountCreated,
                 Payload = JsonDocument.Parse(JsonSerializer.Serialize(eventPayload)),
                 Status = IntegrationEventStatus.Pending
@@ -83,7 +86,7 @@ namespace Identity.Infrastructure.Account {
 
             await txn.CommitAsync();
 
-            return token;
+            return null;
         }
 
         public Task<bool> VerifyEmailConfirmationCode(
@@ -137,11 +140,14 @@ namespace Identity.Infrastructure.Account {
                 return new AccountError(result.ToErrorDictionary());
             }
 
-            var eventPayload = new Dictionary<string, string> {
-                ["id"] = userPm.Id.ToString()
+            var eventPayload = new Dictionary<string, object> {
+                ["UserId"] = userPm.Id,
+                ["Email"] = userPm.Email,
+                ["Username"] = userPm.UserName
             };
 
             using var @event = new IntegrationEvent {
+                Id = NewId.NextGuid(),
                 Type = IntegrationEventType.UserAccountConfirmed,
                 Payload = JsonDocument.Parse(JsonSerializer.Serialize(eventPayload)),
                 Status = IntegrationEventStatus.Pending

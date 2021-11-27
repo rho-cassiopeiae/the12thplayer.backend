@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Identity.Infrastructure.Account.Persistence.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20211126091520_Change_Integration_Event_Payload_Type")]
-    partial class Change_Integration_Event_Payload_Type
+    [Migration("20211127071204_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,10 +25,9 @@ namespace Identity.Infrastructure.Account.Persistence.Migrations
 
             modelBuilder.Entity("Identity.Infrastructure.Account.Persistence.Models.IntegrationEvent", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("uuid");
 
                     b.Property<JsonDocument>("Payload")
                         .IsRequired()

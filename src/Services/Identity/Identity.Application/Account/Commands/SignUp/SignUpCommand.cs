@@ -46,10 +46,6 @@ namespace Identity.Application.Account.Commands.SignUp {
             }
 
             _logger.LogInformation("User {Email} signed up successfully", user.Email);
-            _logger.LogTrace(
-                "User {Email} confirmation code: {Code}",
-                user.Email, outcome.Data
-            );
 
             return VoidResult.Instance;
         }
