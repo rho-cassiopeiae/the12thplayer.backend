@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Identity;
 
-namespace Identity.Infrastructure.Account.Persistence.Models {
+namespace Identity.Infrastructure.Persistence.Models {
     public class User : IdentityUser<long> {
         public List<RefreshToken> RefreshTokens { get; set; } = new();
     }

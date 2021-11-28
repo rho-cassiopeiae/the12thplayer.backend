@@ -8,6 +8,7 @@ using MediatR;
 using Identity.Application.Common.Results;
 using Identity.Domain.Aggregates.User;
 using Identity.Application.Common.Interfaces;
+using Identity.Domain.Base;
 
 namespace Identity.Application.Account.Commands.SignUp {
     public class SignUpCommand : IRequest<VoidResult> {
@@ -18,13 +19,16 @@ namespace Identity.Application.Account.Commands.SignUp {
 
     public class SignUpCommandHandler : IRequestHandler<SignUpCommand, VoidResult> {
         private readonly ILogger<SignUpCommandHandler> _logger;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IUserService _userService;
 
         public SignUpCommandHandler(
             ILogger<SignUpCommandHandler> logger,
+            IUnitOfWork unitOfWork,
             IUserService userService
         ) {
             _logger = logger;
+            _unitOfWork = unitOfWork;
             _userService = userService;
         }
 
@@ -38,11 +42,23 @@ namespace Identity.Application.Account.Commands.SignUp {
                 username: command.Username
             );
 
-            var outcome = await _userService.Create(user, command.Password);
-            if (outcome.IsError) {
-                return new VoidResult {
-                    Error = outcome.Error
-                };
+            await _unitOfWork.Begin();
+            try {
+                _userService.EnlistAsPartOf(_unitOfWork);
+
+                var outcome = await _userService.Create(user, command.Password);
+                if (outcome.IsError) {
+                    return new VoidResult {
+                        Error = outcome.Error
+                    };
+                }
+
+                await _userService.DispatchDomainEvents(user, cancellationToken);
+
+                await _unitOfWork.Commit();
+            } catch {
+                await _unitOfWork.Rollback();
+                throw;
             }
 
             _logger.LogInformation("User {Email} signed up successfully", user.Email);

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using Identity.Infrastructure.Account.Persistence;
+using Identity.Infrastructure.Persistence;
 
 using Profile.Infrastructure.Persistence;
 
@@ -16,6 +16,14 @@ namespace Migrator {
                     .GetRequiredService<UserDbContext>();
 
                 userDbContext.Database.Migrate();
+            }
+
+            using (var scope = host.Services.CreateScope()) {
+                var integrationEventDbContext = scope
+                    .ServiceProvider
+                    .GetRequiredService<IntegrationEventDbContext>();
+
+                integrationEventDbContext.Database.Migrate();
             }
 
             host = Profile.Api.Program.CreateHostBuilder(args).Build();

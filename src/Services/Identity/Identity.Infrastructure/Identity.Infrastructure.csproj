@@ -5,13 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Account\Persistence\Migrations\Scripts\Functions\NotifyAboutIntegrationEvent\NotifyAboutIntegrationEvent.v0.sql" />
-    <None Remove="Account\Persistence\Migrations\Scripts\Triggers\OnNewIntegrationEvent\OnNewIntegrationEvent.v0.sql" />
+    <None Remove="Persistence\Migrations\IntegrationEvent\Scripts\Functions\NotifyAboutIntegrationEvent\NotifyAboutIntegrationEvent.v0.sql" />
+    <None Remove="Persistence\Migrations\IntegrationEvent\Scripts\Triggers\OnNewIntegrationEvent\OnNewIntegrationEvent.v0.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Account\Persistence\Migrations\Scripts\Functions\NotifyAboutIntegrationEvent\NotifyAboutIntegrationEvent.v0.sql" />
-    <EmbeddedResource Include="Account\Persistence\Migrations\Scripts\Triggers\OnNewIntegrationEvent\OnNewIntegrationEvent.v0.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\IntegrationEvent\Scripts\Functions\NotifyAboutIntegrationEvent\NotifyAboutIntegrationEvent.v0.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\IntegrationEvent\Scripts\Triggers\OnNewIntegrationEvent\OnNewIntegrationEvent.v0.sql" />
   </ItemGroup>
 
   <ItemGroup>

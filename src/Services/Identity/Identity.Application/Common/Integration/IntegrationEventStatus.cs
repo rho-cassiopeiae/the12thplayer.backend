@@ -1,4 +1,4 @@
-﻿namespace Identity.Infrastructure.Account.Persistence.Models {
+﻿namespace Identity.Application.Common.Integration {
     public enum IntegrationEventStatus {
         Pending,
         Published

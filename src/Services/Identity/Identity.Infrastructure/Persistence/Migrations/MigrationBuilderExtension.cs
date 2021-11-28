@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations.Builders;
 
-namespace Identity.Infrastructure.Account.Persistence.Migrations.Scripts {
+namespace Identity.Infrastructure.Persistence.Migrations {
     public static class MigrationBuilderExtension {
         public static OperationBuilder<SqlOperation> SqlResource(
             this MigrationBuilder builder, string filename

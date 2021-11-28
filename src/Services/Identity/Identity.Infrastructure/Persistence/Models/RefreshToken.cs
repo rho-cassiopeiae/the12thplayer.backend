@@ -1,4 +1,4 @@
-﻿namespace Identity.Infrastructure.Account.Persistence.Models {
+﻿namespace Identity.Infrastructure.Persistence.Models {
     public class RefreshToken {
         public long UserId { get; set; }
         public string Value { get; set; }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using Identity.Infrastructure.Account;
+using Identity.Infrastructure.Integration;
 
 namespace Identity.Api.HostedServices {
     public class IntegrationEventDispatcher : BackgroundService {

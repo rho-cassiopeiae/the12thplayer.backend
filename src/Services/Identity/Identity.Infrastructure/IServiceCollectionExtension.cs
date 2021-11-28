@@ -11,9 +11,13 @@ using MassTransit;
 using MessageBus.Components.HostedServices;
 
 using Identity.Infrastructure.Account;
-using Identity.Infrastructure.Account.Persistence;
-using Identity.Infrastructure.Account.Persistence.Models;
+using Identity.Infrastructure.Integration;
+using Identity.Infrastructure.Persistence;
+using Identity.Infrastructure.Persistence.Models;
 using Identity.Application.Common.Interfaces;
+using Identity.Application.Common.Integration;
+using Identity.Infrastructure.Persistence.Repositories;
+using Identity.Domain.Base;
 
 namespace Identity.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -24,7 +28,16 @@ namespace Identity.Infrastructure {
                 optionsBuilder.UseNpgsql(
                     configuration.GetConnectionString("Identity"),
                     pgOptionsBuilder => pgOptionsBuilder.MigrationsHistoryTable(
-                        "__EFMigrationsHistory", "identity"
+                        "__EFMigrationsHistory_UserDbContext", "identity"
+                    )
+                )
+            );
+
+            services.AddDbContext<IntegrationEventDbContext>(optionsBuilder =>
+                optionsBuilder.UseNpgsql(
+                    configuration.GetConnectionString("Identity"),
+                    pgOptionsBuilder => pgOptionsBuilder.MigrationsHistoryTable(
+                        "__EFMigrationsHistory_IntegrationEventDbContext", "identity"
                     )
                 )
             );
@@ -55,8 +68,12 @@ namespace Identity.Infrastructure {
             services.AddHttpContextAccessor();
             services.TryAddScoped<SignInManager<User>>();
 
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<ISecurityTokenProvider, SecurityTokenProvider>();
+
+            services.AddScoped<IIntegrationEventRepository, IntegrationEventRepository>();
 
             services.AddTransient<
                 IIntegrationEventPublisher, IntegrationEventPublisher

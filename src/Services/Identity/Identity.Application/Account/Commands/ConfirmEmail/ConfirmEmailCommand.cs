@@ -11,6 +11,7 @@ using Identity.Application.Account.Common.Errors;
 using Identity.Application.Common.Interfaces;
 using Identity.Application.Common.Results;
 using Identity.Domain.Aggregates.User;
+using Identity.Domain.Base;
 
 namespace Identity.Application.Account.Commands.ConfirmEmail {
     public class ConfirmEmailCommand : IRequest<HandleResult<SecurityCredentials>> {
@@ -22,15 +23,18 @@ namespace Identity.Application.Account.Commands.ConfirmEmail {
         ConfirmEmailCommand, HandleResult<SecurityCredentials>
     > {
         private readonly ILogger<ConfirmEmailCommandHandler> _logger;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IUserService _userService;
         private readonly ISecurityTokenProvider _securityTokenProvider;
 
         public ConfirmEmailCommandHandler(
             ILogger<ConfirmEmailCommandHandler> logger,
+            IUnitOfWork unitOfWork,
             IUserService userService,
             ISecurityTokenProvider securityTokenProvider
         ) {
             _logger = logger;
+            _unitOfWork = unitOfWork;
             _userService = userService;
             _securityTokenProvider = securityTokenProvider;
         }
@@ -38,62 +42,78 @@ namespace Identity.Application.Account.Commands.ConfirmEmail {
         public async Task<HandleResult<SecurityCredentials>> Handle(
             ConfirmEmailCommand command, CancellationToken cancellationToken
         ) {
-            var email = command.Email;
+            // @@NOTE: Have to start a transaction immediately, since
+            // we can only set a db connection for a context if there isn't
+            // an active one yet.
 
-            var outcome = await _userService.FindByEmail(email);
-            if (outcome.IsError) {
-                return new HandleResult<SecurityCredentials> {
-                    Error = outcome.Error
-                };
-            }
+            await _unitOfWork.Begin();
+            try {
+                _userService.EnlistAsPartOf(_unitOfWork);
 
-            var user = outcome.Data;
+                var email = command.Email;
 
-            if (user.IsConfirmed) {
-                return new HandleResult<SecurityCredentials> {
-                    Error = new AccountError(
-                        $"Account {email} has already been confirmed"
-                    )
-                };
-            }
-
-            var success = await _userService.VerifyEmailConfirmationCode(
-                user, command.ConfirmationCode
-            );
-            if (!success) {
-                return new HandleResult<SecurityCredentials> {
-                    Error = new AccountError(
-                        $"Account {email}: invalid confirmation code"
-                    )
-                };
-            }
-
-            user.SetConfirmed();
-            user.AddClaim("__Username", user.Username);
-
-            var refreshToken = new RefreshToken(
-                value: _securityTokenProvider.GenerateRefreshToken(),
-                isActive: true,
-                expiresAt: DateTimeOffset.UtcNow.AddDays(30)
-            );
-
-            user.AddRefreshToken(refreshToken);
-
-            var finOutcome = await _userService.FinalizeAccountCreation(user);
-            if (finOutcome.IsError) {
-                return new HandleResult<SecurityCredentials> {
-                    Error = finOutcome.Error
-                };
-            }
-
-            return new HandleResult<SecurityCredentials> {
-                Data = new SecurityCredentials {
-                    AccessToken = _securityTokenProvider.GenerateJwt(
-                        user.Id, user.Claims.ToList()
-                    ),
-                    RefreshToken = refreshToken.Value
+                var outcome = await _userService.FindByEmail(email);
+                if (outcome.IsError) {
+                    return new HandleResult<SecurityCredentials> {
+                        Error = outcome.Error
+                    };
                 }
-            };
+
+                var user = outcome.Data;
+
+                if (user.IsConfirmed) {
+                    return new HandleResult<SecurityCredentials> {
+                        Error = new AccountError(
+                            $"Account {email} has already been confirmed"
+                        )
+                    };
+                }
+
+                var success = await _userService.VerifyEmailConfirmationCode(
+                    user, command.ConfirmationCode
+                );
+                if (!success) {
+                    return new HandleResult<SecurityCredentials> {
+                        Error = new AccountError(
+                            $"Account {email}: invalid confirmation code"
+                        )
+                    };
+                }
+
+                user.SetConfirmed();
+                user.AddClaim("__Username", user.Username);
+
+                var refreshToken = new RefreshToken(
+                    value: _securityTokenProvider.GenerateRefreshToken(),
+                    isActive: true,
+                    expiresAt: DateTimeOffset.UtcNow.AddDays(30) // @@TODO: Config.
+                );
+
+                user.AddRefreshToken(refreshToken);
+
+                var finOutcome = await _userService.FinalizeAccountCreation(user);
+                if (finOutcome.IsError) {
+                    return new HandleResult<SecurityCredentials> {
+                        Error = finOutcome.Error
+                    };
+                }
+
+                await _userService.DispatchDomainEvents(user, cancellationToken);
+
+                await _unitOfWork.Commit();
+
+                return new HandleResult<SecurityCredentials> {
+                    Data = new SecurityCredentials {
+                        AccessToken = _securityTokenProvider.GenerateJwt(
+                            user.Id, user.Claims.ToList()
+                        ),
+                        RefreshToken = refreshToken.Value
+                    }
+                };
+            } catch {
+                await _unitOfWork.Rollback();
+                throw;
+            }
         }
     }
 }

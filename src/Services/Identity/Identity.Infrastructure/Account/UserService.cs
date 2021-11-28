@@ -1,33 +1,56 @@
 ﻿using System.Linq;
-using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
+using MediatR;
 using MassTransit;
 
 using Identity.Application.Common.Interfaces;
 using Identity.Application.Common.Results;
-using Identity.Infrastructure.Account.Persistence;
+using Identity.Infrastructure.Persistence;
 using Identity.Application.Account.Common.Errors;
-using Identity.Infrastructure.Account.Persistence.Models;
+using Identity.Infrastructure.Persistence.Models;
+using Identity.Application.Account.DomainEvents.UserAccountCreated;
+using Identity.Application.Account.DomainEvents.UserAccountConfirmed;
+using Identity.Domain.Base;
 using UserDm = Identity.Domain.Aggregates.User.User;
-using UserPm = Identity.Infrastructure.Account.Persistence.Models.User;
+using UserPm = Identity.Infrastructure.Persistence.Models.User;
 
 namespace Identity.Infrastructure.Account {
     public class UserService : IUserService {
         private readonly UserDbContext _userDbContext;
         private readonly UserManager<UserPm> _userManager;
+        private readonly IPublisher _mediator;
 
         private readonly Dictionary<UserDm, UserPm> _userDmToPm = new();
         
         public UserService(
             UserDbContext userDbContext,
-            UserManager<UserPm> userManager
+            UserManager<UserPm> userManager,
+            IPublisher mediator
         ) {
             _userDbContext = userDbContext;
             _userManager = userManager;
+            _mediator = mediator;
+        }
+
+        public void EnlistAsPartOf(IUnitOfWork unitOfWork) {
+            _userDbContext.Database.SetDbConnection(unitOfWork.Connection);
+            _userDbContext.Database.UseTransaction(unitOfWork.Transaction);
+        }
+
+        public async Task DispatchDomainEvents(
+            UserDm user, CancellationToken cancellationToken
+        ) {
+            if (user.DomainEvents != null) {
+                foreach (var @event in user.DomainEvents) {
+                    await _mediator.Publish(@event);
+                }
+            }
         }
 
         public async Task<Either<AccountError, UserDm>> FindByEmail(string email) {
@@ -51,8 +74,6 @@ namespace Identity.Infrastructure.Account {
         public async Task<Maybe<AccountError>> Create(
             UserDm userDm, string password
         ) {
-            using var txn = await _userDbContext.Database.BeginTransactionAsync();
-
             var userPm = new UserPm {
                 Email = userDm.Email,
                 UserName = userDm.Username
@@ -67,24 +88,11 @@ namespace Identity.Infrastructure.Account {
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(userPm);
 
-            var eventPayload = new Dictionary<string, string> {
-                ["Email"] = userPm.Email,
-                ["Username"] = userPm.UserName,
-                ["ConfirmationCode"] = code
-            };
-
-            using var @event = new IntegrationEvent {
-                Id = NewId.NextGuid(),
-                Type = IntegrationEventType.UserAccountCreated,
-                Payload = JsonDocument.Parse(JsonSerializer.Serialize(eventPayload)),
-                Status = IntegrationEventStatus.Pending
-            };
-
-            _userDbContext.IntegrationEvents.Add(@event);
-
-            await _userDbContext.SaveChangesAsync();
-
-            await txn.CommitAsync();
+            userDm.AddDomainEvent(new UserAccountCreatedDomainEvent {
+                Email = userPm.Email,
+                Username = userPm.UserName,
+                ConfirmationCode = code
+            });
 
             return null;
         }
@@ -104,8 +112,6 @@ namespace Identity.Infrastructure.Account {
 
         public async Task<Maybe<AccountError>> FinalizeAccountCreation(UserDm userDm) {
             var userPm = _userDmToPm[userDm];
-
-            using var txn = await _userDbContext.Database.BeginTransactionAsync();
 
             userPm.EmailConfirmed = userDm.IsConfirmed;
             userPm.RefreshTokens.AddRange(userDm.RefreshTokens.Select(
@@ -140,24 +146,11 @@ namespace Identity.Infrastructure.Account {
                 return new AccountError(result.ToErrorDictionary());
             }
 
-            var eventPayload = new Dictionary<string, object> {
-                ["UserId"] = userPm.Id,
-                ["Email"] = userPm.Email,
-                ["Username"] = userPm.UserName
-            };
-
-            using var @event = new IntegrationEvent {
-                Id = NewId.NextGuid(),
-                Type = IntegrationEventType.UserAccountConfirmed,
-                Payload = JsonDocument.Parse(JsonSerializer.Serialize(eventPayload)),
-                Status = IntegrationEventStatus.Pending
-            };
-
-            _userDbContext.IntegrationEvents.Add(@event);
-
-            await _userDbContext.SaveChangesAsync();
-
-            await txn.CommitAsync();
+            userDm.AddDomainEvent(new UserAccountConfirmedDomainEvent {
+                UserId = userPm.Id,
+                Email = userPm.Email,
+                Username = userPm.UserName
+            });
 
             return null;
         }

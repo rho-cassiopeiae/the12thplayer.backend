@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Identity.Infrastructure.Account.Persistence.Migrations
+namespace Identity.Infrastructure.Persistence.Migrations.User
 {
     public partial class Initial : Migration
     {
@@ -37,21 +36,6 @@ namespace Identity.Infrastructure.Account.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "IntegrationEvents",
-                schema: "identity",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
-                    Payload = table.Column<JsonDocument>(type: "jsonb", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IntegrationEvents", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -181,10 +165,6 @@ namespace Identity.Infrastructure.Account.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens",
-                schema: "identity");
-
-            migrationBuilder.DropTable(
-                name: "IntegrationEvents",
                 schema: "identity");
 
             migrationBuilder.DropTable(

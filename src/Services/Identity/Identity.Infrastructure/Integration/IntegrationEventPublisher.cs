@@ -14,10 +14,10 @@ using MassTransit;
 using MessageBus.Contracts;
 using MessageBus.Contracts.Events.Identity;
 
-using Identity.Infrastructure.Account.Persistence;
-using Identity.Infrastructure.Account.Persistence.Models;
+using Identity.Infrastructure.Persistence;
+using Identity.Application.Common.Integration;
 
-namespace Identity.Infrastructure.Account {
+namespace Identity.Infrastructure.Integration {
     public class IntegrationEventPublisher : IIntegrationEventPublisher {
         private readonly string _connectionString;
         private NpgsqlConnection _connection;
@@ -72,7 +72,7 @@ namespace Identity.Infrastructure.Account {
                         ""{nameof(IntegrationEvent.Type)}"",
                         ""{nameof(IntegrationEvent.Payload)}""
                     FROM
-                        identity.""{nameof(UserDbContext.IntegrationEvents)}""
+                        identity.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
                     WHERE
                         ""{nameof(IntegrationEvent.Status)}"" =
                             @{cmd.Parameters.First().ParameterName}
@@ -123,7 +123,7 @@ namespace Identity.Infrastructure.Account {
                 }
 
                 cmd.CommandText = $@"
-                    UPDATE identity.""{nameof(UserDbContext.IntegrationEvents)}""
+                    UPDATE identity.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
                     SET ""{nameof(IntegrationEvent.Status)}"" =
                         @{cmd.Parameters.First().ParameterName}
                     WHERE
@@ -163,7 +163,7 @@ namespace Identity.Infrastructure.Account {
                         ""{nameof(IntegrationEvent.Type)}"",
                         ""{nameof(IntegrationEvent.Payload)}""
                     FROM
-                        identity.""{nameof(UserDbContext.IntegrationEvents)}""
+                        identity.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
                     WHERE
                         ""{nameof(IntegrationEvent.Id)}"" =
                             @{cmd.Parameters.First().ParameterName} AND
@@ -204,7 +204,7 @@ namespace Identity.Infrastructure.Account {
                 );
 
                 cmd.CommandText = $@"
-                    UPDATE identity.""{nameof(UserDbContext.IntegrationEvents)}""
+                    UPDATE identity.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
                     SET ""{nameof(IntegrationEvent.Status)}"" =
                         @{cmd.Parameters.Last().ParameterName}
                     WHERE

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Text.Json;
 
-namespace Identity.Infrastructure.Account.Persistence.Models {
-    public class IntegrationEvent : IDisposable {
+using Identity.Domain.Base;
+
+namespace Identity.Application.Common.Integration {
+    public class IntegrationEvent : IAggregateRoot, IDisposable {
         public Guid Id { get; set; }
         public IntegrationEventType Type { get; set; }
         public JsonDocument Payload { get; set; }

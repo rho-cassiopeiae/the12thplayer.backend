@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using Npgsql;
 
-namespace Identity.Infrastructure.Account {
+namespace Identity.Infrastructure.Integration {
     public class IntegrationEventTracker : IIntegrationEventTracker {
         private readonly ILogger<IntegrationEventTracker> _logger;
         private readonly IServiceProvider _serviceProvider;
