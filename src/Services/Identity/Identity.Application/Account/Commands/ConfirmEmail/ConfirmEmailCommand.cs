@@ -42,54 +42,53 @@ namespace Identity.Application.Account.Commands.ConfirmEmail {
         public async Task<HandleResult<SecurityCredentials>> Handle(
             ConfirmEmailCommand command, CancellationToken cancellationToken
         ) {
-            // @@NOTE: Have to start a transaction immediately, since
-            // we can only set a db connection for a context if there isn't
-            // an active one yet.
+            await _unitOfWork.Setup();
+            _userService.EnlistConnectionFrom(_unitOfWork);
+
+            var email = command.Email;
+
+            var outcome = await _userService.FindByEmail(email);
+            if (outcome.IsError) {
+                return new HandleResult<SecurityCredentials> {
+                    Error = outcome.Error
+                };
+            }
+
+            var user = outcome.Data;
+
+            if (user.IsConfirmed) {
+                return new HandleResult<SecurityCredentials> {
+                    Error = new AccountError(
+                        $"Account {email} has already been confirmed"
+                    )
+                };
+            }
+
+            var success = await _userService.VerifyEmailConfirmationCode(
+                user, command.ConfirmationCode
+            );
+            if (!success) {
+                return new HandleResult<SecurityCredentials> {
+                    Error = new AccountError(
+                        $"Account {email}: invalid confirmation code"
+                    )
+                };
+            }
+
+            user.SetConfirmed();
+            user.AddClaim("__Username", user.Username);
+
+            var refreshToken = new RefreshToken(
+                value: _securityTokenProvider.GenerateRefreshToken(),
+                isActive: true,
+                expiresAt: DateTimeOffset.UtcNow.AddDays(30) // @@TODO: Config.
+            );
+
+            user.AddRefreshToken(refreshToken);
 
             await _unitOfWork.Begin();
             try {
-                _userService.EnlistAsPartOf(_unitOfWork);
-
-                var email = command.Email;
-
-                var outcome = await _userService.FindByEmail(email);
-                if (outcome.IsError) {
-                    return new HandleResult<SecurityCredentials> {
-                        Error = outcome.Error
-                    };
-                }
-
-                var user = outcome.Data;
-
-                if (user.IsConfirmed) {
-                    return new HandleResult<SecurityCredentials> {
-                        Error = new AccountError(
-                            $"Account {email} has already been confirmed"
-                        )
-                    };
-                }
-
-                var success = await _userService.VerifyEmailConfirmationCode(
-                    user, command.ConfirmationCode
-                );
-                if (!success) {
-                    return new HandleResult<SecurityCredentials> {
-                        Error = new AccountError(
-                            $"Account {email}: invalid confirmation code"
-                        )
-                    };
-                }
-
-                user.SetConfirmed();
-                user.AddClaim("__Username", user.Username);
-
-                var refreshToken = new RefreshToken(
-                    value: _securityTokenProvider.GenerateRefreshToken(),
-                    isActive: true,
-                    expiresAt: DateTimeOffset.UtcNow.AddDays(30) // @@TODO: Config.
-                );
-
-                user.AddRefreshToken(refreshToken);
+                _userService.EnlistTransactionFrom(_unitOfWork);
 
                 var finOutcome = await _userService.FinalizeAccountCreation(user);
                 if (finOutcome.IsError) {

@@ -22,7 +22,7 @@ namespace Identity.Infrastructure.Persistence {
             _connectionString = configuration.GetConnectionString("Identity");
         }
 
-        private async ValueTask _ensureConnectionOpen() {
+        public async ValueTask Setup() {
             _connection ??= new NpgsqlConnection(_connectionString);
             if (_connection.State != ConnectionState.Open) {
                 await _connection.OpenAsync();
@@ -36,7 +36,7 @@ namespace Identity.Infrastructure.Persistence {
                 );
             }
 
-            await _ensureConnectionOpen();
+            await Setup();
 
             _transaction = await _connection.BeginTransactionAsync(
                 IsolationLevel.Serializable

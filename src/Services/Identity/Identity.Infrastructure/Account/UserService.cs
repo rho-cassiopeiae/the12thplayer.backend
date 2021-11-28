@@ -38,6 +38,14 @@ namespace Identity.Infrastructure.Account {
             _mediator = mediator;
         }
 
+        public void EnlistConnectionFrom(IUnitOfWork unitOfWork) {
+            _userDbContext.Database.SetDbConnection(unitOfWork.Connection);
+        }
+
+        public void EnlistTransactionFrom(IUnitOfWork unitOfWork) {
+            _userDbContext.Database.UseTransaction(unitOfWork.Transaction);
+        }
+
         public void EnlistAsPartOf(IUnitOfWork unitOfWork) {
             _userDbContext.Database.SetDbConnection(unitOfWork.Connection);
             _userDbContext.Database.UseTransaction(unitOfWork.Transaction);
