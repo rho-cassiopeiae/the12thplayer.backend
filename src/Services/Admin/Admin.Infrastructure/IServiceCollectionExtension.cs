@@ -15,6 +15,7 @@ using MessageBus.Contracts.Requests.Admin;
 using Admin.Application.Common.Interfaces;
 using Admin.Infrastructure.Auth;
 using Admin.Infrastructure.Identity;
+using Admin.Infrastructure.Profile;
 
 namespace Admin.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -73,12 +74,19 @@ namespace Admin.Infrastructure {
 
             services.AddScoped<IAuthenticationContext, AuthenticationContext>();
             services.AddTransient<IAuthorizationService, AuthorizationService>();
+            services.AddSingleton<IPrincipalDataProvider, PrincipalDataProvider>();
 
             services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<
+                IProfilePermissionChecker, ProfilePermissionChecker
+            >();
 
             services.AddMassTransit(busCfg => {
                 busCfg.AddRequestClient<LogInAsAdmin>(
                     new Uri("queue:identity-auth-requests")
+                );
+                busCfg.AddRequestClient<CheckProfileHasPermissions>(
+                    new Uri("queue:profile-permission-requests")
                 );
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {

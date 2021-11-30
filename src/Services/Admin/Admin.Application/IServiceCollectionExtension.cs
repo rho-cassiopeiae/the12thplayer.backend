@@ -15,6 +15,9 @@ namespace Admin.Application {
             services.AddTransient(
                 typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>)
             );
+            services.AddTransient(
+                typeof(IPipelineBehavior<,>), typeof(PermissionBehavior<,>)
+            );
 
             return services;
         }

@@ -8,7 +8,7 @@ namespace Profile.Application.Common.Results {
         public HandleError Error { get; init; }
     }
 
-    public class HandleResult<T> : HandleResult where T : class {
+    public class HandleResult<T> : HandleResult {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public T Data { get; init; }
     }
