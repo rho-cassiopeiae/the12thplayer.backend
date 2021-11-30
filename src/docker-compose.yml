@@ -1,6 +1,12 @@
 version: '3.4'
 
 services:
+  admin:
+    image: ${REGISTRY:-the12thplayer}/admin.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/Admin/Admin.Api/Dockerfile
+
   identity:
     image: ${REGISTRY:-the12thplayer}/identity.api:${PLATFORM:-linux}-${TAG:-latest}
     build:

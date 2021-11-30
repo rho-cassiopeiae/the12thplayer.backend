@@ -18,5 +18,6 @@ namespace Identity.Application.Common.Interfaces {
         Task<Maybe<AccountError>> Create(User user, string password);
         Task<bool> VerifyEmailConfirmationCode(User user, string confirmationCode);
         Task<Maybe<AccountError>> FinalizeAccountCreation(User user);
+        Task<Maybe<AccountError>> VerifyPassword(User user, string password);
     }
 }

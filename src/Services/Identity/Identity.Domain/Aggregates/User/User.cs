@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Identity.Domain.Base;
 
 namespace Identity.Domain.Aggregates.User {
-    public class User : DomainModel, IAggregateRoot {
+    public class User : Entity, IAggregateRoot {
         public long Id { get; private set; }
         public string Email { get; private set; }
         public string Username { get; private set; }

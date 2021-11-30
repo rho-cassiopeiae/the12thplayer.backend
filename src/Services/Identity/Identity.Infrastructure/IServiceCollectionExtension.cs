@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,8 +8,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using MassTransit;
+using MassTransit.Definition;
+using MassTransit.ExtensionsDependencyInjectionIntegration;
 
 using MessageBus.Components.HostedServices;
+using MessageBus.Contracts.Requests.Identity;
 
 using Identity.Infrastructure.Account;
 using Identity.Infrastructure.Integration;
@@ -22,7 +26,9 @@ using Identity.Domain.Base;
 namespace Identity.Infrastructure {
     public static class IServiceCollectionExtension {
         public static IServiceCollection AddInfrastructure(
-            this IServiceCollection services, IConfiguration configuration
+            this IServiceCollection services,
+            IConfiguration configuration,
+            Action<IServiceCollectionBusConfigurator> busCfgCallback
         ) {
             services.AddDbContext<UserDbContext>(optionsBuilder =>
                 optionsBuilder.UseNpgsql(
@@ -72,8 +78,13 @@ namespace Identity.Infrastructure {
 
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<ISecurityTokenProvider, SecurityTokenProvider>();
+            services.AddTransient<
+                IProfilePermissionCollector, ProfilePermissionCollector
+            >();
 
-            services.AddScoped<IIntegrationEventRepository, IntegrationEventRepository>();
+            services.AddScoped<
+                IIntegrationEventRepository, IntegrationEventRepository
+            >();
 
             services.AddTransient<
                 IIntegrationEventPublisher, IntegrationEventPublisher
@@ -83,8 +94,19 @@ namespace Identity.Infrastructure {
             >();
 
             services.AddMassTransit(busCfg => {
+                busCfgCallback(busCfg);
+
+                busCfg.AddRequestClient<CollectProfilePermissions>(
+                    new Uri("queue:profile-permission-requests")
+                );
+
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
                     rabbitCfg.Host("rabbit");
+
+                    rabbitCfg.ConfigureEndpoints(
+                        context,
+                        new KebabCaseEndpointNameFormatter("identity", false)
+                    );
                 });
             });
 

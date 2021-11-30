@@ -26,7 +26,13 @@ namespace Profile.Domain.Aggregates.Profile {
             // @@TODO: Check validity.
             var valid = false;
             switch (scope) {
+                case PermissionScope.AdminPanel:
+                    valid = true;
+                    break;
                 case PermissionScope.UserManagement:
+                    valid = true;
+                    break;
+                case PermissionScope.JobManagement:
                     valid = true;
                     break;
                 case PermissionScope.Article:

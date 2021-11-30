@@ -24,6 +24,7 @@ namespace Identity.Infrastructure.Account {
     public class UserService : IUserService {
         private readonly UserDbContext _userDbContext;
         private readonly UserManager<UserPm> _userManager;
+        private readonly SignInManager<UserPm> _signInManager;
         private readonly IPublisher _mediator;
 
         private readonly Dictionary<UserDm, UserPm> _userDmToPm = new();
@@ -31,10 +32,12 @@ namespace Identity.Infrastructure.Account {
         public UserService(
             UserDbContext userDbContext,
             UserManager<UserPm> userManager,
+            SignInManager<UserPm> signInManager,
             IPublisher mediator
         ) {
             _userDbContext = userDbContext;
             _userManager = userManager;
+            _signInManager = signInManager;
             _mediator = mediator;
         }
 
@@ -161,6 +164,18 @@ namespace Identity.Infrastructure.Account {
             });
 
             return null;
+        }
+
+        public async Task<Maybe<AccountError>> VerifyPassword(
+            UserDm userDm, string password
+        ) {
+            var userPm = _userDmToPm[userDm];
+
+            var result = await _signInManager.CheckPasswordSignInAsync(
+                userPm, password, lockoutOnFailure: true
+            );
+
+            return !result.Succeeded ? new AccountError(result.ToString()) : null;
         }
     }
 }

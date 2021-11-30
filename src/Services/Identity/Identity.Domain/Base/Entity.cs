@@ -3,7 +3,7 @@
 using MediatR;
 
 namespace Identity.Domain.Base {
-    public abstract class DomainModel {
+    public abstract class Entity {
         private List<INotification> _domainEvents;
         public IReadOnlyList<INotification> DomainEvents =>_domainEvents;
 

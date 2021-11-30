@@ -10,6 +10,7 @@ using Identity.Application;
 using Identity.Infrastructure;
 using Identity.Api.Controllers.Filters;
 using Identity.Api.HostedServices;
+using Identity.Api.Consumers.Admin;
 
 namespace Identity.Api {
     public class Startup {
@@ -21,7 +22,12 @@ namespace Identity.Api {
 
         public void ConfigureServices(IServiceCollection services) {
             services.AddApplication();
-            services.AddInfrastructure(Configuration);
+            services.AddInfrastructure(
+                Configuration,
+                busCfg => {
+                    busCfg.AddConsumer<AuthRequestsConsumer>();
+                }
+            );
 
             services
                 .AddControllers(options => {

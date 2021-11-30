@@ -40,18 +40,24 @@ namespace Profile.Application.Profile.Commands.CreateProfile {
             );
 
             profile.AddPermission(
-                PermissionScope.UserManagement,
-                (int) (
-                    UserManagementPermissions.ListUsers |
-                    UserManagementPermissions.GrantPermission
-                )
+                PermissionScope.AdminPanel,
+                (int) AdminPanelPermissions.LogIn
             );
 
             profile.AddPermission(
                 PermissionScope.UserManagement,
                 (int) (
                     UserManagementPermissions.ListUsers |
+                    UserManagementPermissions.GrantPermission |
                     UserManagementPermissions.RevokePermission
+                )
+            );
+
+            profile.AddPermission(
+                PermissionScope.JobManagement,
+                (int) (
+                    JobManagementPermissions.ExecuteOneOffJobs |
+                    JobManagementPermissions.SchedulePeriodicJobs
                 )
             );
 

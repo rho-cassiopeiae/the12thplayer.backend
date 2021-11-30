@@ -13,6 +13,8 @@ using MessageBus.Components.HostedServices;
 using Profile.Infrastructure.Persistence;
 using Profile.Domain.Aggregates.Profile;
 using Profile.Infrastructure.Persistence.Repositories;
+using Profile.Application.Common.Interfaces;
+using Profile.Infrastructure.Persistence.Queryables;
 
 namespace Profile.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -30,6 +32,7 @@ namespace Profile.Infrastructure {
                 )
             );
 
+            services.AddScoped<IProfileQueryable, ProfileQueryable>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
 
             services.AddMassTransit(busCfg => {

@@ -9,6 +9,10 @@ COPY "The12thPlayer.sln" "The12thPlayer.sln"
 COPY ["BuildingBlocks/MessageBus/MessageBus.Components/MessageBus.Components.csproj", "BuildingBlocks/MessageBus/MessageBus.Components/"]
 COPY ["BuildingBlocks/MessageBus/MessageBus.Contracts/MessageBus.Contracts.csproj", "BuildingBlocks/MessageBus/MessageBus.Contracts/"]
 
+COPY ["Services/Admin/Admin.Api/Admin.Api.csproj", "Services/Admin/Admin.Api/"]
+COPY ["Services/Admin/Admin.Application/Admin.Application.csproj", "Services/Admin/Admin.Application/"]
+COPY ["Services/Admin/Admin.Infrastructure/Admin.Infrastructure.csproj", "Services/Admin/Admin.Infrastructure/"]
+
 COPY ["Services/Identity/Identity.Api/Identity.Api.csproj", "Services/Identity/Identity.Api/"]
 COPY ["Services/Identity/Identity.Application/Identity.Application.csproj", "Services/Identity/Identity.Application/"]
 COPY ["Services/Identity/Identity.Domain/Identity.Domain.csproj", "Services/Identity/Identity.Domain/"]

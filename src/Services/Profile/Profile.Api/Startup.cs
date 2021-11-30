@@ -22,6 +22,7 @@ namespace Profile.Api {
                 Configuration,
                 busCfg => {
                     busCfg.AddConsumer<UserAccountEventsConsumer>();
+                    busCfg.AddConsumer<PermissionRequestsConsumer>();
                 }
             );
 
