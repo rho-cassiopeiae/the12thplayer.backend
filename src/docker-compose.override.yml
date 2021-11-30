@@ -58,3 +58,9 @@ services:
     - DOTNET_ENVIRONMENT=Development
     depends_on:
     - rabbit
+
+  worker:
+    environment:
+    - DOTNET_ENVIRONMENT=Development
+    depends_on:
+    - rabbit

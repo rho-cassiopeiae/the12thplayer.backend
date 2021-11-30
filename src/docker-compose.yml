@@ -25,6 +25,12 @@ services:
       context: .
       dockerfile: Services/Notification/Notification.Host/Dockerfile
 
+  worker:
+    image: ${REGISTRY:-the12thplayer}/worker.host:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/Worker/Worker.Host/Dockerfile
+
   migrator:
     image: ${REGISTRY:-the12thplayer}/migrator:${PLATFORM:-linux}-${TAG:-latest}
     build:

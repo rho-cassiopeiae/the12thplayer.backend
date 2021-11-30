@@ -11,11 +11,13 @@ using MassTransit;
 
 using MessageBus.Components.HostedServices;
 using MessageBus.Contracts.Requests.Admin;
+using MessageBus.Contracts.Commands.Admin;
 
 using Admin.Application.Common.Interfaces;
 using Admin.Infrastructure.Auth;
 using Admin.Infrastructure.Identity;
 using Admin.Infrastructure.Profile;
+using Admin.Infrastructure.Worker;
 
 namespace Admin.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -81,12 +83,21 @@ namespace Admin.Infrastructure {
                 IProfilePermissionChecker, ProfilePermissionChecker
             >();
 
+            services.AddSingleton<IJobScheduler, JobScheduler>();
+
             services.AddMassTransit(busCfg => {
                 busCfg.AddRequestClient<LogInAsAdmin>(
                     new Uri("queue:identity-auth-requests")
                 );
                 busCfg.AddRequestClient<CheckProfileHasPermissions>(
                     new Uri("queue:profile-permission-requests")
+                );
+
+                EndpointConvention.Map<ExecuteOneOffJobs>(
+                    new Uri("queue:worker-job-commands")
+                );
+                EndpointConvention.Map<SchedulePeriodicJobs>(
+                    new Uri("queue:worker-job-commands")
                 );
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {

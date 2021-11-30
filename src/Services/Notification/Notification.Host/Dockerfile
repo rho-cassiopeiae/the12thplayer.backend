@@ -26,6 +26,10 @@ COPY ["Services/Profile/Profile.Infrastructure/Profile.Infrastructure.csproj", "
 COPY ["Services/Notification/Notification.Host/Notification.Host.csproj", "Services/Notification/Notification.Host/"]
 COPY ["Services/Notification/Notification.Application/Notification.Application.csproj", "Services/Notification/Notification.Application/"]
 
+COPY ["Services/Worker/Worker.Host/Worker.Host.csproj", "Services/Worker/Worker.Host/"]
+COPY ["Services/Worker/Worker.Application/Worker.Application.csproj", "Services/Worker/Worker.Application/"]
+COPY ["Services/Worker/Worker.Infrastructure/Worker.Infrastructure.csproj", "Services/Worker/Worker.Infrastructure/"]
+
 COPY ["Deploy/Migrator/Migrator.csproj", "Deploy/Migrator/"]
 
 COPY "docker-compose.dcproj" "docker-compose.dcproj"
