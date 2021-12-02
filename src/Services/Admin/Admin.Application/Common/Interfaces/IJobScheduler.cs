@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using JobDto = Admin.Application.Job.Common.Dto.Job;
+using Admin.Application.Job.Common.Dto;
 
 namespace Admin.Application.Common.Interfaces {
     public interface IJobScheduler {

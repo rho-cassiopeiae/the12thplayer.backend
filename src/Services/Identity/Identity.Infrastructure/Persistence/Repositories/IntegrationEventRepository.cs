@@ -21,7 +21,7 @@ namespace Identity.Infrastructure.Persistence.Repositories {
             _integrationEventDbContext.Database.UseTransaction(unitOfWork.Transaction);
         }
 
-        public async Task SaveChangesAsync(CancellationToken cancellationToken) {
+        public async Task SaveChanges(CancellationToken cancellationToken) {
             await _integrationEventDbContext.SaveChangesAsync(cancellationToken);
         }
 

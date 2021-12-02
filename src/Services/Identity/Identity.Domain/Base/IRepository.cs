@@ -7,6 +7,6 @@ namespace Identity.Domain.Base {
         void EnlistConnectionFrom(IUnitOfWork unitOfWork) => throw new NotSupportedException();
         void EnlistTransactionFrom(IUnitOfWork unitOfWork) => throw new NotSupportedException();
         void EnlistAsPartOf(IUnitOfWork unitOfWork) => throw new NotSupportedException();
-        Task SaveChangesAsync(CancellationToken cancellationToken);
+        Task SaveChanges(CancellationToken cancellationToken);
     }
 }

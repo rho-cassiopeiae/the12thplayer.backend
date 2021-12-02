@@ -44,7 +44,7 @@ namespace Identity.Application.Account.DomainEvents.UserAccountCreated {
 
             _integrationEventRepository.Create(integrationEvent);
 
-            await _integrationEventRepository.SaveChangesAsync(cancellationToken);
+            await _integrationEventRepository.SaveChanges(cancellationToken);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ using MessageBus.Components.HostedServices;
 
 using Worker.Application.Common.Interfaces;
 using Worker.Infrastructure.FootballDataProvider;
+using Worker.Infrastructure.Livescore;
 
 namespace Worker.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -21,6 +23,10 @@ namespace Worker.Infrastructure {
         ) {
             services.AddSingleton<Mapper>();
             services.AddSingleton<IFootballDataProvider, SportmonksDataProvider>();
+
+            services.AddScoped<ILivescoreSeeder, LivescoreSeeder>();
+
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);

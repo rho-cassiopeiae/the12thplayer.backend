@@ -34,8 +34,9 @@ namespace Worker.Infrastructure.FootballDataProvider {
             _baseUrl = new Uri(configuration["Sportmonks:BaseUrl"]);
             _baseQueryString = QueryString.Create(
                 "api_token",
-                configuration["Sportmonks:ApiToken"] ?? "DUMMY_TOKEN"
+                configuration["Sportmonks:ApiToken"]
             );
+
             _jsonSerializerOptions = new JsonSerializerOptions {
                 PropertyNamingPolicy = new JsonSnakeCaseNamingPolicy()
             };
@@ -87,11 +88,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
 
             var pagination = response.Meta.Pagination;
             if (pagination != null) {
-                for (
-                    int i = pagination.CurrentPage + 1;
-                    i <= pagination.TotalPages;
-                    ++i
-                ) {
+                for (int i = pagination.CurrentPage + 1; i <= pagination.TotalPages; ++i) {
                     var nextPageQueryString = queryString.Add("page", i.ToString());
                     var nextResponse = await _get<FetchCountriesResponseDto>(
                         client, $"countries{nextPageQueryString}"
@@ -113,10 +110,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
                 client, $"teams/{teamId}{queryString}"
             );
 
-            return _mapper.Map(
-                response.Data,
-                postMap: t => t.HasCommunity = true
-            );
+            return _mapper.Map(response.Data);
         }
 
         //public async Task<IEnumerable<FixtureDto>> GetTeamFinishedFixtures(

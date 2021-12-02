@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace Admin.Application.Job.Common.Dto {
-    public class Job {
+    public class JobDto {
         public string Name { get; set; }
         public string Type { get; set; }
         public string CronSchedule { get; set; }

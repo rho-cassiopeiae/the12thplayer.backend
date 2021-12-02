@@ -8,7 +8,7 @@ using Admin.Application.Common.Results;
 using Admin.Application.Common.Attributes;
 using Admin.Application.Common.Enums;
 using Admin.Application.Common.Interfaces;
-using JobDto = Admin.Application.Job.Common.Dto.Job;
+using Admin.Application.Job.Common.Dto;
 
 namespace Admin.Application.Job.Commands.ExecuteOneOffJobs {
     [RequireAuthorization(Policy = "HasAdminPanelAccess")]

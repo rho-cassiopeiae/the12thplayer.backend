@@ -39,8 +39,8 @@ namespace Worker.Infrastructure.FootballDataProvider {
                 Name = dto.Name,
                 CountryId = dto.CountryId,
                 LogoUrl = dto.LogoPath,
-                Venue = Map(dto.Venue.Data, postMap: v => v.TeamId = dto.Id),
-                Manager = Map(dto.Coach?.Data, postMap: m => m.TeamId = dto.Id)
+                Venue = Map(dto.Venue.Data),
+                Manager = Map(dto.Coach?.Data)
             };
 
             postMap?.Invoke(t);

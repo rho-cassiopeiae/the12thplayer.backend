@@ -53,6 +53,16 @@ services:
     - migrator
     - rabbit
 
+  livescore:
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://0.0.0.0:80
+    ports:
+    - "8000:80"
+    depends_on:
+    - migrator
+    - rabbit
+
   notification:
     environment:
     - DOTNET_ENVIRONMENT=Development
@@ -62,5 +72,7 @@ services:
   worker:
     environment:
     - DOTNET_ENVIRONMENT=Development
+    volumes:
+    - "${UserSecretsPath}:/root/.microsoft/usersecrets:ro"
     depends_on:
     - rabbit

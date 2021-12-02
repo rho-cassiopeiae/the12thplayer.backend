@@ -5,6 +5,8 @@ using Identity.Infrastructure.Persistence;
 
 using Profile.Infrastructure.Persistence;
 
+using Livescore.Infrastructure.Persistence;
+
 namespace Migrator {
     class Program {
         static void Main(string[] args) {
@@ -34,6 +36,16 @@ namespace Migrator {
                     .GetRequiredService<ProfileDbContext>();
 
                 profileDbContext.Database.Migrate();
+            }
+
+            host = Livescore.Api.Program.CreateHostBuilder(args).Build();
+
+            using (var scope = host.Services.CreateScope()) {
+                var livescoreDbContext = scope
+                    .ServiceProvider
+                    .GetRequiredService<LivescoreDbContext>();
+
+                livescoreDbContext.Database.Migrate();
             }
         }
     }

@@ -18,7 +18,7 @@ namespace Admin.Infrastructure.Worker {
             _bus = bus;
         }
 
-        public async Task ExecuteOneOffJobs(List<Job> jobs) {
+        public async Task ExecuteOneOffJobs(List<JobDto> jobs) {
             await _bus.Send(new ExecuteOneOffJobs {
                 CorrelationId = Guid.NewGuid(),
                 Jobs = jobs.Select(job => new ExecuteOneOffJobs.Job {
@@ -38,7 +38,7 @@ namespace Admin.Infrastructure.Worker {
             });
         }
 
-        public async Task SchedulePeridiocJobs(List<Job> jobs) {
+        public async Task SchedulePeridiocJobs(List<JobDto> jobs) {
             await _bus.Send(new SchedulePeriodicJobs {
                 CorrelationId = Guid.NewGuid(),
                 Jobs = jobs.Select(job => new SchedulePeriodicJobs.Job {

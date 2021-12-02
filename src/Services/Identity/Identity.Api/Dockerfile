@@ -23,6 +23,11 @@ COPY ["Services/Profile/Profile.Application/Profile.Application.csproj", "Servic
 COPY ["Services/Profile/Profile.Domain/Profile.Domain.csproj", "Services/Profile/Profile.Domain/"]
 COPY ["Services/Profile/Profile.Infrastructure/Profile.Infrastructure.csproj", "Services/Profile/Profile.Infrastructure/"]
 
+COPY ["Services/Livescore/Livescore.Api/Livescore.Api.csproj", "Services/Livescore/Livescore.Api/"]
+COPY ["Services/Livescore/Livescore.Application/Livescore.Application.csproj", "Services/Livescore/Livescore.Application/"]
+COPY ["Services/Livescore/Livescore.Domain/Livescore.Domain.csproj", "Services/Livescore/Livescore.Domain/"]
+COPY ["Services/Livescore/Livescore.Infrastructure/Livescore.Infrastructure.csproj", "Services/Livescore/Livescore.Infrastructure/"]
+
 COPY ["Services/Notification/Notification.Host/Notification.Host.csproj", "Services/Notification/Notification.Host/"]
 COPY ["Services/Notification/Notification.Application/Notification.Application.csproj", "Services/Notification/Notification.Application/"]
 
