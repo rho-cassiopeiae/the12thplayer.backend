@@ -91,8 +91,7 @@ namespace Worker.Infrastructure.FootballDataProvider.Dto {
                 }
 
                 public long TeamId { get; set; }
-                public long PlayerId { get; set; }
-                public string PlayerName { get; set; }
+                public long? PlayerId { get; set; }
                 public short Number { get; set; }
                 public string Position { get; set; }
                 public short? FormationPosition { get; set; }

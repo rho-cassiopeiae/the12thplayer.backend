@@ -1,9 +1,7 @@
-﻿using System;
-
-using Livescore.Domain.Base;
+﻿using Livescore.Domain.Base;
 
 namespace Livescore.Domain.Aggregates.Team {
-    public class Team : Entity, IAggregateRoot, IEquatable<Team> {
+    public class Team : Entity, IAggregateRoot {
         public long Id { get; private set; }
         public string Name { get; private set; }
         public long CountryId { get; private set; }
@@ -32,9 +30,5 @@ namespace Livescore.Domain.Aggregates.Team {
         public void SetHasThe12thPlayerCommunity(bool hasThe12thPlayerCommunity) {
             HasThe12thPlayerCommunity = hasThe12thPlayerCommunity;
         }
-
-        public bool Equals(Team other) => other != null && Id == other.Id;
-
-        public override int GetHashCode() => Id.GetHashCode();
     }
 }

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 using Worker.Infrastructure.FootballDataProvider.Utils;
 
 namespace Worker.Infrastructure.FootballDataProvider.Dto {
-    public class PlayerResponseDto : ResponseDto {
+    public class GetPlayerResponseDto : ResponseDto {
         public class PlayerDto {
             public class PositionDataDto {
                 public class PositionDto {

@@ -9,6 +9,9 @@ using MessageBus.Contracts.Requests.Worker;
 using MessageBus.Contracts.Responses.Livescore;
 using CountryDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.CountryDto;
 using TeamDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.TeamDto;
+using FixtureDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.FixtureDto;
+using SeasonDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.SeasonDto;
+using PlayerDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.PlayerDto;
 
 using Worker.Application.Common.Interfaces;
 using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
@@ -40,6 +43,23 @@ namespace Worker.Infrastructure.Livescore {
             await client.GetResponse<AddTeamDetailsSuccess>(new AddTeamDetails {
                 CorrelationId = Guid.NewGuid(),
                 Team = _mapper.Map<TeamDto, TeamDtoMsg>(team)
+            });
+        }
+
+        public async Task AddTeamFinishedFixtures(
+            long teamId,
+            IEnumerable<FixtureDto> fixtures,
+            IEnumerable<SeasonDto> seasons,
+            IEnumerable<PlayerDto> players
+        ) {
+            var client = _bus.CreateRequestClient<AddTeamFinishedFixtures>(_destinationAddress);
+
+            await client.GetResponse<AddTeamFinishedFixturesSuccess>(new AddTeamFinishedFixtures {
+                CorrelationId = Guid.NewGuid(),
+                TeamId = teamId,
+                Fixtures = _mapper.Map<IEnumerable<FixtureDto>, IEnumerable<FixtureDtoMsg>>(fixtures),
+                Seasons = _mapper.Map<IEnumerable<SeasonDto>, IEnumerable<SeasonDtoMsg>>(seasons),
+                Players = _mapper.Map<IEnumerable<PlayerDto>, IEnumerable<PlayerDtoMsg>>(players)
             });
         }
     }

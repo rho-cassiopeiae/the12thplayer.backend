@@ -13,6 +13,8 @@ using Worker.Application.Common.Interfaces;
 using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
 using Worker.Infrastructure.FootballDataProvider.Dto;
 using Worker.Infrastructure.FootballDataProvider.Utils;
+using FixtureDtoApp = Worker.Application.Jobs.OneOff.FootballDataCollection.Dto.FixtureDto;
+using SeasonDtoApp = Worker.Application.Jobs.OneOff.FootballDataCollection.Dto.SeasonDto;
 
 namespace Worker.Infrastructure.FootballDataProvider {
     public class SportmonksDataProvider : IFootballDataProvider {
@@ -81,16 +83,16 @@ namespace Worker.Infrastructure.FootballDataProvider {
 
             var queryString = _baseQueryString.Add("per_page", "100");
 
-            var response = await _get<FetchCountriesResponseDto>(
+            var response = await _get<GetCountriesResponseDto>(
                 client, $"countries{queryString}"
             );
-            var responses = new List<FetchCountriesResponseDto> { response };
+            var responses = new List<GetCountriesResponseDto> { response };
 
             var pagination = response.Meta.Pagination;
             if (pagination != null) {
                 for (int i = pagination.CurrentPage + 1; i <= pagination.TotalPages; ++i) {
                     var nextPageQueryString = queryString.Add("page", i.ToString());
-                    var nextResponse = await _get<FetchCountriesResponseDto>(
+                    var nextResponse = await _get<GetCountriesResponseDto>(
                         client, $"countries{nextPageQueryString}"
                     );
                     responses.Add(nextResponse);
@@ -102,59 +104,77 @@ namespace Worker.Infrastructure.FootballDataProvider {
             );
         }
 
-        public async Task<TeamDto> GetTeamById(long teamId) {
+        public async Task<TeamDto> GetTeamDetails(long teamId) {
             using var client = _createClient();
 
             var queryString = _baseQueryString.Add("include", "coach,venue");
-            var response = await _get<TeamResponseDto>(
+            var response = await _get<GetTeamDetailsResponseDto>(
                 client, $"teams/{teamId}{queryString}"
             );
 
             return _mapper.Map(response.Data);
         }
 
-        //public async Task<IEnumerable<FixtureDto>> GetTeamFinishedFixtures(
-        //    long teamId, string startDate, string endDate
-        //) {
-        //    using var client = createClient();
+        public async Task<IEnumerable<SeasonDtoApp>> GetSeasons(IEnumerable<long> seasonIds) {
+            using var client = _createClient();
 
-        //    var queryString = _baseQueryString.Add(
-        //        QueryString.Create(new[] {
-        //            KeyValuePair.Create(
-        //                "include",
-        //                "referee,venue,localTeam,visitorTeam,localCoach,visitorCoach,lineup,bench,stats,events"
-        //            ),
-        //            KeyValuePair.Create(
-        //                "per_page",
-        //                "10"
-        //            )
-        //        })
-        //    );
+            var queryString = _baseQueryString.Add("include", "league");
+            var tasks = seasonIds.Select(
+                seasonId => _get<GetSeasonResponseDto>(client, $"seasons/{seasonId}{queryString}")
+            );
+            var responses = await Task.WhenAll(tasks);
 
-        //    var response = await get<TeamFinishedFixturesResponseDto>(
-        //        client,
-        //        $"fixtures/between/{startDate}/{endDate}/{teamId}{queryString}"
-        //    );
-        //    var responses = new List<TeamFinishedFixturesResponseDto> { response };
+            return _mapper.Map<SeasonDtoApp>(responses.Select(response => response.Data));
+        }
 
-        //    var pagination = response.Meta.Pagination;
-        //    if (pagination != null) {
-        //        for (
-        //            int i = pagination.CurrentPage + 1;
-        //            i <= pagination.TotalPages;
-        //            ++i
-        //        ) {
-        //            var nextPageQueryString = queryString.Add("page", i.ToString());
-        //            var nextResponse = await get<TeamFinishedFixturesResponseDto>(
-        //                client,
-        //                $"fixtures/between/{startDate}/{endDate}/{teamId}{nextPageQueryString}"
-        //            );
-        //            responses.Add(nextResponse);
-        //        }
-        //    }
+        public async Task<IEnumerable<PlayerDto>> GetPlayers(IEnumerable<long> playerIds) {
+            using var client = _createClient();
 
-        //    return responses.SelectMany(response => response.Data);
-        //}
+            var queryString = _baseQueryString.Add("include", "position");
+            var tasks = playerIds.Select(playerId => _get<GetPlayerResponseDto>(client, $"players/{playerId}{queryString}"));
+            var responses = await Task.WhenAll(tasks);
+
+            return _mapper.Map<PlayerDto>(responses.Select(response => response.Data));
+        }
+
+        public async Task<IEnumerable<FixtureDtoApp>> GetTeamFinishedFixtures(
+            long teamId, string startDate, string endDate
+        ) {
+            using var client = _createClient();
+
+            var queryString = _baseQueryString.Add(
+                QueryString.Create(new[] {
+                    KeyValuePair.Create(
+                        "include",
+                        "referee,venue,localTeam,visitorTeam,localCoach,visitorCoach,lineup,bench,stats,events"
+                    ),
+                    KeyValuePair.Create(
+                        "per_page",
+                        "10"
+                    )
+                })
+            );
+
+            var response = await _get<GetTeamFinishedFixturesResponseDto>(
+                client,
+                $"fixtures/between/{startDate}/{endDate}/{teamId}{queryString}"
+            );
+            var responses = new List<GetTeamFinishedFixturesResponseDto> { response };
+
+            var pagination = response.Meta.Pagination;
+            if (pagination != null) {
+                for (int i = pagination.CurrentPage + 1; i <= pagination.TotalPages; ++i) {
+                    var nextPageQueryString = queryString.Add("page", i.ToString());
+                    var nextResponse = await _get<GetTeamFinishedFixturesResponseDto>(
+                        client,
+                        $"fixtures/between/{startDate}/{endDate}/{teamId}{nextPageQueryString}"
+                    );
+                    responses.Add(nextResponse);
+                }
+            }
+
+            return _mapper.Map<FixtureDtoApp>(responses.SelectMany(response => response.Data), arg: teamId);
+        }
 
         //public async Task<IEnumerable<FixtureDto>> GetTeamUpcomingFixtures(
         //    long teamId

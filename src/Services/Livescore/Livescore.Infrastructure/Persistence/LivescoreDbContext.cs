@@ -4,6 +4,9 @@ using Livescore.Domain.Aggregates.Country;
 using Livescore.Domain.Aggregates.Manager;
 using Livescore.Domain.Aggregates.Team;
 using Livescore.Domain.Aggregates.Venue;
+using Livescore.Domain.Aggregates.League;
+using Livescore.Domain.Aggregates.Player;
+using Livescore.Domain.Aggregates.Fixture;
 
 namespace Livescore.Infrastructure.Persistence {
     public class LivescoreDbContext : DbContext {
@@ -11,6 +14,9 @@ namespace Livescore.Infrastructure.Persistence {
         public DbSet<Team> Teams { get; set; }
         public DbSet<Venue> Venues { get; set; }
         public DbSet<Manager> Managers { get; set; }
+        public DbSet<League> Leagues { get; set; }
+        public DbSet<Player> Players { get; set; }
+        public DbSet<Fixture> Fixtures { get; set; }
 
         public LivescoreDbContext(DbContextOptions<LivescoreDbContext> options)
             : base(options) { }
@@ -68,6 +74,99 @@ namespace Livescore.Infrastructure.Persistence {
                     .HasOne<Team>()
                     .WithOne()
                     .HasForeignKey<Manager>(m => m.TeamId)
+                    .IsRequired(false);
+            });
+
+            modelBuilder.Entity<League>(builder => {
+                builder.HasKey(l => l.Id);
+                builder.Property(l => l.Id).ValueGeneratedNever();
+                builder.Property(l => l.Name).IsRequired();
+                builder.Property(l => l.Type).IsRequired(false);
+                builder.Property(l => l.IsCup).IsRequired(false);
+                builder.Property(l => l.LogoUrl).IsRequired(false);
+
+                builder.Metadata
+                    .FindNavigation(nameof(League.Seasons))
+                    .SetPropertyAccessMode(PropertyAccessMode.Field);
+            });
+
+            modelBuilder.Entity<Season>(builder => {
+                builder.HasKey(s => s.Id);
+                builder.Property(s => s.Id).ValueGeneratedNever();
+                builder.Property(s => s.Name).IsRequired();
+                builder.Property(s => s.IsCurrent).IsRequired();
+                builder
+                    .HasOne<League>()
+                    .WithMany(l => l.Seasons)
+                    .HasForeignKey(s => s.LeagueId)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity<Player>(builder => {
+                builder.HasKey(p => p.Id);
+                builder.Property(p => p.Id).ValueGeneratedNever();
+                builder.Property(p => p.FirstName).IsRequired(false);
+                builder.Property(p => p.LastName).IsRequired(false);
+                builder.Property(p => p.BirthDate).IsRequired(false);
+                builder.Property(p => p.Number).IsRequired(false);
+                builder.Property(p => p.Position).IsRequired(false);
+                builder.Property(p => p.ImageUrl).IsRequired(false);
+                builder.Property(p => p.LastLineupAt).IsRequired();
+                builder
+                    .HasOne<Country>()
+                    .WithMany()
+                    .HasForeignKey(p => p.CountryId)
+                    .IsRequired(false);
+                builder
+                    .HasOne<Team>()
+                    .WithMany()
+                    .HasForeignKey(p => p.TeamId)
+                    .IsRequired(false);
+            });
+
+            modelBuilder.Entity<Fixture>(builder => {
+                builder.HasKey(f => new { f.Id, f.TeamId });
+                builder.Property(f => f.HomeStatus).IsRequired();
+                builder.Property(f => f.StartTime).IsRequired(false);
+                builder.Property(f => f.Status).IsRequired();
+                builder.Property(f => f.GameTime)
+                    .HasColumnType("jsonb")
+                    .IsRequired();
+                builder.Property(f => f.Score)
+                    .HasColumnType("jsonb")
+                    .IsRequired();
+                builder.Property(f => f.RefereeName).IsRequired(false);
+                builder.Property(f => f.Colors)
+                    .HasColumnType("jsonb")
+                    .IsRequired();
+                builder.Property(f => f.Lineups)
+                    .HasColumnType("jsonb")
+                    .IsRequired();
+                builder.Property(f => f.Events)
+                    .HasColumnType("jsonb")
+                    .IsRequired();
+                builder.Property(f => f.Stats)
+                    .HasColumnType("jsonb")
+                    .IsRequired();
+                builder
+                    .HasOne<Team>()
+                    .WithMany()
+                    .HasForeignKey(f => f.TeamId)
+                    .IsRequired();
+                builder
+                    .HasOne<Team>()
+                    .WithMany()
+                    .HasForeignKey(f => f.OpponentTeamId)
+                    .IsRequired();
+                builder
+                    .HasOne<Season>()
+                    .WithMany()
+                    .HasForeignKey(f => f.SeasonId)
+                    .IsRequired(false);
+                builder
+                    .HasOne<Venue>()
+                    .WithMany()
+                    .HasForeignKey(f => f.VenueId)
                     .IsRequired(false);
             });
         }

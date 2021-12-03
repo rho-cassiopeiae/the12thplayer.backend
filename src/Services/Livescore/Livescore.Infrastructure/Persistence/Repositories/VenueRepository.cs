@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +25,15 @@ namespace Livescore.Infrastructure.Persistence.Repositories {
             );
 
             return venue;
+        }
+
+        public async Task<IEnumerable<Venue>> FindById(IEnumerable<long> ids) {
+            var venues = await _livescoreDbContext.Venues
+                .AsNoTracking()
+                .Where(v => ids.Contains(v.Id))
+                .ToListAsync();
+
+            return venues;
         }
 
         public void Create(Venue venue) {

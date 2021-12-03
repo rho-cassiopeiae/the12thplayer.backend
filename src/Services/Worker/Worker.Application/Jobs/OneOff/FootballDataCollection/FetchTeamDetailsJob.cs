@@ -22,7 +22,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
         protected override async Task<IDictionary<string, object>> _execute() {
             var teamId = long.Parse(_context.MergedJobDataMap.GetString("TeamId"));
 
-            var team = await _footballDataProvider.GetTeamById(teamId);
+            var team = await _footballDataProvider.GetTeamDetails(teamId);
 
             await _livescoreSeeder.AddTeamDetails(team);
 

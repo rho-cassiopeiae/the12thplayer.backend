@@ -1,9 +1,7 @@
-﻿using System;
-
-using Livescore.Domain.Base;
+﻿using Livescore.Domain.Base;
 
 namespace Livescore.Domain.Aggregates.Venue {
-    public class Venue : Entity, IAggregateRoot, IEquatable<Venue> {
+    public class Venue : Entity, IAggregateRoot {
         public long Id { get; private set; }
         public long? TeamId { get; private set; }
         public string Name { get; private set; }
@@ -34,9 +32,5 @@ namespace Livescore.Domain.Aggregates.Venue {
         public void ChangeImage(string imageUrl) {
             ImageUrl = imageUrl;
         }
-
-        public bool Equals(Venue other) => other != null && Id == other.Id;
-
-        public override int GetHashCode() => Id.GetHashCode();
     }
 }

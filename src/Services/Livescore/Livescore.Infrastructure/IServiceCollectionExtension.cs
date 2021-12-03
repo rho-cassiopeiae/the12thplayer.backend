@@ -17,6 +17,9 @@ using Livescore.Infrastructure.Persistence.Repositories;
 using Livescore.Domain.Aggregates.Team;
 using Livescore.Domain.Aggregates.Venue;
 using Livescore.Domain.Aggregates.Manager;
+using Livescore.Domain.Aggregates.League;
+using Livescore.Domain.Aggregates.Player;
+using Livescore.Domain.Aggregates.Fixture;
 
 namespace Livescore.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -40,6 +43,9 @@ namespace Livescore.Infrastructure {
             services.AddScoped<ITeamRepository, TeamRepository>();
             services.AddScoped<IVenueRepository, VenueRepository>();
             services.AddScoped<IManagerRepository, ManagerRepository>();
+            services.AddScoped<ILeagueRepository, LeagueRepository>();
+            services.AddScoped<IPlayerRepository, PlayerRepository>();
+            services.AddScoped<IFixtureRepository, FixtureRepository>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
