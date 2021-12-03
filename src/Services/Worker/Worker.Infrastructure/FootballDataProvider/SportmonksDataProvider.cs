@@ -176,35 +176,19 @@ namespace Worker.Infrastructure.FootballDataProvider {
             return _mapper.Map<FixtureDtoApp>(responses.SelectMany(response => response.Data), arg: teamId);
         }
 
-        //public async Task<IEnumerable<FixtureDto>> GetTeamUpcomingFixtures(
-        //    long teamId
-        //) {
-        //    using var client = createClient();
+        public async Task<IEnumerable<FixtureDtoApp>> GetTeamUpcomingFixtures(long teamId) {
+            using var client = _createClient();
 
-        //    var queryString = _baseQueryString.Add(
-        //        "include",
-        //        "upcoming.referee,upcoming.venue,upcoming.localTeam,upcoming.visitorTeam,upcoming.localCoach,upcoming.visitorCoach,upcoming.lineup,upcoming.bench,upcoming.stats,upcoming.events"
-        //    );
-        //    var response = await get<TeamUpcomingFixturesResponseDto>(
-        //        client, $"teams/{teamId}{queryString}"
-        //    );
+            var queryString = _baseQueryString.Add(
+                "include",
+                "upcoming.referee,upcoming.venue,upcoming.localTeam,upcoming.visitorTeam,upcoming.localCoach,upcoming.visitorCoach,upcoming.lineup,upcoming.bench,upcoming.stats,upcoming.events"
+            );
+            var response = await _get<GetTeamUpcomingFixturesResponseDto>(
+                client, $"teams/{teamId}{queryString}"
+            );
 
-        //    return response.Data.Upcoming.Data;
-        //}
-
-        //public async Task<IEnumerable<PlayerResponseDto.PlayerDto>> GetPlayersByIds(
-        //    IEnumerable<long> playerIds
-        //) {
-        //    using var client = createClient();
-
-        //    var queryString = _baseQueryString.Add("include", "position");
-        //    var tasks = playerIds.Select(playerId =>
-        //        get<PlayerResponseDto>(client, $"players/{playerId}{queryString}")
-        //    );
-        //    var responses = await Task.WhenAll(tasks);
-
-        //    return responses.Select(response => response.Data);
-        //}
+            return _mapper.Map<FixtureDtoApp>(response.Data.Upcoming.Data, arg: teamId);
+        }
 
         //public async Task<FixtureDto> GetFixtureLivescore(
         //    long fixtureId,

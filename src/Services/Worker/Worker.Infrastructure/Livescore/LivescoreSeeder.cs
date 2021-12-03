@@ -62,5 +62,20 @@ namespace Worker.Infrastructure.Livescore {
                 Players = _mapper.Map<IEnumerable<PlayerDto>, IEnumerable<PlayerDtoMsg>>(players)
             });
         }
+
+        public async Task AddTeamUpcomingFixtures(
+            long teamId,
+            IEnumerable<FixtureDto> fixtures,
+            IEnumerable<SeasonDto> seasons
+        ) {
+            var client = _bus.CreateRequestClient<AddTeamUpcomingFixtures>(_destinationAddress);
+
+            await client.GetResponse<AddTeamUpcomingFixturesSuccess>(new AddTeamUpcomingFixtures {
+                CorrelationId = Guid.NewGuid(),
+                TeamId = teamId,
+                Fixtures = _mapper.Map<IEnumerable<FixtureDto>, IEnumerable<FixtureDtoMsg>>(fixtures),
+                Seasons = _mapper.Map<IEnumerable<SeasonDto>, IEnumerable<SeasonDtoMsg>>(seasons)
+            });
+        }
     }
 }

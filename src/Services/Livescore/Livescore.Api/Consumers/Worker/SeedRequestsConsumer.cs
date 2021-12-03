@@ -14,16 +14,18 @@ using FixtureDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.FixtureDto;
 using SeasonDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.SeasonDto;
 using PlayerDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.PlayerDto;
 
-using Livescore.Application.Seed.Commands.AddTeamDetails;
 using Livescore.Application.Seed.Common.Dto;
+using Livescore.Application.Seed.Commands.AddTeamDetails;
 using Livescore.Application.Seed.Commands.AddCountries;
 using Livescore.Application.Seed.Commands.AddTeamFinishedFixtures;
+using Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures;
 
 namespace Livescore.Api.Consumers.Worker {
     public class SeedRequestsConsumer :
         IConsumer<AddCountries>,
         IConsumer<AddTeamDetails>,
-        IConsumer<AddTeamFinishedFixtures> {
+        IConsumer<AddTeamFinishedFixtures>,
+        IConsumer<AddTeamUpcomingFixtures> {
         private readonly IMapper _mapper;
         private readonly ISender _mediator;
 
@@ -75,6 +77,24 @@ namespace Livescore.Api.Consumers.Worker {
             await _mediator.Send(command);
 
             await context.RespondAsync(new AddTeamFinishedFixturesSuccess {
+                CorrelationId = Guid.NewGuid()
+            });
+        }
+
+        public async Task Consume(ConsumeContext<AddTeamUpcomingFixtures> context) {
+            var command = new AddTeamUpcomingFixturesCommand {
+                TeamId = context.Message.TeamId,
+                Fixtures = _mapper.Map<IEnumerable<FixtureDtoMsg>, IEnumerable<FixtureDto>>(
+                    context.Message.Fixtures
+                ),
+                Seasons = _mapper.Map<IEnumerable<SeasonDtoMsg>, IEnumerable<SeasonDto>>(
+                    context.Message.Seasons
+                )
+            };
+
+            await _mediator.Send(command);
+
+            await context.RespondAsync(new AddTeamUpcomingFixturesSuccess {
                 CorrelationId = Guid.NewGuid()
             });
         }

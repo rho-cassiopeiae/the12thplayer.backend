@@ -169,7 +169,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
                 GameTime = Map(dto.MatchStatus),
                 Score = Map(dto.Scores ?? new FixtureDtoResponse.ScoreDto()),
                 RefereeName = dto.Referee?.Data.CommonName,
-                Colors = new List<TeamColorDto> {
+                Colors = new[] {
                     new TeamColorDto {
                         TeamId = teamId,
                         Color = homeStatus ? dto.Colors?.Localteam?.Color : dto.Colors?.Visitorteam?.Color
@@ -179,7 +179,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
                         Color = homeStatus ? dto.Colors?.Visitorteam?.Color : dto.Colors?.Localteam?.Color
                     }
                 },
-                Lineups = new List<TeamLineupDto> {
+                Lineups = new[] {
                     new TeamLineupDto {
                         TeamId = teamId,
                         Formation = homeStatus ? dto.Formations?.LocalteamFormation : dto.Formations?.VisitorteamFormation,
@@ -207,7 +207,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
                             .ToList()
                     }
                 },
-                Events = new List<TeamMatchEventsDto> {
+                Events = new[] {
                     new TeamMatchEventsDto {
                         TeamId = teamId,
                         Events = dto.Events?.Data
@@ -223,7 +223,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
                             .ToList()
                     }
                 },
-                Stats = new List<TeamStatsDto> {
+                Stats = new[] {
                     new TeamStatsDto {
                         TeamId = teamId,
                         Stats = Map(dto.Stats?.Data.FirstOrDefault(stats => stats.TeamId == teamId)),

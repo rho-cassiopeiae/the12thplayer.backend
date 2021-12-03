@@ -16,9 +16,7 @@ namespace Worker.Application.Common.Interfaces {
             long teamId, string startDate, string endDate
         );
 
-        //Task<IEnumerable<FixtureDto>> GetTeamUpcomingFixtures(long teamId);
-
-        //Task<IEnumerable<PlayerResponseDto.PlayerDto>> GetPlayersByIds(IEnumerable<long> playerIds);
+        Task<IEnumerable<FixtureDto>> GetTeamUpcomingFixtures(long teamId);
 
         //Task<FixtureDto> GetFixtureLivescore(
         //    long fixtureId,
