@@ -8,7 +8,7 @@ using Livescore.Application.Common.Results;
 using Livescore.Domain.Aggregates.Team;
 using Livescore.Domain.Aggregates.Venue;
 using Livescore.Domain.Aggregates.Manager;
-using Livescore.Application.Seed.Common.Dto;
+using Livescore.Application.Common.Dto;
 
 namespace Livescore.Application.Seed.Commands.AddTeamDetails {
     public class AddTeamDetailsCommand : IRequest<VoidResult> {

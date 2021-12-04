@@ -1,19 +1,19 @@
 ﻿using AutoMapper;
 
-using CountryDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.CountryDto;
-using TeamDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.TeamDto;
-using VenueDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.VenueDto;
-using ManagerDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.ManagerDto;
-using FixtureDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.FixtureDto;
-using GameTimeDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.GameTimeDto;
-using ScoreDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.ScoreDto;
-using TeamColorDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.TeamColorDto;
-using TeamLineupDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.TeamLineupDto;
-using TeamMatchEventsDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.TeamMatchEventsDto;
-using TeamStatsDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.TeamStatsDto;
-using SeasonDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.SeasonDto;
-using LeagueDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.LeagueDto;
-using PlayerDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.PlayerDto;
+using CountryDtoMsg = MessageBus.Contracts.Common.Dto.CountryDto;
+using TeamDtoMsg = MessageBus.Contracts.Common.Dto.TeamDto;
+using VenueDtoMsg = MessageBus.Contracts.Common.Dto.VenueDto;
+using ManagerDtoMsg = MessageBus.Contracts.Common.Dto.ManagerDto;
+using FixtureDtoMsg = MessageBus.Contracts.Common.Dto.FixtureDto;
+using GameTimeDtoMsg = MessageBus.Contracts.Common.Dto.GameTimeDto;
+using ScoreDtoMsg = MessageBus.Contracts.Common.Dto.ScoreDto;
+using TeamColorDtoMsg = MessageBus.Contracts.Common.Dto.TeamColorDto;
+using TeamLineupDtoMsg = MessageBus.Contracts.Common.Dto.TeamLineupDto;
+using TeamMatchEventsDtoMsg = MessageBus.Contracts.Common.Dto.TeamMatchEventsDto;
+using TeamStatsDtoMsg = MessageBus.Contracts.Common.Dto.TeamStatsDto;
+using SeasonDtoMsg = MessageBus.Contracts.Common.Dto.SeasonDto;
+using LeagueDtoMsg = MessageBus.Contracts.Common.Dto.LeagueDto;
+using PlayerDtoMsg = MessageBus.Contracts.Common.Dto.PlayerDto;
 
 using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
 
@@ -42,7 +42,8 @@ namespace Worker.Infrastructure.Livescore {
             CreateMap<SeasonDto, SeasonDtoMsg>();
             CreateMap<LeagueDto, LeagueDtoMsg>();
 
-            CreateMap<PlayerDto, PlayerDtoMsg>();
+            CreateMap<PlayerDto, PlayerDtoMsg>()
+                .ReverseMap();
         }
     }
 }

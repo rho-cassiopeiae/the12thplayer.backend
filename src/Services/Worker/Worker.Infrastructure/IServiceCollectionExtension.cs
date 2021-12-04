@@ -25,6 +25,8 @@ namespace Worker.Infrastructure {
             services.AddSingleton<IFootballDataProvider, SportmonksDataProvider>();
 
             services.AddScoped<ILivescoreSeeder, LivescoreSeeder>();
+            services.AddScoped<IFixtureLivescoreNotifier, FixtureLivescoreNotifier>();
+            services.AddScoped<ILivescoreSvcQueryable, LivescoreSvcQueryable>();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 

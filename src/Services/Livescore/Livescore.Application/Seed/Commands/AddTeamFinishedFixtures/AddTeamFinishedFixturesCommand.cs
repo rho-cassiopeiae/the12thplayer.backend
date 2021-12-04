@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using MediatR;
 
 using Livescore.Application.Common.Results;
-using Livescore.Application.Seed.Common.Dto;
+using Livescore.Application.Common.Dto;
 using Livescore.Domain.Aggregates.Team;
 using Livescore.Domain.Aggregates.Venue;
 using Livescore.Domain.Aggregates.League;

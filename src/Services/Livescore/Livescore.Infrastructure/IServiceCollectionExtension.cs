@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using MassTransit;
 using MassTransit.Definition;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
+using StackExchange.Redis;
 
 using MessageBus.Components.HostedServices;
 
@@ -20,6 +21,9 @@ using Livescore.Domain.Aggregates.Manager;
 using Livescore.Domain.Aggregates.League;
 using Livescore.Domain.Aggregates.Player;
 using Livescore.Domain.Aggregates.Fixture;
+using Livescore.Application.Common.Interfaces;
+using Livescore.Infrastructure.Livescore;
+using Livescore.Infrastructure.Persistence.Queryables;
 
 namespace Livescore.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -46,6 +50,18 @@ namespace Livescore.Infrastructure {
             services.AddScoped<ILeagueRepository, LeagueRepository>();
             services.AddScoped<IPlayerRepository, PlayerRepository>();
             services.AddScoped<IFixtureRepository, FixtureRepository>();
+
+            services.AddScoped<ILivescoreQueryable, LivescoreQueryable>();
+
+            services.AddSingleton(sp => {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                var host = configuration["Redis:Host"];
+                var port = configuration["Redis:Port"];
+
+                return ConnectionMultiplexer.Connect($"{host}:{port}");
+            });
+
+            services.AddScoped<IInMemoryStore, RedisStore>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);

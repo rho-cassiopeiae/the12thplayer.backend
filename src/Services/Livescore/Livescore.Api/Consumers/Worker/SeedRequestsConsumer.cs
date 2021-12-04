@@ -8,24 +8,26 @@ using AutoMapper;
 
 using MessageBus.Contracts.Requests.Worker;
 using MessageBus.Contracts.Responses.Livescore;
-using CountryDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.CountryDto;
-using TeamDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.TeamDto;
-using FixtureDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.FixtureDto;
-using SeasonDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.SeasonDto;
-using PlayerDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.PlayerDto;
+using CountryDtoMsg = MessageBus.Contracts.Common.Dto.CountryDto;
+using TeamDtoMsg = MessageBus.Contracts.Common.Dto.TeamDto;
+using FixtureDtoMsg = MessageBus.Contracts.Common.Dto.FixtureDto;
+using SeasonDtoMsg = MessageBus.Contracts.Common.Dto.SeasonDto;
+using PlayerDtoMsg = MessageBus.Contracts.Common.Dto.PlayerDto;
 
-using Livescore.Application.Seed.Common.Dto;
+using Livescore.Application.Common.Dto;
 using Livescore.Application.Seed.Commands.AddTeamDetails;
 using Livescore.Application.Seed.Commands.AddCountries;
 using Livescore.Application.Seed.Commands.AddTeamFinishedFixtures;
 using Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures;
+using Livescore.Application.Seed.Commands.AddTeamPlayers;
 
 namespace Livescore.Api.Consumers.Worker {
     public class SeedRequestsConsumer :
         IConsumer<AddCountries>,
         IConsumer<AddTeamDetails>,
         IConsumer<AddTeamFinishedFixtures>,
-        IConsumer<AddTeamUpcomingFixtures> {
+        IConsumer<AddTeamUpcomingFixtures>,
+        IConsumer<AddTeamPlayers> {
         private readonly IMapper _mapper;
         private readonly ISender _mediator;
 
@@ -95,6 +97,21 @@ namespace Livescore.Api.Consumers.Worker {
             await _mediator.Send(command);
 
             await context.RespondAsync(new AddTeamUpcomingFixturesSuccess {
+                CorrelationId = Guid.NewGuid()
+            });
+        }
+
+        public async Task Consume(ConsumeContext<AddTeamPlayers> context) {
+            var command = new AddTeamPlayersCommand {
+                TeamId = context.Message.TeamId,
+                Players = _mapper.Map<IEnumerable<PlayerDtoMsg>, IEnumerable<PlayerDto>>(
+                    context.Message.Players
+                )
+            };
+
+            await _mediator.Send(command);
+
+            await context.RespondAsync(new AddTeamPlayersSuccess {
                 CorrelationId = Guid.NewGuid()
             });
         }

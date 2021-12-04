@@ -18,6 +18,13 @@ services:
     - "15672:15672"
     - "5672"
 
+  redis:
+    image: bitnami/redis:6.2.6
+    environment:
+    - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+    - "6379:6379"
+
   migrator:
     environment:
     - DOTNET_ENVIRONMENT=Development

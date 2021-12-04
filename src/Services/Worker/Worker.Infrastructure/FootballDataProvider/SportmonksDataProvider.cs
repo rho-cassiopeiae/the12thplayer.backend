@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -190,49 +191,48 @@ namespace Worker.Infrastructure.FootballDataProvider {
             return _mapper.Map<FixtureDtoApp>(response.Data.Upcoming.Data, arg: teamId);
         }
 
-        //public async Task<FixtureDto> GetFixtureLivescore(
-        //    long fixtureId,
-        //    bool emulateOngoing,
-        //    bool includeReferee = false,
-        //    bool includeLineups = false,
-        //    bool includeEventsAndStats = false
-        //) {
-        //    _includeBuilder.Clear();
-        //    _includeBuilder.Append("localTeam,visitorTeam");
-        //    if (includeReferee) {
-        //        _includeBuilder.Append(",referee");
-        //    }
-        //    if (includeLineups) {
-        //        _includeBuilder.Append(",localCoach,visitorCoach,lineup,bench");
-        //    }
-        //    if (includeEventsAndStats) {
-        //        _includeBuilder.Append(",events,stats");
-        //    }
+        public async Task<FixtureDtoApp> GetFixtureLivescore(
+            long fixtureId,
+            long teamId,
+            bool emulateOngoing,
+            bool includeReferee = false,
+            bool includeLineups = false,
+            bool includeEventsAndStats = false
+        ) {
+            var includeBuilder = new StringBuilder();
+            includeBuilder.Append("localTeam,visitorTeam");
+            if (includeReferee) {
+                includeBuilder.Append(",referee");
+            }
+            if (includeLineups) {
+                includeBuilder.Append(",localCoach,visitorCoach,lineup,bench");
+            }
+            if (includeEventsAndStats) {
+                includeBuilder.Append(",events,stats");
+            }
 
-        //    using var client = createClient();
+            using var client = _createClient();
 
-        //    if (emulateOngoing) {
-        //        var queryString = _baseQueryString.Add(
-        //            "include", _includeBuilder.ToString()
-        //        );
-        //        var response = await get<FixtureResponseDto>(
-        //            client, $"fixtures/{fixtureId}{queryString}"
-        //        );
+            if (emulateOngoing) {
+                var queryString = _baseQueryString.Add("include", includeBuilder.ToString());
+                var response = await _get<GetFixtureResponseDto>(
+                    client, $"fixtures/{fixtureId}{queryString}"
+                );
 
-        //        return response.Data;
-        //    } else {
-        //        var queryString = _baseQueryString.Add(
-        //            QueryString.Create(new[] {
-        //                KeyValuePair.Create("fixtures", fixtureId.ToString()),
-        //                KeyValuePair.Create("include", _includeBuilder.ToString())
-        //            })
-        //        );
-        //        var response = await get<FixtureLivescoreResponseDto>(
-        //            client, $"livescores{queryString}"
-        //        );
+                return _mapper.Map(response.Data, teamId);
+            } else {
+                var queryString = _baseQueryString.Add(
+                    QueryString.Create(new[] {
+                        KeyValuePair.Create("fixtures", fixtureId.ToString()),
+                        KeyValuePair.Create("include", includeBuilder.ToString())
+                    })
+                );
+                var response = await _get<GetFixtureLivescoreResponseDto>(
+                    client, $"livescores{queryString}"
+                );
 
-        //        return response.Data?.SingleOrDefault();
-        //    }
-        //}
+                return _mapper.Map(response.Data?.SingleOrDefault(), teamId);
+            }
+        }
     }
 }

@@ -45,7 +45,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
 
             var playerLineupEntries = fixtures
                 .SelectMany(fixture => {
-                    var lineup = fixture.Lineups.FirstOrDefault(lineup => lineup.TeamId == teamId);
+                    var lineup = fixture.Lineups.First(lineup => lineup.TeamId == teamId);
                     return (lineup.StartingXI ?? new List<TeamLineupDto.PlayerDto>())
                         .Concat(lineup.Subs ?? new List<TeamLineupDto.PlayerDto>());
                 })
@@ -73,7 +73,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
 
             var opponentPlayerLineupEntries = fixtures
                 .SelectMany(fixture => {
-                    var lineup = fixture.Lineups.FirstOrDefault(lineup => lineup.TeamId == fixture.OpponentTeam.Id);
+                    var lineup = fixture.Lineups.First(lineup => lineup.TeamId == fixture.OpponentTeam.Id);
                     return (lineup.StartingXI ?? new List<TeamLineupDto.PlayerDto>())
                         .Concat(lineup.Subs ?? new List<TeamLineupDto.PlayerDto>());
                 })

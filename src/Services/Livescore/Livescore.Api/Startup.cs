@@ -22,6 +22,8 @@ namespace Livescore.Api {
                 Configuration,
                 busCfg => {
                     busCfg.AddConsumer<SeedRequestsConsumer>();
+                    busCfg.AddConsumer<LivescoreEventsConsumer>();
+                    busCfg.AddConsumer<QueryRequestsConsumer>();
                 }
             );
 

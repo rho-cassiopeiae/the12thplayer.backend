@@ -7,11 +7,11 @@ using MassTransit;
 
 using MessageBus.Contracts.Requests.Worker;
 using MessageBus.Contracts.Responses.Livescore;
-using CountryDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.CountryDto;
-using TeamDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.TeamDto;
-using FixtureDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.FixtureDto;
-using SeasonDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.SeasonDto;
-using PlayerDtoMsg = MessageBus.Contracts.Requests.Worker.Dto.PlayerDto;
+using CountryDtoMsg = MessageBus.Contracts.Common.Dto.CountryDto;
+using TeamDtoMsg = MessageBus.Contracts.Common.Dto.TeamDto;
+using FixtureDtoMsg = MessageBus.Contracts.Common.Dto.FixtureDto;
+using SeasonDtoMsg = MessageBus.Contracts.Common.Dto.SeasonDto;
+using PlayerDtoMsg = MessageBus.Contracts.Common.Dto.PlayerDto;
 
 using Worker.Application.Common.Interfaces;
 using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
@@ -75,6 +75,16 @@ namespace Worker.Infrastructure.Livescore {
                 TeamId = teamId,
                 Fixtures = _mapper.Map<IEnumerable<FixtureDto>, IEnumerable<FixtureDtoMsg>>(fixtures),
                 Seasons = _mapper.Map<IEnumerable<SeasonDto>, IEnumerable<SeasonDtoMsg>>(seasons)
+            });
+        }
+
+        public async Task AddTeamPlayers(long teamId, IEnumerable<PlayerDto> players) {
+            var client = _bus.CreateRequestClient<AddTeamPlayers>(_destinationAddress);
+
+            await client.GetResponse<AddTeamPlayersSuccess>(new AddTeamPlayers {
+                CorrelationId = Guid.NewGuid(),
+                TeamId = teamId,
+                Players = _mapper.Map<IEnumerable<PlayerDto>, IEnumerable<PlayerDtoMsg>>(players)
             });
         }
     }

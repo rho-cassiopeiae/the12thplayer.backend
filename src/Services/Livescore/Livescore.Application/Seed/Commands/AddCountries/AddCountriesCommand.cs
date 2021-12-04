@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 
 using Livescore.Application.Common.Results;
-using Livescore.Application.Seed.Common.Dto;
+using Livescore.Application.Common.Dto;
 using Livescore.Domain.Aggregates.Country;
 
 namespace Livescore.Application.Seed.Commands.AddCountries {

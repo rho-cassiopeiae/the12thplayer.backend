@@ -18,12 +18,13 @@ namespace Worker.Application.Common.Interfaces {
 
         Task<IEnumerable<FixtureDto>> GetTeamUpcomingFixtures(long teamId);
 
-        //Task<FixtureDto> GetFixtureLivescore(
-        //    long fixtureId,
-        //    bool emulateOngoing,
-        //    bool includeReferee = false,
-        //    bool includeLineups = false,
-        //    bool includeEventsAndStats = false
-        //);
+        Task<FixtureDto> GetFixtureLivescore(
+            long fixtureId,
+            long teamId,
+            bool emulateOngoing,
+            bool includeReferee = false,
+            bool includeLineups = false,
+            bool includeEventsAndStats = false
+        );
     }
 }

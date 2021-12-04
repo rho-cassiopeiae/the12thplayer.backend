@@ -42,5 +42,25 @@ namespace Livescore.Domain.Aggregates.Fixture {
             Events = events;
             Stats = stats;
         }
+
+        public void SetStartTime(long startTime) {
+            StartTime = startTime;
+        }
+
+        public void SetStatus(string status) {
+            Status = status;
+        }
+
+        public void SetReferee(string refereeName) {
+            RefereeName = refereeName;
+        }
+
+        public void SetColors(IEnumerable<TeamColor> colors) {
+            Colors = colors;
+        }
+
+        public void SetLineups(IEnumerable<TeamLineup> lineups) {
+            Lineups = lineups;
+        }
     }
 }
