@@ -11,7 +11,7 @@ using MessageBus.Contracts.Responses.Livescore;
 using PlayerDtoMsg = MessageBus.Contracts.Common.Dto.PlayerDto;
 
 using Livescore.Application.Common.Dto;
-using Livescore.Application.Livescore.Queries.GetTeamPlayers;
+using Livescore.Application.Livescore.Worker.Queries.GetTeamPlayers;
 
 namespace Livescore.Api.Consumers.Worker {
     public class QueryRequestsConsumer : IConsumer<GetTeamPlayers> {

@@ -13,5 +13,9 @@ namespace Livescore.Application.Common.Interfaces {
         void AddFixtureParticipantsFromLineup(
             long fixtureId, long teamId, TeamLineupDto lineup
         );
+
+        void AddFixtureParticipantsFromMatchEvents(
+            long fixtureId, long teamId, TeamMatchEventsDto teamMatchEvents
+        );
     }
 }

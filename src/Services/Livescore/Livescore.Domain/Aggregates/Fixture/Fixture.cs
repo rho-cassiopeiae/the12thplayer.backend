@@ -51,6 +51,14 @@ namespace Livescore.Domain.Aggregates.Fixture {
             Status = status;
         }
 
+        public void SetGameTime(GameTime gameTime) {
+            GameTime = gameTime;
+        }
+
+        public void SetScore(Score score) {
+            Score = score;
+        }
+
         public void SetReferee(string refereeName) {
             RefereeName = refereeName;
         }
@@ -61,6 +69,14 @@ namespace Livescore.Domain.Aggregates.Fixture {
 
         public void SetLineups(IEnumerable<TeamLineup> lineups) {
             Lineups = lineups;
+        }
+
+        public void SetEvents(IEnumerable<TeamMatchEvents> events) {
+            Events = events;
+        }
+
+        public void SetStats(IEnumerable<TeamStats> stats) {
+            Stats = stats;
         }
     }
 }

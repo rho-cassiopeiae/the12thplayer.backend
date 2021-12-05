@@ -10,7 +10,7 @@ using Livescore.Application.Common.Results;
 using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Application.Common.Interfaces;
 
-namespace Livescore.Application.Livescore.Commands.UpdateFixturePrematch {
+namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch {
     public class UpdateFixturePrematchCommand : IRequest<VoidResult> {
         public long FixtureId { get; init; }
         public long TeamId { get; init; }

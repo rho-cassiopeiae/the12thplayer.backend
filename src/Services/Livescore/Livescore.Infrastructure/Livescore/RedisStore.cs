@@ -173,5 +173,31 @@ namespace Livescore.Infrastructure.Livescore {
                 }
             }
         }
+
+        public void AddFixtureParticipantsFromMatchEvents(
+            long fixtureId, long teamId, TeamMatchEventsDto teamMatchEvents
+        ) {
+            var subs = teamMatchEvents.Events?.Where(e => e.Type.ToLowerInvariant() == "substitution");
+            if (subs != null && subs.Count() > 0) {
+                _ensureTransaction();
+
+                var fixtureIdentifier = $"fixture:{fixtureId}.team:{teamId}";
+                
+                foreach (var sub in subs) {
+                    _txn.HashSetAsync(
+                        $"{fixtureIdentifier}.performance-ratings",
+                        $"sub:{sub.PlayerId}.total-rating",
+                        0,
+                        When.NotExists
+                    );
+                    _txn.HashSetAsync(
+                        $"{fixtureIdentifier}.performance-ratings",
+                        $"sub:{sub.PlayerId}.total-voters",
+                        0,
+                        When.NotExists
+                    );
+                }
+            }
+        }
     }
 }

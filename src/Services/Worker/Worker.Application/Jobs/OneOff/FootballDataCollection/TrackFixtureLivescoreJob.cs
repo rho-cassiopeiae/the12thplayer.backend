@@ -62,6 +62,8 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
 
             await _monitorPrematch(startTime.Value);
 
+            await _monitorLive();
+
             _logger.LogInformation(
                 "Fixture {FixtureId} Team {TeamId}: Full-time",
                 _fixtureId, _teamId
@@ -288,6 +290,56 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
 
                 try {
                     await Task.Delay(sleepInterval, _context.CancellationToken);
+                } catch {
+                    _logger.LogInformation(
+                        "Fixture {FixtureId} Team {TeamId}: Job canceled",
+                        _fixtureId, _teamId
+                    );
+                }
+            }
+        }
+
+        private bool _isFixtureCompleted(FixtureDto fixture) =>
+            fixture.Status == "FT" || fixture.Status == "AET" || fixture.Status == "FT_PEN";
+
+        private async Task _monitorLive() {
+            _logger.LogInformation(
+                "Fixture {FixtureId} Team {TeamId}: Monitor live",
+                _fixtureId, _teamId
+            );
+
+            var fixtureCompleted = false;
+            while (!_isCanceled && !fixtureCompleted) {
+                var fixture = await _footballDataProvider.GetFixtureLivescore(
+                    _fixtureId,
+                    _teamId,
+                    _emulateOngoing,
+                    includeEventsAndStats: true
+                );
+                // @@TODO: Include lineups for the first N minutes of the game.
+
+                if (fixture != null) {
+                    _logger.LogInformation(
+                        "Fixture {FixtureId} Team {TeamId}: Notifying about a new live update",
+                        _fixtureId, _teamId
+                    );
+
+                    await _fixtureLivescoreNotifier.NotifyFixtureLiveUpdated(_fixtureId, _teamId, fixture);
+
+                    if (
+                        !_emulateOngoing && _isFixtureCompleted(fixture) ||
+                        _emulateOngoing && _emulateForMin == 0
+                    ) {
+                        fixtureCompleted = true;
+                    }
+                }
+
+                if (_emulateOngoing) {
+                    --_emulateForMin;
+                }
+
+                try {
+                    await Task.Delay(TimeSpan.FromMinutes(1), _context.CancellationToken);
                 } catch {
                     _logger.LogInformation(
                         "Fixture {FixtureId} Team {TeamId}: Job canceled",

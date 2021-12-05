@@ -1,16 +1,46 @@
 version: '3.4'
 
 services:
+  #postgres:
+  #  image: bitnami/postgresql:13.3.0
+  #  environment:
+  #  - POSTGRESQL_DATABASE=The12thPlayerDev
+  #  - POSTGRESQL_POSTGRES_PASSWORD=postgres
+  #  - POSTGRESQL_USERNAME=The12thPlayerUser
+  #  - POSTGRESQL_PASSWORD=The12thPlayerPassword
+  #  - POSTGRESQL_SHARED_PRELOAD_LIBRARIES=pgaudit,pg_stat_statements
+  #  ports:
+  #  - "5432:5432"
+
   postgres:
-    image: bitnami/postgresql:13.3.0
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:centos8-13.4-4.7.3
+    hostname: postgres
     environment:
-    - POSTGRESQL_DATABASE=The12thPlayerDev
-    - POSTGRESQL_POSTGRES_PASSWORD=postgres
-    - POSTGRESQL_USERNAME=The12thPlayerUser
-    - POSTGRESQL_PASSWORD=The12thPlayerPassword
-    - POSTGRESQL_SHARED_PRELOAD_LIBRARIES=pgaudit,pg_stat_statements
+    - MODE=postgres
+    - PG_MODE=primary
+    - PG_USER=The12thPlayerUser
+    - PG_PASSWORD=The12thPlayerPassword
+    - PG_DATABASE=The12thPlayerDev
+    - PG_PRIMARY_USER=PrimaryUser
+    - PG_PRIMARY_PASSWORD=PrimaryPassword
+    - PG_ROOT_PASSWORD=postgres
+    - PGHOST=/tmp
+    - PG_PRIMARY_PORT=5432
     ports:
     - "5432:5432"
+    volumes:
+    - pgdata:/pgdata
+
+  pgbadger:
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbadger:centos8-13.4-4.7.3
+    environment:
+    - BADGER_TARGET=postgres # Must be the same as the postgres service's 'hostname' parameter.
+    - 'BADGER_CUSTOM_OPTS=--incremental --prefix="%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h"'
+    ports:
+    - "10000:10000"
+    volumes:
+    - pgdata:/pgdata:ro
+    - pgreport:/report
   
   rabbit:
     image: masstransit/rabbitmq:3.9.7
@@ -69,6 +99,7 @@ services:
     depends_on:
     - migrator
     - rabbit
+    - redis
 
   notification:
     environment:
@@ -83,3 +114,7 @@ services:
     - "${UserSecretsPath}:/root/.microsoft/usersecrets:ro"
     depends_on:
     - rabbit
+
+volumes:
+  pgdata:
+  pgreport:

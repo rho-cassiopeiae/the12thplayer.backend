@@ -6,7 +6,7 @@ using MediatR;
 using Livescore.Application.Common.Results;
 using Livescore.Application.Common.Interfaces;
 
-namespace Livescore.Application.Livescore.Commands.ActivateFixture {
+namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
     public class ActivateFixtureCommand : IRequest<VoidResult> {
         public long FixtureId { get; init; }
         public long TeamId { get; init; }

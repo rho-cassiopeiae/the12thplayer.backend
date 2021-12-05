@@ -9,7 +9,7 @@ using Livescore.Application.Common.Results;
 using Livescore.Application.Common.Dto;
 using Livescore.Application.Common.Interfaces;
 
-namespace Livescore.Application.Livescore.Queries.GetTeamPlayers {
+namespace Livescore.Application.Livescore.Worker.Queries.GetTeamPlayers {
     public class GetTeamPlayersQuery : IRequest<HandleResult<IEnumerable<PlayerDto>>> {
         public long TeamId { get; init; }
     }

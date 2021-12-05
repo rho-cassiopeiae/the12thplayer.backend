@@ -7,5 +7,7 @@ namespace Worker.Application.Common.Interfaces {
         Task NotifyFixtureActivated(long fixtureId, long teamId);
 
         Task NotifyFixturePrematchUpdated(long fixtureId, long teamId, FixtureDto fixture);
+
+        Task NotifyFixtureLiveUpdated(long fixtureId, long teamId, FixtureDto fixture);
     }
 }
