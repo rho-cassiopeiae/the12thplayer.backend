@@ -7,6 +7,7 @@ using Livescore.Domain.Aggregates.Venue;
 using Livescore.Domain.Aggregates.League;
 using Livescore.Domain.Aggregates.Player;
 using Livescore.Domain.Aggregates.Fixture;
+using Livescore.Application.Livescore.Fixture.Common.Dto;
 
 namespace Livescore.Infrastructure.Persistence {
     public class LivescoreDbContext : DbContext {
@@ -17,6 +18,8 @@ namespace Livescore.Infrastructure.Persistence {
         public DbSet<League> Leagues { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<Fixture> Fixtures { get; set; }
+
+        public DbSet<FixtureSummaryDto> FixtureSummaries { get; set; }
 
         public LivescoreDbContext(DbContextOptions<LivescoreDbContext> options)
             : base(options) { }
@@ -168,6 +171,13 @@ namespace Livescore.Infrastructure.Persistence {
                     .WithMany()
                     .HasForeignKey(f => f.VenueId)
                     .IsRequired(false);
+            });
+
+            modelBuilder.Entity<FixtureSummaryDto>(builder => {
+                builder.HasNoKey();
+                builder.Property(f => f.GameTime).HasColumnType("jsonb");
+                builder.Property(f => f.Score).HasColumnType("jsonb");
+                builder.ToView(nameof(FixtureSummaries));
             });
         }
     }

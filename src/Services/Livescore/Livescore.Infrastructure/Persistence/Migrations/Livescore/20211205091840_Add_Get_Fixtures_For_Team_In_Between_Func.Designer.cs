@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Livescore.Infrastructure.Persistence.Migrations
+namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
 {
     [DbContext(typeof(LivescoreDbContext))]
-    [Migration("20211203122209_Add_Player_League_Season_Fixture")]
-    partial class Add_Player_League_Season_Fixture
+    [Migration("20211205091840_Add_Get_Fixtures_For_Team_In_Between_Func")]
+    partial class Add_Get_Fixtures_For_Team_In_Between_Func
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

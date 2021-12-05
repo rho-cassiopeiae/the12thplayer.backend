@@ -5,6 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v0.sql" />
+    <None Remove="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v1.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v0.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v1.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.10">
       <PrivateAssets>all</PrivateAssets>

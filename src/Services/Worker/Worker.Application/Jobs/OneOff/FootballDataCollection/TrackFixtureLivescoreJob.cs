@@ -64,6 +64,9 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
 
             await _monitorLive();
 
+            // @@TODO: Send FixtureCompleted event.
+            // Schedule finalize job.
+
             _logger.LogInformation(
                 "Fixture {FixtureId} Team {TeamId}: Full-time",
                 _fixtureId, _teamId

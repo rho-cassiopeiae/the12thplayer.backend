@@ -5,15 +5,17 @@ using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Livescore.Infrastructure.Persistence.Migrations
+namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
 {
     [DbContext(typeof(LivescoreDbContext))]
-    partial class LivescoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211205084113_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

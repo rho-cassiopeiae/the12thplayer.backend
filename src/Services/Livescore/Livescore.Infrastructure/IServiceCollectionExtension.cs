@@ -38,7 +38,7 @@ namespace Livescore.Infrastructure {
                 optionsBuilder.UseNpgsql(
                     configuration.GetConnectionString("Livescore"),
                     pgOptionsBuilder => pgOptionsBuilder.MigrationsHistoryTable(
-                        "__EFMigrationsHistory", "livescore"
+                        "__EFMigrationsHistory_LivescoreDbContext", "livescore"
                     )
                 )
             );
