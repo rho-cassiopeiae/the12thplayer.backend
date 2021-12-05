@@ -11,5 +11,7 @@ namespace Livescore.Application.Common.Interfaces {
         Task<IEnumerable<FixtureSummaryDto>> GetFixturesForTeamInBetween(
             long teamId, long startTime, long endTime
         );
+
+        Task<FixtureFullDto> GetFixtureForTeam(long fixtureId, long teamId);
     }
 }

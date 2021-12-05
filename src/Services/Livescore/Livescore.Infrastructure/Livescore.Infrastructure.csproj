@@ -5,11 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Persistence\Migrations\Livescore\Scripts\Functions\GetFixtureForTeam\GetFixtureForTeam.v0.sql" />
     <None Remove="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v0.sql" />
     <None Remove="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v1.sql" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\Functions\GetFixtureForTeam\GetFixtureForTeam.v0.sql" />
     <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v0.sql" />
     <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v1.sql" />
   </ItemGroup>

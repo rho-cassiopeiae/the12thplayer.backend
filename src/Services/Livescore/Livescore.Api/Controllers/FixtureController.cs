@@ -8,6 +8,7 @@ using MediatR;
 using Livescore.Application.Common.Results;
 using Livescore.Application.Livescore.Fixture.Common.Dto;
 using Livescore.Application.Livescore.Fixture.Queries.GetFixturesForTeamInBetween;
+using Livescore.Application.Livescore.Fixture.Queries.GetFixtureForTeam;
 
 namespace Livescore.Api.Controllers {
     [Route("fixtures")]
@@ -23,5 +24,10 @@ namespace Livescore.Api.Controllers {
         public Task<HandleResult<IEnumerable<FixtureSummaryDto>>> GetFixturesForTeamInBetween(
             GetFixturesForTeamInBetweenQuery query
         ) => _mediator.Send(query);
+
+        // /fixtures/{fixtureId}?teamId={teamId}
+        [HttpGet("{fixtureId}")]
+        public Task<HandleResult<FixtureFullDto>> GetFixtureForTeam(GetFixtureForTeamQuery query) =>
+            _mediator.Send(query);
     }
 }

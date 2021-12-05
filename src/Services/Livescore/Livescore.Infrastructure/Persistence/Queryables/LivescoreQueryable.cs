@@ -43,5 +43,19 @@ namespace Livescore.Infrastructure.Persistence.Queryables {
 
             return fixtures;
         }
+
+        public async Task<FixtureFullDto> GetFixtureForTeam(long fixtureId, long teamId) {
+            var fixtureIdParameter = new NpgsqlParameter<long>("FixtureId", fixtureId);
+            var teamIdParameter = new NpgsqlParameter<long>("TeamId", teamId);
+
+            var fixture = await _livescoreDbContext.FixtureFullViews
+                .FromSqlRaw(
+                    $"SELECT * FROM livescore.get_fixture_for_team (@{fixtureIdParameter.ParameterName}, @{teamIdParameter.ParameterName})",
+                    fixtureIdParameter, teamIdParameter
+                )
+                .SingleAsync();
+
+            return fixture;
+        }
     }
 }

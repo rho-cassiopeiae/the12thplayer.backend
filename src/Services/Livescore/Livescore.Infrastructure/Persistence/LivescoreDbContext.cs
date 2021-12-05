@@ -20,6 +20,7 @@ namespace Livescore.Infrastructure.Persistence {
         public DbSet<Fixture> Fixtures { get; set; }
 
         public DbSet<FixtureSummaryDto> FixtureSummaries { get; set; }
+        public DbSet<FixtureFullDto> FixtureFullViews { get; set; }
 
         public LivescoreDbContext(DbContextOptions<LivescoreDbContext> options)
             : base(options) { }
@@ -178,6 +179,17 @@ namespace Livescore.Infrastructure.Persistence {
                 builder.Property(f => f.GameTime).HasColumnType("jsonb");
                 builder.Property(f => f.Score).HasColumnType("jsonb");
                 builder.ToView(nameof(FixtureSummaries));
+            });
+
+            modelBuilder.Entity<FixtureFullDto>(builder => {
+                builder.HasNoKey();
+                builder.Property(f => f.GameTime).HasColumnType("jsonb");
+                builder.Property(f => f.Score).HasColumnType("jsonb");
+                builder.Property(f => f.Colors).HasColumnType("jsonb");
+                builder.Property(f => f.Lineups).HasColumnType("jsonb");
+                builder.Property(f => f.Events).HasColumnType("jsonb");
+                builder.Property(f => f.Stats).HasColumnType("jsonb");
+                builder.ToView(nameof(FixtureFullViews));
             });
         }
     }
