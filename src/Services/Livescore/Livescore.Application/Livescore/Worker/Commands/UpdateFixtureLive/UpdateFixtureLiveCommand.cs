@@ -8,6 +8,7 @@ using Livescore.Application.Common.Dto;
 using Livescore.Application.Common.Results;
 using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Domain.Aggregates.PlayerRating;
+using PlayerRatingDm = Livescore.Domain.Aggregates.PlayerRating.PlayerRating;
 
 namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
     public class UpdateFixtureLiveCommand : IRequest<VoidResult> {
@@ -151,7 +152,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
             var subs = teamMatchEvents.Events?.Where(e => e.Type.ToLowerInvariant() == "substitution");
             if (subs != null && subs.Count() > 0) {
                 foreach (var sub in subs) {
-                    _playerRatingInMemRepository.CreateIfNotExists(new PlayerRating(
+                    _playerRatingInMemRepository.CreateIfNotExists(new PlayerRatingDm(
                         fixtureId: command.FixtureId,
                         teamId: command.TeamId,
                         participantKey: $"s:{sub.PlayerId}",

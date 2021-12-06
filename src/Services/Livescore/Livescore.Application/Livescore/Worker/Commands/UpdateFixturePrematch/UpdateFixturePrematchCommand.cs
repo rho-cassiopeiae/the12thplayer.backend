@@ -9,6 +9,7 @@ using Livescore.Application.Common.Dto;
 using Livescore.Application.Common.Results;
 using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Domain.Aggregates.PlayerRating;
+using PlayerRatingDm = Livescore.Domain.Aggregates.PlayerRating.PlayerRating;
 
 namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch {
     public class UpdateFixturePrematchCommand : IRequest<VoidResult> {
@@ -130,7 +131,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch 
             await _fixtureRepository.SaveChanges(cancellationToken);
 
             if (teamLineup.Manager != null) {
-                _playerRatingInMemRepository.CreateIfNotExists(new PlayerRating(
+                _playerRatingInMemRepository.CreateIfNotExists(new PlayerRatingDm(
                     fixtureId: command.FixtureId,
                     teamId: command.TeamId,
                     participantKey: $"m:{teamLineup.Manager.Id}",
@@ -141,7 +142,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch 
 
             if (teamLineup.StartingXI != null) {
                 foreach (var player in teamLineup.StartingXI) {
-                    _playerRatingInMemRepository.CreateIfNotExists(new PlayerRating(
+                    _playerRatingInMemRepository.CreateIfNotExists(new PlayerRatingDm(
                         fixtureId: command.FixtureId,
                         teamId: command.TeamId,
                         participantKey: $"p:{player.Id}",

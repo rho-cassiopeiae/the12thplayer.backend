@@ -23,5 +23,19 @@ namespace Livescore.Domain.Aggregates.PlayerRating {
             TotalRating = totalRating;
             TotalVoters = totalVoters;
         }
+
+        public PlayerRating(long fixtureId, long teamId, string participantKey) {
+            FixtureId = fixtureId;
+            TeamId = teamId;
+            ParticipantKey = participantKey;
+        }
+
+        public void AddUserVote(UserVote userVote) {
+            _userVotes.Add(userVote);
+        }
+
+        public void RemoveUserVote(UserVote userVote) {
+            _userVotes.Remove(userVote);
+        }
     }
 }
