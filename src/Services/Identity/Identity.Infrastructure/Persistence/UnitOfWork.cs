@@ -39,7 +39,7 @@ namespace Identity.Infrastructure.Persistence {
             await Setup();
 
             _transaction = await _connection.BeginTransactionAsync(
-                IsolationLevel.Serializable
+                IsolationLevel.Serializable // @@TODO: Make it tunable.
             );
         }
 

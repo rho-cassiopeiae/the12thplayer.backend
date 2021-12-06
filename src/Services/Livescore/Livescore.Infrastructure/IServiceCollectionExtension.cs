@@ -22,8 +22,13 @@ using Livescore.Domain.Aggregates.League;
 using Livescore.Domain.Aggregates.Player;
 using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Application.Common.Interfaces;
-using Livescore.Infrastructure.Livescore;
 using Livescore.Infrastructure.Persistence.Queryables;
+using Livescore.Domain.Aggregates.Discussion;
+using Livescore.Infrastructure.InMemory.Repositories;
+using Livescore.Domain.Aggregates.FixtureLivescoreStatus;
+using Livescore.Domain.Base;
+using Livescore.Infrastructure.InMemory;
+using Livescore.Domain.Aggregates.PlayerRating;
 
 namespace Livescore.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -61,7 +66,10 @@ namespace Livescore.Infrastructure {
                 return ConnectionMultiplexer.Connect($"{host}:{port}");
             });
 
-            services.AddScoped<IInMemoryStore, RedisStore>();
+            services.AddScoped<IInMemUnitOfWork, InMemUnitOfWork>();
+            services.AddScoped<IDiscussionInMemRepository, DiscussionInMemRepository>();
+            services.AddScoped<IFixtureLivescoreStatusInMemRepository, FixtureLivescoreStatusInMemRepository>();
+            services.AddScoped<IPlayerRatingInMemRepository, PlayerRatingInMemRepository>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);

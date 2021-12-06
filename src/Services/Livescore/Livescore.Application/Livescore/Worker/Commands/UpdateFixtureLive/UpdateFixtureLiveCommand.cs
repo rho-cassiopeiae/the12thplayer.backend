@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using MediatR;
 
 using Livescore.Application.Common.Dto;
-using Livescore.Application.Common.Interfaces;
 using Livescore.Application.Common.Results;
 using Livescore.Domain.Aggregates.Fixture;
+using Livescore.Domain.Aggregates.PlayerRating;
 
 namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
     public class UpdateFixtureLiveCommand : IRequest<VoidResult> {
@@ -20,14 +20,14 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
         UpdateFixtureLiveCommand, VoidResult
     > {
         private readonly IFixtureRepository _fixtureRepository;
-        private readonly IInMemoryStore _inMemoryStore;
+        private readonly IPlayerRatingInMemRepository _playerRatingInMemRepository;
 
         public UpdateFixtureLiveCommandHandler(
             IFixtureRepository fixtureRepository,
-            IInMemoryStore inMemoryStore
+            IPlayerRatingInMemRepository playerRatingInMemRepository
         ) {
             _fixtureRepository = fixtureRepository;
-            _inMemoryStore = inMemoryStore;
+            _playerRatingInMemRepository = playerRatingInMemRepository;
         }
 
         public async Task<VoidResult> Handle(
@@ -148,9 +148,20 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
 
             await _fixtureRepository.SaveChanges(cancellationToken);
 
-            _inMemoryStore.AddFixtureParticipantsFromMatchEvents(command.FixtureId, command.TeamId, teamMatchEvents);
+            var subs = teamMatchEvents.Events?.Where(e => e.Type.ToLowerInvariant() == "substitution");
+            if (subs != null && subs.Count() > 0) {
+                foreach (var sub in subs) {
+                    _playerRatingInMemRepository.CreateIfNotExists(new PlayerRating(
+                        fixtureId: command.FixtureId,
+                        teamId: command.TeamId,
+                        participantKey: $"s:{sub.PlayerId}",
+                        totalRating: 0,
+                        totalVoters: 0
+                    ));
+                }
 
-            await _inMemoryStore.SaveChanges();
+                await _playerRatingInMemRepository.SaveChanges();
+            }
 
             return VoidResult.Instance;
         }

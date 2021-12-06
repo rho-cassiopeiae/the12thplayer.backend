@@ -8,7 +8,7 @@ using MediatR;
 using Livescore.Application.Common.Dto;
 using Livescore.Application.Common.Results;
 using Livescore.Domain.Aggregates.Fixture;
-using Livescore.Application.Common.Interfaces;
+using Livescore.Domain.Aggregates.PlayerRating;
 
 namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch {
     public class UpdateFixturePrematchCommand : IRequest<VoidResult> {
@@ -21,14 +21,14 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch 
         UpdateFixturePrematchCommand, VoidResult
     > {
         private readonly IFixtureRepository _fixtureRepository;
-        private readonly IInMemoryStore _inMemoryStore;
+        private readonly IPlayerRatingInMemRepository _playerRatingInMemRepository;
 
         public UpdateFixturePrematchCommandHandler(
             IFixtureRepository fixtureRepository,
-            IInMemoryStore inMemoryStore
+            IPlayerRatingInMemRepository playerRatingInMemRepository
         ) {
             _fixtureRepository = fixtureRepository;
-            _inMemoryStore = inMemoryStore;
+            _playerRatingInMemRepository = playerRatingInMemRepository;
         }
 
         public async Task<VoidResult> Handle(
@@ -129,9 +129,29 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch 
 
             await _fixtureRepository.SaveChanges(cancellationToken);
 
-            _inMemoryStore.AddFixtureParticipantsFromLineup(command.FixtureId, command.TeamId, teamLineup);
+            if (teamLineup.Manager != null) {
+                _playerRatingInMemRepository.CreateIfNotExists(new PlayerRating(
+                    fixtureId: command.FixtureId,
+                    teamId: command.TeamId,
+                    participantKey: $"m:{teamLineup.Manager.Id}",
+                    totalRating: 0,
+                    totalVoters: 0
+                ));
+            }
 
-            await _inMemoryStore.SaveChanges();
+            if (teamLineup.StartingXI != null) {
+                foreach (var player in teamLineup.StartingXI) {
+                    _playerRatingInMemRepository.CreateIfNotExists(new PlayerRating(
+                        fixtureId: command.FixtureId,
+                        teamId: command.TeamId,
+                        participantKey: $"p:{player.Id}",
+                        totalRating: 0,
+                        totalVoters: 0
+                    ));
+                }
+            }
+
+            await _playerRatingInMemRepository.SaveChanges();
 
             return VoidResult.Instance;
         }
