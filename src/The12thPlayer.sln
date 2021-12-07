@@ -63,13 +63,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin.Infrastructure", "Ser
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Livescore", "Livescore", "{37283DD6-3396-4965-8721-BD67A1AD11D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Livescore.Api", "Services\Livescore\Livescore.Api\Livescore.Api.csproj", "{B43E0649-0A9D-4E0F-AD38-61666389E693}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Livescore.Api", "Services\Livescore\Livescore.Api\Livescore.Api.csproj", "{B43E0649-0A9D-4E0F-AD38-61666389E693}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Livescore.Domain", "Services\Livescore\Livescore.Domain\Livescore.Domain.csproj", "{6EBF51C6-7AFA-4ADD-88D6-A049013D5099}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Livescore.Domain", "Services\Livescore\Livescore.Domain\Livescore.Domain.csproj", "{6EBF51C6-7AFA-4ADD-88D6-A049013D5099}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Livescore.Application", "Services\Livescore\Livescore.Application\Livescore.Application.csproj", "{E11324F6-E32D-4AA2-A4B2-515D9EB3B38B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Livescore.Application", "Services\Livescore\Livescore.Application\Livescore.Application.csproj", "{E11324F6-E32D-4AA2-A4B2-515D9EB3B38B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Livescore.Infrastructure", "Services\Livescore\Livescore.Infrastructure\Livescore.Infrastructure.csproj", "{2EEDF024-1119-47A7-B717-6F896B267282}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Livescore.Infrastructure", "Services\Livescore\Livescore.Infrastructure\Livescore.Infrastructure.csproj", "{2EEDF024-1119-47A7-B717-6F896B267282}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Livescore.IntegrationTests", "Services\Livescore\Livescore.IntegrationTests\Livescore.IntegrationTests.csproj", "{66EFEA45-BB63-4A72-B13D-46FD26076BF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -369,6 +371,18 @@ Global
 		{2EEDF024-1119-47A7-B717-6F896B267282}.Release|x64.Build.0 = Release|Any CPU
 		{2EEDF024-1119-47A7-B717-6F896B267282}.Release|x86.ActiveCfg = Release|Any CPU
 		{2EEDF024-1119-47A7-B717-6F896B267282}.Release|x86.Build.0 = Release|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Debug|x64.Build.0 = Debug|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Debug|x86.Build.0 = Debug|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Release|x64.ActiveCfg = Release|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Release|x64.Build.0 = Release|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Release|x86.ActiveCfg = Release|Any CPU
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -404,6 +418,7 @@ Global
 		{6EBF51C6-7AFA-4ADD-88D6-A049013D5099} = {37283DD6-3396-4965-8721-BD67A1AD11D6}
 		{E11324F6-E32D-4AA2-A4B2-515D9EB3B38B} = {37283DD6-3396-4965-8721-BD67A1AD11D6}
 		{2EEDF024-1119-47A7-B717-6F896B267282} = {37283DD6-3396-4965-8721-BD67A1AD11D6}
+		{66EFEA45-BB63-4A72-B13D-46FD26076BF5} = {37283DD6-3396-4965-8721-BD67A1AD11D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B1C3BF53-FCCB-42E6-8034-50D26A6785FA}

@@ -74,13 +74,13 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                 _transaction.HashIncrementAsync(
                     $"{fixtureIdentifier}.player-ratings",
                     $"{participantKey}.total-rating",
-                    newRating - oldRating.Value
+                    (int) newRating - (int) oldRating.Value
                 );
             } else {
                 _transaction.HashIncrementAsync(
                     $"{fixtureIdentifier}.player-ratings",
                     $"{participantKey}.total-rating",
-                    newRating
+                    (int) newRating
                 );
                 _transaction.HashIncrementAsync(
                     $"{fixtureIdentifier}.player-ratings",

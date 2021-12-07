@@ -1,0 +1,22 @@
+{
+  "Id": 53,
+  "Name": "Celtic",
+  "CountryId": 1161,
+  "LogoUrl": "https://cdn.sportmonks.com/images/soccer/teams/21/53.png",
+  "Venue": {
+    "Id": 8909,
+    "TeamId": null,
+    "Name": "Celtic Park",
+    "City": "Glasgow",
+    "Capacity": 60411,
+    "ImageUrl": "https://cdn.sportmonks.com/images/soccer/venues/13/8909.png"
+  },
+  "Manager": {
+    "Id": 896805,
+    "FirstName": "Angelos",
+    "LastName": "Postecoglou",
+    "BirthDate": "1965-07-27T00:00:00",
+    "CountryId": 98,
+    "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/5/896805.png"
+  }
+}

@@ -1,0 +1,85 @@
+[
+  {
+    "Id": 18136964,
+    "SeasonId": 18369,
+    "HomeStatus": false,
+    "StartTime": "2021-12-15T19:45:00",
+    "Status": "NS",
+    "GameTime": {
+      "Minute": null,
+      "ExtraTimeMinute": null,
+      "AddedTimeMinute": null
+    },
+    "Score": {
+      "LocalTeam": 0,
+      "VisitorTeam": 0,
+      "HT": null,
+      "FT": null,
+      "ET": null,
+      "PS": null
+    },
+    "RefereeName": null,
+    "Colors": [
+      {
+        "TeamId": 53,
+        "Color": null
+      },
+      {
+        "TeamId": 246,
+        "Color": null
+      }
+    ],
+    "Lineups": [
+      {
+        "TeamId": 53,
+        "Formation": null,
+        "Manager": null,
+        "StartingXI": [],
+        "Subs": []
+      },
+      {
+        "TeamId": 246,
+        "Formation": null,
+        "Manager": null,
+        "StartingXI": [],
+        "Subs": []
+      }
+    ],
+    "Events": [
+      {
+        "TeamId": 53,
+        "Events": []
+      },
+      {
+        "TeamId": 246,
+        "Events": []
+      }
+    ],
+    "Stats": [
+      {
+        "TeamId": 53,
+        "Stats": null
+      },
+      {
+        "TeamId": 246,
+        "Stats": null
+      }
+    ],
+    "OpponentTeam": {
+      "Id": 246,
+      "Name": "Ross County",
+      "CountryId": 1161,
+      "LogoUrl": "https://cdn.sportmonks.com/images/soccer/teams/22/246.png",
+      "Venue": null,
+      "Manager": null
+    },
+    "Venue": {
+      "Id": 8908,
+      "TeamId": 246,
+      "Name": "Global Energy Stadium",
+      "City": "Dingwall",
+      "Capacity": 6541,
+      "ImageUrl": "https://cdn.sportmonks.com/images/soccer/venues/12/8908.png"
+    }
+  }
+]

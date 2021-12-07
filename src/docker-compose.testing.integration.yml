@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+  postgres-test:
+    image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:centos8-13.4-4.7.3
+    environment:
+    - MODE=postgres
+    - PG_MODE=primary
+    - PG_USER=The12thPlayerUser
+    - PG_PASSWORD=The12thPlayerPassword
+    - PG_DATABASE=The12thPlayerTest
+    - PG_PRIMARY_USER=PrimaryUser
+    - PG_PRIMARY_PASSWORD=PrimaryPassword
+    - PG_ROOT_PASSWORD=postgres
+    - PGHOST=/tmp
+    - PG_PRIMARY_PORT=5432
+    ports:
+    - "5432:5432"
+  
+  rabbit-test:
+    image: masstransit/rabbitmq:3.9.7
+    ports:
+    - "15672:15672"
+    - "5672:5672"
+
+  redis-test:
+    image: bitnami/redis:6.2.6
+    environment:
+    - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+    - "6379:6379"

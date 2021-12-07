@@ -1,0 +1,591 @@
+[
+  {
+    "Id": 18136949,
+    "SeasonId": 18369,
+    "HomeStatus": true,
+    "StartTime": "2021-10-30T14:00:00",
+    "Status": "FT",
+    "GameTime": {
+      "Minute": 90,
+      "ExtraTimeMinute": null,
+      "AddedTimeMinute": null
+    },
+    "Score": {
+      "LocalTeam": 0,
+      "VisitorTeam": 0,
+      "HT": "0-0",
+      "FT": "0-0",
+      "ET": null,
+      "PS": null
+    },
+    "RefereeName": "B. Madden",
+    "Colors": [
+      {
+        "TeamId": 53,
+        "Color": "#339063"
+      },
+      {
+        "TeamId": 258,
+        "Color": "#0A0A0A"
+      }
+    ],
+    "Lineups": [
+      {
+        "TeamId": 53,
+        "Formation": "4-3-3",
+        "Manager": {
+          "Id": 896805,
+          "Name": "A. Postecoglou",
+          "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/5/896805.png"
+        },
+        "StartingXI": [
+          {
+            "Id": 275,
+            "FirstName": "Joe",
+            "LastName": "Hart",
+            "Number": 15,
+            "IsCaptain": false,
+            "Position": "G",
+            "FormationPosition": 1,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/19/275.png",
+            "Rating": 6.92
+          },
+          {
+            "Id": 173129,
+            "FirstName": "Anthony",
+            "LastName": "Ralston",
+            "Number": 56,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": 2,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/9/173129.png",
+            "Rating": 8.42
+          },
+          {
+            "Id": 1712,
+            "FirstName": "Cameron",
+            "LastName": "Carter-Vickers",
+            "Number": 20,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": 3,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/16/1712.png",
+            "Rating": 7.45
+          },
+          {
+            "Id": 190919,
+            "FirstName": "Carl",
+            "LastName": "Starfelt",
+            "Number": 4,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": 4,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/7/190919.png",
+            "Rating": 7.14
+          },
+          {
+            "Id": 74000,
+            "FirstName": "Josip",
+            "LastName": "Juranovi\u0107",
+            "Number": 88,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": 5,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/placeholder.png",
+            "Rating": 7.35
+          },
+          {
+            "Id": 8585,
+            "FirstName": "Callum",
+            "LastName": "McGregor",
+            "Number": 42,
+            "IsCaptain": true,
+            "Position": "M",
+            "FormationPosition": 6,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/9/8585.png",
+            "Rating": 7.42
+          },
+          {
+            "Id": 123913,
+            "FirstName": "Nir",
+            "LastName": "Bitton",
+            "Number": 6,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": 7,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/9/123913.png",
+            "Rating": 7.12
+          },
+          {
+            "Id": 173160,
+            "FirstName": "David",
+            "LastName": "Turnbull",
+            "Number": 14,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": 8,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/8/173160.png",
+            "Rating": 7.84
+          },
+          {
+            "Id": 9939171,
+            "FirstName": "Liel",
+            "LastName": "Abada",
+            "Number": 11,
+            "IsCaptain": false,
+            "Position": "A",
+            "FormationPosition": 9,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/leagues/3/9939171.png",
+            "Rating": 6.73
+          },
+          {
+            "Id": 108471,
+            "FirstName": "Giorgos",
+            "LastName": "Giakoumakis",
+            "Number": 7,
+            "IsCaptain": false,
+            "Position": "A",
+            "FormationPosition": 10,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/23/108471.png",
+            "Rating": 6
+          },
+          {
+            "Id": 163711,
+            "FirstName": "Jo\u00E3o Pedro",
+            "LastName": "Neves Filipe",
+            "Number": 17,
+            "IsCaptain": false,
+            "Position": "A",
+            "FormationPosition": 11,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/31/163711.png",
+            "Rating": 6.64
+          }
+        ],
+        "Subs": [
+          {
+            "Id": 172923,
+            "FirstName": "Scott",
+            "LastName": "Bain",
+            "Number": 29,
+            "IsCaptain": false,
+            "Position": "G",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/27/172923.png",
+            "Rating": null
+          },
+          {
+            "Id": 37558562,
+            "FirstName": "Adam",
+            "LastName": "Montgomery",
+            "Number": 54,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/leagues/2/37558562.png",
+            "Rating": null
+          },
+          {
+            "Id": 540672,
+            "FirstName": "Stephen",
+            "LastName": "Welsh",
+            "Number": 57,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/0/540672.png",
+            "Rating": null
+          },
+          {
+            "Id": 172104,
+            "FirstName": "James",
+            "LastName": "Forrest",
+            "Number": 49,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/8/172104.png",
+            "Rating": 7.02
+          },
+          {
+            "Id": 526,
+            "FirstName": "James",
+            "LastName": "McCarthy",
+            "Number": 16,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/14/526.png",
+            "Rating": null
+          },
+          {
+            "Id": 378560,
+            "FirstName": "Michael",
+            "LastName": "Johnston",
+            "Number": 19,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/0/378560.png",
+            "Rating": 6.83
+          },
+          {
+            "Id": 460810,
+            "FirstName": "Kyogo",
+            "LastName": "Furuhashi",
+            "Number": 8,
+            "IsCaptain": false,
+            "Position": "A",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/placeholder.png",
+            "Rating": 7.01
+          }
+        ]
+      },
+      {
+        "TeamId": 258,
+        "Formation": "5-4-1",
+        "Manager": {
+          "Id": 19256146,
+          "Name": "D. Martindale",
+          "ImageUrl": null
+        },
+        "StartingXI": [
+          {
+            "Id": 4763,
+            "FirstName": "Maksymilian",
+            "LastName": "Stryjek",
+            "Number": 32,
+            "IsCaptain": false,
+            "Position": "G",
+            "FormationPosition": 1,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/27/4763.png",
+            "Rating": 7.6
+          },
+          {
+            "Id": 173891,
+            "FirstName": "Nicky",
+            "LastName": "Devlin",
+            "Number": 2,
+            "IsCaptain": true,
+            "Position": "D",
+            "FormationPosition": 2,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/3/173891.png",
+            "Rating": 7.34
+          },
+          {
+            "Id": 12352,
+            "FirstName": "Ayo",
+            "LastName": "Obileye",
+            "Number": 6,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": 4,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/leagues/0/12352.png",
+            "Rating": 6.53
+          },
+          {
+            "Id": 9680,
+            "FirstName": "Jack",
+            "LastName": "Fitzwater",
+            "Number": 5,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": 3,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/leagues/16/9680.png",
+            "Rating": 7.85
+          },
+          {
+            "Id": 5105,
+            "FirstName": "Tom",
+            "LastName": "Parkes",
+            "Number": 4,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": 5,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/leagues/17/5105.png",
+            "Rating": 7.05
+          },
+          {
+            "Id": 9597,
+            "FirstName": "Sean",
+            "LastName": "Kelly",
+            "Number": 24,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": 6,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/29/9597.png",
+            "Rating": 6.82
+          },
+          {
+            "Id": 14685080,
+            "FirstName": "Odin",
+            "LastName": "Bailey",
+            "Number": 14,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": 7,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/24/14685080.png",
+            "Rating": 6.14
+          },
+          {
+            "Id": 3574,
+            "FirstName": "Jason",
+            "LastName": "Holt",
+            "Number": 18,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": 8,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/22/3574.png",
+            "Rating": 6.41
+          },
+          {
+            "Id": 131876,
+            "FirstName": "Stephane",
+            "LastName": "Omeonga",
+            "Number": 33,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": 9,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/4/131876.png",
+            "Rating": 6.65
+          },
+          {
+            "Id": 2827,
+            "FirstName": "Andrew",
+            "LastName": "Shinnie",
+            "Number": 22,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": 10,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/11/2827.png",
+            "Rating": 6.11
+          },
+          {
+            "Id": 173948,
+            "FirstName": "Bruce",
+            "LastName": "Anderson",
+            "Number": 9,
+            "IsCaptain": false,
+            "Position": "A",
+            "FormationPosition": 11,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/28/173948.png",
+            "Rating": 6.6
+          }
+        ],
+        "Subs": [
+          {
+            "Id": 175526,
+            "FirstName": "Gary",
+            "LastName": "Maley",
+            "Number": 36,
+            "IsCaptain": false,
+            "Position": "G",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/6/175526.png",
+            "Rating": null
+          },
+          {
+            "Id": 174207,
+            "FirstName": "Jackson",
+            "LastName": "Longridge",
+            "Number": 3,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/leagues/31/174207.png",
+            "Rating": 0
+          },
+          {
+            "Id": 8201,
+            "FirstName": "Christian Alexis",
+            "LastName": "Monta\u00F1o Castillo",
+            "Number": 11,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/placeholder.png",
+            "Rating": null
+          },
+          {
+            "Id": 173208,
+            "FirstName": "Jack",
+            "LastName": "McMillan",
+            "Number": 21,
+            "IsCaptain": false,
+            "Position": "D",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/24/173208.png",
+            "Rating": null
+          },
+          {
+            "Id": 173717,
+            "FirstName": "Keaghan",
+            "LastName": "Jacobs",
+            "Number": 7,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/players/21/173717.png",
+            "Rating": null
+          },
+          {
+            "Id": 174304,
+            "FirstName": "Alan",
+            "LastName": "Forrest",
+            "Number": 17,
+            "IsCaptain": false,
+            "Position": "M",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/leagues/0/174304.png",
+            "Rating": 6.64
+          },
+          {
+            "Id": 6179,
+            "FirstName": "Harry",
+            "LastName": "Panayiotou",
+            "Number": 15,
+            "IsCaptain": false,
+            "Position": "A",
+            "FormationPosition": null,
+            "ImageUrl": "https://cdn.sportmonks.com/images/soccer/leagues/3/6179.png",
+            "Rating": 6.52
+          }
+        ]
+      }
+    ],
+    "Events": [
+      {
+        "TeamId": 53,
+        "Events": [
+          {
+            "Minute": 58,
+            "AddedTimeMinute": null,
+            "Type": "substitution",
+            "PlayerId": 378560,
+            "RelatedPlayerId": 9939171
+          },
+          {
+            "Minute": 58,
+            "AddedTimeMinute": null,
+            "Type": "substitution",
+            "PlayerId": 460810,
+            "RelatedPlayerId": 190919
+          },
+          {
+            "Minute": 82,
+            "AddedTimeMinute": null,
+            "Type": "substitution",
+            "PlayerId": 172104,
+            "RelatedPlayerId": 163711
+          },
+          {
+            "Minute": 90,
+            "AddedTimeMinute": 3,
+            "Type": "missed_penalty",
+            "PlayerId": 108471,
+            "RelatedPlayerId": null
+          }
+        ]
+      },
+      {
+        "TeamId": 258,
+        "Events": [
+          {
+            "Minute": 73,
+            "AddedTimeMinute": null,
+            "Type": "substitution",
+            "PlayerId": 6179,
+            "RelatedPlayerId": 173948
+          },
+          {
+            "Minute": 73,
+            "AddedTimeMinute": null,
+            "Type": "substitution",
+            "PlayerId": 174304,
+            "RelatedPlayerId": 2827
+          },
+          {
+            "Minute": 90,
+            "AddedTimeMinute": null,
+            "Type": "substitution",
+            "PlayerId": 174207,
+            "RelatedPlayerId": 9597
+          },
+          {
+            "Minute": 90,
+            "AddedTimeMinute": 2,
+            "Type": "redcard",
+            "PlayerId": 12352,
+            "RelatedPlayerId": null
+          }
+        ]
+      }
+    ],
+    "Stats": [
+      {
+        "TeamId": 53,
+        "Stats": {
+          "Shots": {
+            "Total": 16,
+            "OnTarget": 2,
+            "OffTarget": 14,
+            "Blocked": 1,
+            "InsideBox": 10,
+            "OutsideBox": 6
+          },
+          "Passes": {
+            "Total": 881,
+            "Accurate": 799
+          },
+          "Fouls": 10,
+          "Corners": 6,
+          "Offsides": 0,
+          "BallPossession": 85,
+          "YellowCards": 0,
+          "RedCards": 0,
+          "Tackles": 14
+        }
+      },
+      {
+        "TeamId": 258,
+        "Stats": {
+          "Shots": {
+            "Total": 2,
+            "OnTarget": 0,
+            "OffTarget": 2,
+            "Blocked": 0,
+            "InsideBox": 1,
+            "OutsideBox": 1
+          },
+          "Passes": {
+            "Total": 154,
+            "Accurate": 80
+          },
+          "Fouls": 10,
+          "Corners": 3,
+          "Offsides": 5,
+          "BallPossession": 15,
+          "YellowCards": 0,
+          "RedCards": 1,
+          "Tackles": 12
+        }
+      }
+    ],
+    "OpponentTeam": {
+      "Id": 258,
+      "Name": "Livingston",
+      "CountryId": 1161,
+      "LogoUrl": "https://cdn.sportmonks.com/images/soccer/teams/2/258.png",
+      "Venue": null,
+      "Manager": null
+    },
+    "Venue": {
+      "Id": 8909,
+      "TeamId": 53,
+      "Name": "Celtic Park",
+      "City": "Glasgow",
+      "Capacity": 60411,
+      "ImageUrl": "https://cdn.sportmonks.com/images/soccer/venues/13/8909.png"
+    }
+  }
+]

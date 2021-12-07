@@ -1,0 +1,13 @@
+[
+  {
+    "Id": 18369,
+    "Name": "2021/2022",
+    "League": {
+      "Id": 501,
+      "Name": "Premiership",
+      "Type": "domestic",
+      "IsCup": false,
+      "LogoUrl": "https://cdn.sportmonks.com/images/soccer/leagues/501.png"
+    }
+  }
+]

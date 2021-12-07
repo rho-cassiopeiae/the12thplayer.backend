@@ -83,7 +83,7 @@ namespace Livescore.Infrastructure {
                 busCfgCallback(busCfg);
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
-                    rabbitCfg.Host("rabbit");
+                    rabbitCfg.Host(configuration["RabbitMQ:Host"]);
 
                     rabbitCfg.ConfigureEndpoints(
                         context,
