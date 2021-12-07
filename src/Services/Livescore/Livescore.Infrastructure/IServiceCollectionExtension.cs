@@ -30,6 +30,8 @@ using Livescore.Domain.Base;
 using Livescore.Infrastructure.InMemory;
 using Livescore.Domain.Aggregates.PlayerRating;
 using Livescore.Infrastructure.InMemory.Queryables;
+using Livescore.Domain.Aggregates.UserVote;
+using Livescore.Domain.Aggregates.VideoReaction;
 
 namespace Livescore.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -71,8 +73,11 @@ namespace Livescore.Infrastructure {
             services.AddScoped<IDiscussionInMemRepository, DiscussionInMemRepository>();
             services.AddScoped<IFixtureLivescoreStatusInMemRepository, FixtureLivescoreStatusInMemRepository>();
             services.AddScoped<IPlayerRatingInMemRepository, PlayerRatingInMemRepository>();
+            services.AddScoped<IVideoReactionInMemRepository, VideoReactionInMemRepository>();
+            services.AddScoped<IUserVoteInMemRepository, UserVoteInMemRepository>();
 
             services.AddScoped<IPlayerRatingInMemQueryable, PlayerRatingInMemQueryable>();
+            services.AddScoped<IVideoReactionInMemQueryable, VideoReactionInMemQueryable>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);

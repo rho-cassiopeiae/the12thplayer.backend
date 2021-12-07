@@ -19,6 +19,7 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
 
         public void EnlistAsPartOf(IInMemUnitOfWork unitOfWork) {
             _unitOfWork = unitOfWork;
+            _transaction = unitOfWork.Transaction;
         }
 
         public async ValueTask<bool> SaveChanges() {
@@ -33,19 +34,33 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                 return await _transaction.ExecuteAsync();
             }
 
-            return false;
+            return true;
         }
 
         private void _ensureTransaction() {
             if (_transaction == null) {
-                _transaction = _unitOfWork?.Transaction ?? _redis.GetDatabase().CreateTransaction();
+                _transaction = _redis.GetDatabase().CreateTransaction();
             }
+        }
+
+        public Task<bool> FindOutIfActive(long fixtureId, long teamId) {
+            return _redis.GetDatabase().SetContainsAsync(
+                "fixtures.active", $"f:{fixtureId}.t:{teamId}"
+            );
+        }
+
+        public void WatchStillActive(long fixtureId, long teamId) {
+            _ensureTransaction();
+
+            _transaction.AddCondition(
+                Condition.SetContains("fixtures.active", $"f:{fixtureId}.t:{teamId}")
+            );
         }
 
         public void SetOrUpdate(FixtureLivescoreStatus fixtureStatus) {
             _ensureTransaction();
 
-            var fixtureIdentifier = $"fixture:{fixtureStatus.FixtureId}.team:{fixtureStatus.TeamId}";
+            var fixtureIdentifier = $"f:{fixtureStatus.FixtureId}.t:{fixtureStatus.TeamId}";
 
             if (fixtureStatus.Active != null) {
                 if (fixtureStatus.Active.Value) {

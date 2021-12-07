@@ -55,6 +55,12 @@ services:
     ports:
     - "6379:6379"
 
+  redsmin:
+    image: redsmin/proxy
+    environment:
+    - REDSMIN_KEY=${REDSMIN_KEY}
+    - REDIS_URI=redis://redis:6379
+
   migrator:
     environment:
     - DOTNET_ENVIRONMENT=Development

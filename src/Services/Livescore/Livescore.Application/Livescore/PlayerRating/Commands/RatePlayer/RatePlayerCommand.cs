@@ -1,12 +1,15 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using MediatR;
 
 using Livescore.Application.Common.Interfaces;
 using Livescore.Application.Common.Results;
+using Livescore.Application.Livescore.Common.Errors;
+using Livescore.Domain.Aggregates.FixtureLivescoreStatus;
 using Livescore.Domain.Aggregates.PlayerRating;
+using Livescore.Domain.Aggregates.UserVote;
+using Livescore.Domain.Base;
 
 namespace Livescore.Application.Livescore.PlayerRating.Commands.RatePlayer {
     public class RatePlayerCommand : IRequest<HandleResult<PlayerRatingDto>> {
@@ -19,13 +22,22 @@ namespace Livescore.Application.Livescore.PlayerRating.Commands.RatePlayer {
     public class RatePlayerCommandHandler : IRequestHandler<
         RatePlayerCommand, HandleResult<PlayerRatingDto>
     > {
+        private readonly IInMemUnitOfWork _unitOfWork;
+        private readonly IFixtureLivescoreStatusInMemRepository _fixtureLivescoreStatusInMemRepository;
+        private readonly IUserVoteInMemRepository _userVoteInMemRepository;
         private readonly IPlayerRatingInMemRepository _playerRatingInMemRepository;
         private readonly IPlayerRatingInMemQueryable _playerRatingInMemQueryable;
 
         public RatePlayerCommandHandler(
+            IInMemUnitOfWork unitOfWork,
+            IFixtureLivescoreStatusInMemRepository fixtureLivescoreStatusInMemRepository,
+            IUserVoteInMemRepository userVoteInMemRepository,
             IPlayerRatingInMemRepository playerRatingInMemRepository,
             IPlayerRatingInMemQueryable playerRatingInMemQueryable
         ) {
+            _unitOfWork = unitOfWork;
+            _fixtureLivescoreStatusInMemRepository = fixtureLivescoreStatusInMemRepository;
+            _userVoteInMemRepository = userVoteInMemRepository;
             _playerRatingInMemRepository = playerRatingInMemRepository;
             _playerRatingInMemQueryable = playerRatingInMemQueryable;
         }
@@ -33,25 +45,40 @@ namespace Livescore.Application.Livescore.PlayerRating.Commands.RatePlayer {
         public async Task<HandleResult<PlayerRatingDto>> Handle(
             RatePlayerCommand command, CancellationToken cancellationToken
         ) {
+            long userId = 1;
+
             bool applied;
             do {
-                var playerRating = await _playerRatingInMemRepository.FindUserVoteForPlayer(
-                    command.FixtureId, command.TeamId, 1, command.ParticipantKey
+                var active = await _fixtureLivescoreStatusInMemRepository.FindOutIfActive(
+                    command.FixtureId, command.TeamId
+                );
+                if (!active) {
+                    return new HandleResult<PlayerRatingDto> {
+                        Error = new LivescoreError("Fixture is no longer active")
+                    };
+                }
+
+                var userVote = await _userVoteInMemRepository.FindOneForFixtureParticipant(
+                    userId, command.FixtureId, command.TeamId, command.ParticipantKey
                 );
 
-                var userVote = playerRating.UserVotes.Single();
-                var newUserVote = new UserVote(
-                    userId: userVote.UserId,
-                    currentRating: userVote.CurrentRating,
-                    newRating: (int) command.Rating
+                float? oldRating = userVote.ChangePlayerRating(command.ParticipantKey, command.Rating);
+                
+                _unitOfWork.Begin();
+                
+                _fixtureLivescoreStatusInMemRepository.EnlistAsPartOf(_unitOfWork);
+                _fixtureLivescoreStatusInMemRepository.WatchStillActive(command.FixtureId, command.TeamId);
+
+                _userVoteInMemRepository.EnlistAsPartOf(_unitOfWork);
+                _userVoteInMemRepository.UpdateOneForFixtureParticipant(userVote, oldRating);
+
+                _playerRatingInMemRepository.EnlistAsPartOf(_unitOfWork);
+                _playerRatingInMemRepository.UpdateOneFor(
+                    command.FixtureId, command.TeamId, command.ParticipantKey,
+                    oldRating, command.Rating
                 );
 
-                playerRating.RemoveUserVote(userVote);
-                playerRating.AddUserVote(newUserVote);
-
-                _playerRatingInMemRepository.Update(playerRating);
-
-                applied = await _playerRatingInMemRepository.SaveChanges();
+                applied = await _unitOfWork.Commit();
             } while (!applied);
 
             var updatedPlayerRating = await _playerRatingInMemQueryable.GetRatingFor(

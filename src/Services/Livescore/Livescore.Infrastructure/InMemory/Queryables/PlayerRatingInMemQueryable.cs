@@ -14,12 +14,13 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
         }
 
         public async Task<PlayerRating> GetRatingFor(long fixtureId, long teamId, string participantKey) {
-            var db = _redis.GetDatabase();
-
-            var values = await db.HashGetAsync($"fixture:{fixtureId}.team:{teamId}.player-ratings", new RedisValue[] {
-                $"{participantKey}.total-rating",
-                $"{participantKey}.total-voters"
-            });
+            var values = await _redis.GetDatabase().HashGetAsync(
+                $"f:{fixtureId}.t:{teamId}.player-ratings",
+                new RedisValue[] {
+                    $"{participantKey}.total-rating",
+                    $"{participantKey}.total-voters"
+                }
+            );
 
             return new PlayerRating(
                 fixtureId: fixtureId,

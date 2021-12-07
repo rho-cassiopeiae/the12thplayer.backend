@@ -150,7 +150,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
             await _fixtureRepository.SaveChanges(cancellationToken);
 
             var subs = teamMatchEvents.Events?.Where(e => e.Type.ToLowerInvariant() == "substitution");
-            if (subs != null && subs.Count() > 0) {
+            if (subs != null) {
                 foreach (var sub in subs) {
                     _playerRatingInMemRepository.CreateIfNotExists(new PlayerRatingDm(
                         fixtureId: command.FixtureId,

@@ -1,26 +1,40 @@
-﻿using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
 
 using StackExchange.Redis;
 
 using Livescore.Domain.Aggregates.PlayerRating;
+using Livescore.Domain.Base;
 
 namespace Livescore.Infrastructure.InMemory.Repositories {
     public class PlayerRatingInMemRepository : IPlayerRatingInMemRepository {
         private readonly ConnectionMultiplexer _redis;
 
+        private IInMemUnitOfWork _unitOfWork;
         private ITransaction _transaction;
 
         public PlayerRatingInMemRepository(ConnectionMultiplexer redis) {
             _redis = redis;
         }
 
+        public void EnlistAsPartOf(IInMemUnitOfWork unitOfWork) {
+            _unitOfWork = unitOfWork;
+            _transaction = unitOfWork.Transaction;
+        }
+
         public async ValueTask<bool> SaveChanges() {
+            if (_unitOfWork != null) {
+                throw new InvalidOperationException(
+                    $"This repository is enlisted as part of a unit of work, so its '{nameof(SaveChanges)}' method must not be invoked. " +
+                    $"Instead, call '{nameof(IInMemUnitOfWork)}.{nameof(IInMemUnitOfWork.Commit)}'"
+                );
+            }
+
             if (_transaction != null) {
                 return await _transaction.ExecuteAsync();
             }
 
-            return false;
+            return true;
         }
 
         private void _ensureTransaction() {
@@ -32,7 +46,7 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
         public void CreateIfNotExists(PlayerRating playerRating) {
             _ensureTransaction();
 
-            var fixtureIdentifier = $"fixture:{playerRating.FixtureId}.team:{playerRating.TeamId}";
+            var fixtureIdentifier = $"f:{playerRating.FixtureId}.t:{playerRating.TeamId}";
 
             _transaction.HashSetAsync(
                 $"{fixtureIdentifier}.player-ratings",
@@ -48,70 +62,32 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
             );
         }
 
-        public async Task<PlayerRating> FindUserVoteForPlayer(
-            long fixtureId, long teamId, long userId, string participantKey
+        public void UpdateOneFor(
+            long fixtureId, long teamId, string participantKey,
+            float? oldRating, float newRating
         ) {
-            var db = _redis.GetDatabase();
-
-            var value = await db.HashGetAsync(
-                $"fixture:{fixtureId}.team:{teamId}.user:{userId}.player-ratings", participantKey
-            );
-
-            var playerRating = new PlayerRating(
-                fixtureId: fixtureId,
-                teamId: teamId,
-                participantKey: participantKey
-            );
-
-            playerRating.AddUserVote(new UserVote(
-                userId: userId,
-                currentRating: (int?) value
-            ));
-
-            return playerRating;
-        }
-
-        public void Update(PlayerRating playerRating) {
             _ensureTransaction();
 
-            var fixtureIdentifier = $"fixture:{playerRating.FixtureId}.team:{playerRating.TeamId}";
-            var userVote = playerRating.UserVotes.Single();
+            var fixtureIdentifier = $"f:{fixtureId}.t:{teamId}";
 
-            if (userVote.CurrentRating != null) {
-                _transaction.AddCondition(Condition.HashEqual(
-                    $"{fixtureIdentifier}.user:{userVote.UserId}.player-ratings",
-                    playerRating.ParticipantKey,
-                    userVote.CurrentRating.Value
-                ));
-
+            if (oldRating != null) {
                 _transaction.HashIncrementAsync(
                     $"{fixtureIdentifier}.player-ratings",
-                    $"{playerRating.ParticipantKey}.total-rating",
-                    userVote.NewRating - userVote.CurrentRating.Value
+                    $"{participantKey}.total-rating",
+                    newRating - oldRating.Value
                 );
             } else {
-                _transaction.AddCondition(Condition.HashNotExists(
-                    $"{fixtureIdentifier}.user:{userVote.UserId}.player-ratings",
-                    playerRating.ParticipantKey
-                ));
-
                 _transaction.HashIncrementAsync(
                     $"{fixtureIdentifier}.player-ratings",
-                    $"{playerRating.ParticipantKey}.total-rating",
-                    userVote.NewRating
+                    $"{participantKey}.total-rating",
+                    newRating
                 );
                 _transaction.HashIncrementAsync(
                     $"{fixtureIdentifier}.player-ratings",
-                    $"{playerRating.ParticipantKey}.total-voters",
+                    $"{participantKey}.total-voters",
                     1
                 );
             }
-
-            _transaction.HashSetAsync(
-                $"{fixtureIdentifier}.user:{userVote.UserId}.player-ratings",
-                playerRating.ParticipantKey,
-                userVote.NewRating
-            );
         }
     }
 }

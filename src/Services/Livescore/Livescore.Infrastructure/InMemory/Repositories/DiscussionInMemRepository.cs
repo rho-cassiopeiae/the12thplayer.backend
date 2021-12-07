@@ -19,6 +19,7 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
 
         public void EnlistAsPartOf(IInMemUnitOfWork unitOfWork) {
             _unitOfWork = unitOfWork;
+            _transaction = unitOfWork.Transaction;
         }
 
         public async ValueTask<bool> SaveChanges() {
@@ -33,31 +34,31 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                 return await _transaction.ExecuteAsync();
             }
 
-            return false;
+            return true;
         }
 
         private void _ensureTransaction() {
             if (_transaction == null) {
-                _transaction = _unitOfWork?.Transaction ?? _redis.GetDatabase().CreateTransaction();
+                _transaction = _redis.GetDatabase().CreateTransaction();
             }
         }
         
         public void Create(Discussion discussion) {
             _ensureTransaction();
 
-            var fixtureIdentifier = $"fixture:{discussion.FixtureId}.team:{discussion.TeamId}";
+            var fixtureIdentifier = $"f:{discussion.FixtureId}.t:{discussion.TeamId}";
 
             _transaction.HashSetAsync(
                 $"{fixtureIdentifier}.discussions",
                 new[] {
-                    new HashEntry($"discussion:{discussion.Id}.{nameof(discussion.Name)}", discussion.Name),
-                    new HashEntry($"discussion:{discussion.Id}.{nameof(discussion.Active)}", discussion.Active ? 1 : 0)
+                    new HashEntry($"d:{discussion.Id}.{nameof(discussion.Name)}", discussion.Name),
+                    new HashEntry($"d:{discussion.Id}.{nameof(discussion.Active)}", discussion.Active ? 1 : 0)
                 }
             );
 
             foreach (var entry in discussion.Entries) {
                 _transaction.StreamAddAsync(
-                    $"{fixtureIdentifier}.discussion:{discussion.Id}",
+                    $"{fixtureIdentifier}.d:{discussion.Id}",
                     new[] {
                         new NameValueEntry(nameof(entry.Username), entry.Username),
                         new NameValueEntry(nameof(entry.Body), entry.Body)
@@ -69,7 +70,7 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
             _transaction.StreamAddAsync(
                 "discussions",
                 new[] {
-                    new NameValueEntry("identifier", $"{fixtureIdentifier}.discussion:{discussion.Id}"),
+                    new NameValueEntry("identifier", $"{fixtureIdentifier}.d:{discussion.Id}"),
                     new NameValueEntry("command", "sub")
                 }
             );
