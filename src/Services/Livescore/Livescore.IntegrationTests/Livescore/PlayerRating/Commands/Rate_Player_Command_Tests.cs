@@ -60,5 +60,32 @@ namespace Livescore.IntegrationTests.Livescore.PlayerRating.Commands {
                 }
             );
         }
+
+        [Fact]
+        public async Task Should_Update_Player_Total_Rating_When_Rate_For_The_Second_Time() {
+#pragma warning disable CS4014
+            _sut.SendRequest(new RatePlayerCommand {
+                FixtureId = _fixtureId,
+                TeamId = _teamId,
+                ParticipantKey = _participantKey,
+                Rating = 8.15f
+            });
+#pragma warning restore
+
+            var result = await _sut.SendRequest(new RatePlayerCommand {
+                FixtureId = _fixtureId,
+                TeamId = _teamId,
+                ParticipantKey = _participantKey,
+                Rating = 6.94f
+            });
+
+            result.Data.Should().BeEquivalentTo(
+                new PlayerRatingDto {
+                    ParticipantKey = _participantKey,
+                    TotalRating = 6,
+                    TotalVoters = 1
+                }
+            );
+        }
     }
 }

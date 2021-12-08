@@ -63,10 +63,8 @@ namespace Livescore.IntegrationTests {
             context.Database.OpenConnection();
             _checkpoint.Reset(context.Database.GetDbConnection()).Wait();
 
-            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-            var connectionString = $"{configuration["Redis:Host"]}:{configuration["Redis:Port"]}";
-            var redis = ConnectionMultiplexer.Connect(connectionString + ",allowAdmin=true");
-            redis.GetServer(connectionString).FlushDatabase();
+            var redis = scope.ServiceProvider.GetRequiredService<ConnectionMultiplexer>();
+            redis.GetServer(redis.Configuration.Split(',').First()).FlushDatabase();
         }
 
         private string _getFileContent(string path) {

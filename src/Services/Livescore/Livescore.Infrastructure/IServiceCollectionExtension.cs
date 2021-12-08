@@ -65,8 +65,11 @@ namespace Livescore.Infrastructure {
                 var configuration = sp.GetRequiredService<IConfiguration>();
                 var host = configuration["Redis:Host"];
                 var port = configuration["Redis:Port"];
+                bool allowAdmin = configuration.GetValue("Redis:AllowAdmin", false);
 
-                return ConnectionMultiplexer.Connect($"{host}:{port}");
+                return ConnectionMultiplexer.Connect(
+                    $"{host}:{port}" + (allowAdmin ? ",allowAdmin=true" : string.Empty)
+                );
             });
 
             services.AddScoped<IInMemUnitOfWork, InMemUnitOfWork>();

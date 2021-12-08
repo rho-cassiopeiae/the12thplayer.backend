@@ -43,6 +43,39 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
             }
         }
 
+        public void Create(VideoReaction videoReaction) {
+            _ensureTransaction();
+
+            var fixtureIdentifier = $"f:{videoReaction.FixtureId}.t:{videoReaction.TeamId}";
+            var authorIdentifier = $"vra:{videoReaction.AuthorId}";
+
+            _transaction.AddCondition(Condition.SortedSetNotContains(
+                $"{fixtureIdentifier}.video-reaction-author-ids.by-rating", videoReaction.AuthorId
+            ));
+
+            _transaction.SortedSetAddAsync(
+                $"{fixtureIdentifier}.video-reaction-author-ids.by-rating",
+                videoReaction.AuthorId,
+                videoReaction.Rating
+            );
+
+            _transaction.SortedSetAddAsync(
+                $"{fixtureIdentifier}.video-reaction-author-ids.by-date",
+                videoReaction.AuthorId,
+                videoReaction.PostedAt
+            );
+
+            _transaction.HashSetAsync(
+                $"{fixtureIdentifier}.video-reactions",
+                new[] {
+                    new HashEntry($"{authorIdentifier}.{nameof(videoReaction.Title)}", videoReaction.Title),
+                    new HashEntry($"{authorIdentifier}.{nameof(videoReaction.AuthorUsername)}", videoReaction.AuthorUsername),
+                    new HashEntry($"{authorIdentifier}.{nameof(videoReaction.VideoId)}", videoReaction.VideoId),
+                    new HashEntry($"{authorIdentifier}.{nameof(videoReaction.ThumbnailUrl)}", videoReaction.ThumbnailUrl)
+                }
+            );
+        }
+        
         public void UpdateRatingFor(long fixtureId, long teamId, long authorId, int incrementRatingBy) {
             _ensureTransaction();
 
