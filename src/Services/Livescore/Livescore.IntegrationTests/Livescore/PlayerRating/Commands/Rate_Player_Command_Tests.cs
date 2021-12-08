@@ -45,6 +45,8 @@ namespace Livescore.IntegrationTests.Livescore.PlayerRating.Commands {
 
         [Fact]
         public async Task Should_Update_Player_Total_Rating_And_Total_Voters_When_Rate_For_The_First_Time() {
+            _sut.RunAs(userId: 1, username: "user-1");
+
             var result = await _sut.SendRequest(new RatePlayerCommand {
                 FixtureId = _fixtureId,
                 TeamId = _teamId,
@@ -63,6 +65,8 @@ namespace Livescore.IntegrationTests.Livescore.PlayerRating.Commands {
 
         [Fact]
         public async Task Should_Update_Player_Total_Rating_When_Rate_For_The_Second_Time() {
+            _sut.RunAs(userId: 1, username: "user-1");
+
 #pragma warning disable CS4014
             _sut.SendRequest(new RatePlayerCommand {
                 FixtureId = _fixtureId,

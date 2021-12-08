@@ -48,7 +48,7 @@ namespace Livescore.Infrastructure.Identity {
                 // per connection, not once per method call. Therefore, it's possible for a stolen token
                 // to be used indefinitely, even long after it should have been discarded as expired.
                 // To solve this problem, we save the token in IAuthenticationContext and validate its lifetime
-                // manually here.
+                // for every hub method invocation manually.
                 if (DateTime.UtcNow.CompareTo(authenticationContext.Token.ValidTo) > 0) {
                     return new AuthorizationError(
                         $"The token expired at '{authenticationContext.Token.ValidTo.ToString(CultureInfo.InvariantCulture)}'"

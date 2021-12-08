@@ -10,8 +10,10 @@ using Livescore.Domain.Aggregates.FixtureLivescoreStatus;
 using Livescore.Domain.Aggregates.PlayerRating;
 using Livescore.Domain.Aggregates.UserVote;
 using Livescore.Domain.Base;
+using Livescore.Application.Common.Attributes;
 
 namespace Livescore.Application.Livescore.PlayerRating.Commands.RatePlayer {
+    [RequireAuthorization]
     public class RatePlayerCommand : IRequest<HandleResult<PlayerRatingDto>> {
         public long FixtureId { get; set; }
         public long TeamId { get; set; }
@@ -22,6 +24,8 @@ namespace Livescore.Application.Livescore.PlayerRating.Commands.RatePlayer {
     public class RatePlayerCommandHandler : IRequestHandler<
         RatePlayerCommand, HandleResult<PlayerRatingDto>
     > {
+        private readonly IAuthenticationContext _authenticationContext;
+        private readonly IPrincipalDataProvider _principalDataProvider;
         private readonly IInMemUnitOfWork _unitOfWork;
         private readonly IFixtureLivescoreStatusInMemRepository _fixtureLivescoreStatusInMemRepository;
         private readonly IUserVoteInMemRepository _userVoteInMemRepository;
@@ -29,12 +33,16 @@ namespace Livescore.Application.Livescore.PlayerRating.Commands.RatePlayer {
         private readonly IPlayerRatingInMemQueryable _playerRatingInMemQueryable;
 
         public RatePlayerCommandHandler(
+            IAuthenticationContext authenticationContext,
+            IPrincipalDataProvider principalDataProvider,
             IInMemUnitOfWork unitOfWork,
             IFixtureLivescoreStatusInMemRepository fixtureLivescoreStatusInMemRepository,
             IUserVoteInMemRepository userVoteInMemRepository,
             IPlayerRatingInMemRepository playerRatingInMemRepository,
             IPlayerRatingInMemQueryable playerRatingInMemQueryable
         ) {
+            _authenticationContext = authenticationContext;
+            _principalDataProvider = principalDataProvider;
             _unitOfWork = unitOfWork;
             _fixtureLivescoreStatusInMemRepository = fixtureLivescoreStatusInMemRepository;
             _userVoteInMemRepository = userVoteInMemRepository;
@@ -45,7 +53,7 @@ namespace Livescore.Application.Livescore.PlayerRating.Commands.RatePlayer {
         public async Task<HandleResult<PlayerRatingDto>> Handle(
             RatePlayerCommand command, CancellationToken cancellationToken
         ) {
-            long userId = 1;
+            long userId = _principalDataProvider.GetId(_authenticationContext.User);
 
             bool applied;
             do {

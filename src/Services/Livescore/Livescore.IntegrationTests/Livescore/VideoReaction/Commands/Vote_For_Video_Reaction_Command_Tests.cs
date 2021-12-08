@@ -35,10 +35,14 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Commands {
 
         [Fact]
         public async Task Should_Increase_Video_Reaction_Rating_By_1_When_Upvote_For_The_First_Time() {
+            _sut.RunAs(userId: 1, username: "user-1");
+
             await _sut.SendRequest(new PostVideoReactionCommand {
                 FixtureId = _fixtureId,
                 TeamId = _teamId
             });
+
+            _sut.RunAs(userId: 2, username: "user-2");
 
             var result = await _sut.SendRequest(new VoteForVideoReactionCommand {
                 FixtureId = _fixtureId,
@@ -55,10 +59,14 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Commands {
 
         [Fact]
         public async Task Should_Reset_Video_Reaction_Rating_And_User_Vote_When_Upvote_Twice() {
+            _sut.RunAs(userId: 1, username: "user-1");
+
             await _sut.SendRequest(new PostVideoReactionCommand {
                 FixtureId = _fixtureId,
                 TeamId = _teamId
             });
+
+            _sut.RunAs(userId: 2, username: "user-2");
 
 #pragma warning disable CS4014
             _sut.SendRequest(new VoteForVideoReactionCommand {

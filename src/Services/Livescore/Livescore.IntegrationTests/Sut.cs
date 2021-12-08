@@ -3,6 +3,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,12 +21,15 @@ using Livescore.Application.Seed.Commands.AddCountries;
 using Livescore.Application.Common.Dto;
 using Livescore.Application.Seed.Commands.AddTeamDetails;
 using Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures;
+using Livescore.Application.Common.Interfaces;
 
 namespace Livescore.IntegrationTests {
     public class Sut {
         private readonly IHost _host;
         private readonly IHostEnvironment _hostEnvironment;
         private readonly Checkpoint _checkpoint;
+
+        private ClaimsPrincipal _user;
 
         public Sut() {
             _host = Program
@@ -65,6 +70,22 @@ namespace Livescore.IntegrationTests {
 
             var redis = scope.ServiceProvider.GetRequiredService<ConnectionMultiplexer>();
             redis.GetServer(redis.Configuration.Split(',').First()).FlushDatabase();
+
+            RunAsGuest();
+        }
+
+        public void RunAs(long userId, string username) {
+            _user = new ClaimsPrincipal(new ClaimsIdentity(
+                new[] {
+                    new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                    new Claim("__Username", username)
+                },
+                "Bearer"
+            ));
+        }
+
+        public void RunAsGuest() {
+            _user = null;
         }
 
         private string _getFileContent(string path) {
@@ -165,6 +186,11 @@ namespace Livescore.IntegrationTests {
 
         public async Task<T> SendRequest<T>(IRequest<T> request) {
             using var scope = _host.Services.CreateScope();
+
+            if (_user != null) {
+                var context = scope.ServiceProvider.GetRequiredService<IAuthenticationContext>();
+                context.User = _user;
+            }
 
             var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
             var result = await mediator.Send(request);
