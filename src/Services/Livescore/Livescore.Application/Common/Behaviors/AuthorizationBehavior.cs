@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 using MediatR;
 
-using Admin.Application.Common.Attributes;
-using Admin.Application.Common.Interfaces;
-using Admin.Application.Common.Results;
+using Livescore.Application.Common.Attributes;
+using Livescore.Application.Common.Interfaces;
+using Livescore.Application.Common.Results;
 
-namespace Admin.Application.Common.Behaviors {
+namespace Livescore.Application.Common.Behaviors {
     public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<
         TRequest, TResponse
     > where TRequest : IRequest<TResponse>

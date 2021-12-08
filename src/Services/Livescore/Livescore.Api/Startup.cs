@@ -37,6 +37,8 @@ namespace Livescore.Api {
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
             });

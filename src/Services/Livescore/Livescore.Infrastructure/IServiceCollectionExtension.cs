@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 using MassTransit;
 using MassTransit.Definition;
@@ -32,6 +36,7 @@ using Livescore.Domain.Aggregates.PlayerRating;
 using Livescore.Infrastructure.InMemory.Queryables;
 using Livescore.Domain.Aggregates.UserVote;
 using Livescore.Domain.Aggregates.VideoReaction;
+using Livescore.Infrastructure.Identity;
 
 namespace Livescore.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -40,6 +45,69 @@ namespace Livescore.Infrastructure {
             IConfiguration configuration,
             Action<IServiceCollectionBusConfigurator> busCfgCallback
         ) {
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options => {
+                    var rsa = RSA.Create(); // @@NOTE: Important to not dispose.
+                    rsa.FromXmlString(configuration["Jwt:PublicKey"]);
+
+                    options.MapInboundClaims = false;
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = false;
+                    options.TokenValidationParameters = new TokenValidationParameters {
+                        ValidateIssuer = true,
+                        ValidIssuer = configuration["Jwt:Issuer"],
+                        ValidateAudience = true,
+                        ValidAudience = configuration["Jwt:Audience"],
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
+                        IssuerSigningKey = new RsaSecurityKey(rsa)
+                    };
+                    options.Events = new JwtBearerEvents {
+                        OnMessageReceived = context => {
+                            var accessToken = context.Request.Query["access_token"];
+                            if (
+                                !string.IsNullOrEmpty(accessToken) &&
+                                context.Request.Path.StartsWithSegments("/livescore")
+                            ) {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = context => {
+                            var authenticationContext = context
+                                .HttpContext
+                                .RequestServices
+                                .GetRequiredService<IAuthenticationContext>();
+
+                            authenticationContext.User = context.Principal;
+
+                            if (context.Request.Path.StartsWithSegments("/livescore")) {
+                                authenticationContext.Token = context.SecurityToken;
+                            }
+
+                            return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = context => {
+                            var authenticationContext = context
+                                .HttpContext
+                                .RequestServices
+                                .GetRequiredService<IAuthenticationContext>();
+
+                            authenticationContext.Failure = context.Exception;
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+
+            services.AddAuthorizationCore();
+
+            services.AddScoped<IAuthenticationContext, AuthenticationContext>();
+            services.AddTransient<IAuthorizationService, AuthorizationService>();
+            services.AddSingleton<IPrincipalDataProvider, PrincipalDataProvider>();
+
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             services.AddDbContext<LivescoreDbContext>(optionsBuilder =>

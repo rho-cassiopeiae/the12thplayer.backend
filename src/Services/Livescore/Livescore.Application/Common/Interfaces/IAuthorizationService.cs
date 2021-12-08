@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Admin.Application.Common.Attributes;
-using Admin.Application.Common.Errors;
-using Admin.Application.Common.Results;
+using Livescore.Application.Common.Attributes;
+using Livescore.Application.Common.Errors;
+using Livescore.Application.Common.Results;
 
-namespace Admin.Application.Common.Interfaces {
+namespace Livescore.Application.Common.Interfaces {
     public interface IAuthorizationService {
         Task<Maybe<AuthorizationError>> Authorize(
             IAuthenticationContext authenticationContext,
