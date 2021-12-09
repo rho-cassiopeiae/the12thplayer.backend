@@ -17,16 +17,16 @@ namespace Livescore.Application.Livescore.Worker.Queries.GetTeamPlayers {
     public class GetTeamPlayersQueryHandler : IRequestHandler<
         GetTeamPlayersQuery, HandleResult<IEnumerable<PlayerDto>>
     > {
-        private readonly ILivescoreQueryable _livescoreQueryable;
+        private readonly IPlayerQueryable _playerQueryable;
 
-        public GetTeamPlayersQueryHandler(ILivescoreQueryable livescoreQueryable) {
-            _livescoreQueryable = livescoreQueryable;
+        public GetTeamPlayersQueryHandler(IPlayerQueryable playerQueryable) {
+            _playerQueryable = playerQueryable;
         }
 
         public async Task<HandleResult<IEnumerable<PlayerDto>>> Handle(
             GetTeamPlayersQuery query, CancellationToken cancellationToken
         ) {
-            var players = await _livescoreQueryable.GetPlayersFrom(query.TeamId);
+            var players = await _playerQueryable.GetPlayersFrom(query.TeamId);
 
             return new HandleResult<IEnumerable<PlayerDto>> {
                 Data = players.Select(p => new PlayerDto {

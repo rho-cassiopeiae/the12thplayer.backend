@@ -16,16 +16,16 @@ namespace Livescore.Application.Livescore.Fixture.Queries.GetFixtureForTeam {
     public class GetFixtureForTeamQueryHandler : IRequestHandler<
         GetFixtureForTeamQuery, HandleResult<FixtureFullDto>
     > {
-        private readonly ILivescoreQueryable _livescoreQueryable;
+        private readonly IFixtureQueryable _fixtureQueryable;
 
-        public GetFixtureForTeamQueryHandler(ILivescoreQueryable livescoreQueryable) {
-            _livescoreQueryable = livescoreQueryable;
+        public GetFixtureForTeamQueryHandler(IFixtureQueryable fixtureQueryable) {
+            _fixtureQueryable = fixtureQueryable;
         }
 
         public async Task<HandleResult<FixtureFullDto>> Handle(
             GetFixtureForTeamQuery query, CancellationToken cancellationToken
         ) {
-            var fixture = await _livescoreQueryable.GetFixtureForTeam(query.FixtureId, query.TeamId);
+            var fixture = await _fixtureQueryable.GetFixtureForTeam(query.FixtureId, query.TeamId);
             
             return new HandleResult<FixtureFullDto> {
                 Data = fixture

@@ -129,7 +129,8 @@ namespace Livescore.Infrastructure {
             services.AddScoped<IPlayerRatingRepository, PlayerRatingRepository>();
             services.AddScoped<IUserVoteRepository, UserVoteRepository>();
 
-            services.AddScoped<ILivescoreQueryable, LivescoreQueryable>();
+            services.AddScoped<IFixtureQueryable, FixtureQueryable>();
+            services.AddScoped<IPlayerQueryable, PlayerQueryable>();
             services.AddScoped<IPlayerRatingQueryable, PlayerRatingQueryable>();
             services.AddScoped<IUserVoteQueryable, UserVoteQueryable>();
 

@@ -20,16 +20,16 @@ namespace Livescore.Application.Livescore.Fixture.Queries.GetFixturesForTeamInBe
     public class GetFixturesForTeamInBetweenQueryHandler : IRequestHandler<
         GetFixturesForTeamInBetweenQuery, HandleResult<IEnumerable<FixtureSummaryDto>>
     > {
-        private readonly ILivescoreQueryable _livescoreQueryable;
+        private readonly IFixtureQueryable _fixtureQueryable;
 
-        public GetFixturesForTeamInBetweenQueryHandler(ILivescoreQueryable livescoreQueryable) {
-            _livescoreQueryable = livescoreQueryable;
+        public GetFixturesForTeamInBetweenQueryHandler(IFixtureQueryable fixtureQueryable) {
+            _fixtureQueryable = fixtureQueryable;
         }
 
         public async Task<HandleResult<IEnumerable<FixtureSummaryDto>>> Handle(
             GetFixturesForTeamInBetweenQuery query, CancellationToken cancellationToken
         ) {
-            var fixtures = await _livescoreQueryable.GetFixturesForTeamInBetween(
+            var fixtures = await _fixtureQueryable.GetFixturesForTeamInBetween(
                 query.TeamId, query.StartTime, query.EndTime
             );
 

@@ -2,12 +2,9 @@
 using System.Threading.Tasks;
 
 using Livescore.Application.Livescore.Fixture.Common.Dto;
-using Livescore.Domain.Aggregates.Player;
 
 namespace Livescore.Application.Common.Interfaces {
-    public interface ILivescoreQueryable {
-        Task<IEnumerable<Player>> GetPlayersFrom(long teamId);
-
+    public interface IFixtureQueryable {
         Task<IEnumerable<FixtureSummaryDto>> GetFixturesForTeamInBetween(
             long teamId, long startTime, long endTime
         );
