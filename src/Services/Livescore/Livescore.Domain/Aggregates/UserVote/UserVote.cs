@@ -31,6 +31,10 @@ namespace Livescore.Domain.Aggregates.UserVote {
             _fixtureParticipantKeyToRating[participantKey] = rating;
         }
 
+        public void SetPlayerRatings(IReadOnlyDictionary<string, float?> playerRatings) {
+            _fixtureParticipantKeyToRating = new Dictionary<string, float?>(playerRatings);
+        }
+
         public float? ChangePlayerRating(string participantKey, float rating) {
             float? currentRating = _fixtureParticipantKeyToRating[participantKey];
             _fixtureParticipantKeyToRating[participantKey] = rating;

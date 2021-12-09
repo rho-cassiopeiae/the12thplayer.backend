@@ -130,6 +130,8 @@ namespace Livescore.Infrastructure {
             services.AddScoped<IUserVoteRepository, UserVoteRepository>();
 
             services.AddScoped<ILivescoreQueryable, LivescoreQueryable>();
+            services.AddScoped<IPlayerRatingQueryable, PlayerRatingQueryable>();
+            services.AddScoped<IUserVoteQueryable, UserVoteQueryable>();
 
             services.AddSingleton(sp => {
                 var configuration = sp.GetRequiredService<IConfiguration>();
@@ -149,8 +151,10 @@ namespace Livescore.Infrastructure {
             services.AddScoped<IVideoReactionInMemRepository, VideoReactionInMemRepository>();
             services.AddScoped<IUserVoteInMemRepository, UserVoteInMemRepository>();
 
+            services.AddScoped<IFixtureLivescoreStatusInMemQueryable, FixtureLivescoreStatusInMemQueryable>();
             services.AddScoped<IPlayerRatingInMemQueryable, PlayerRatingInMemQueryable>();
             services.AddScoped<IVideoReactionInMemQueryable, VideoReactionInMemQueryable>();
+            services.AddScoped<IUserVoteInMemQueryable, UserVoteInMemQueryable>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);

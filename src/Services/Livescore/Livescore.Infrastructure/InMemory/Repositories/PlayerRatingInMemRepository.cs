@@ -59,8 +59,8 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                     // s:789.total-rating
                     // s:789.total-voters
 
-                    var e1NameSplit = e1.Name.ToString().Split(new[] { ':', '.' });
-                    var e2NameSplit = e2.Name.ToString().Split(new[] { ':', '.' });
+                    var e1NameSplit = e1.Name.ToString().Split(':', '.');
+                    var e2NameSplit = e2.Name.ToString().Split(':', '.');
                     var c = e1NameSplit[0].CompareTo(e2NameSplit[0]);
                     if (c != 0) {
                         return c;
