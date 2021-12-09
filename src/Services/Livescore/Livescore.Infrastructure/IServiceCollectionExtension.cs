@@ -118,6 +118,7 @@ namespace Livescore.Infrastructure {
                 )
             );
 
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICountryRepository, CountryRepository>();
             services.AddScoped<ITeamRepository, TeamRepository>();
             services.AddScoped<IVenueRepository, VenueRepository>();
@@ -125,6 +126,8 @@ namespace Livescore.Infrastructure {
             services.AddScoped<ILeagueRepository, LeagueRepository>();
             services.AddScoped<IPlayerRepository, PlayerRepository>();
             services.AddScoped<IFixtureRepository, FixtureRepository>();
+            services.AddScoped<IPlayerRatingRepository, PlayerRatingRepository>();
+            services.AddScoped<IUserVoteRepository, UserVoteRepository>();
 
             services.AddScoped<ILivescoreQueryable, LivescoreQueryable>();
 

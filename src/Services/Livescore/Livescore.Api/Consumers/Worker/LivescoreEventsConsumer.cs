@@ -11,12 +11,14 @@ using Livescore.Application.Common.Dto;
 using Livescore.Application.Livescore.Worker.Commands.ActivateFixture;
 using Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch;
 using Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive;
+using Livescore.Application.Livescore.Worker.Commands.DeactivateFixture;
 
 namespace Livescore.Api.Consumers.Worker {
     public class LivescoreEventsConsumer :
         IConsumer<FixtureActivated>,
         IConsumer<FixturePrematchUpdated>,
-        IConsumer<FixtureLiveUpdated> {
+        IConsumer<FixtureLiveUpdated>,
+        IConsumer<FixtureDeactivated> {
         private readonly ISender _mediator;
         private readonly IMapper _mapper;
 
@@ -49,6 +51,15 @@ namespace Livescore.Api.Consumers.Worker {
                 FixtureId = context.Message.FixtureId,
                 TeamId = context.Message.TeamId,
                 Fixture = _mapper.Map<FixtureDtoMsg, FixtureDto>(context.Message.Fixture)
+            };
+
+            await _mediator.Send(command);
+        }
+
+        public async Task Consume(ConsumeContext<FixtureDeactivated> context) {
+            var command = new DeactivateFixtureCommand {
+                FixtureId = context.Message.FixtureId,
+                TeamId = context.Message.TeamId
             };
 
             await _mediator.Send(command);

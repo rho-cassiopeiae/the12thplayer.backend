@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Quartz;
+
 using Worker.Application.Common.Interfaces;
 using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
 
@@ -64,13 +66,14 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
 
             await _monitorLive();
 
-            // @@TODO: Send FixtureCompleted event.
-            // Schedule finalize job.
-
+            // @@TODO: Send FixtureFinished event.
+            
             _logger.LogInformation(
-                "Fixture {FixtureId} Team {TeamId}: Full-time",
+                "Fixture {FixtureId} Team {TeamId}: Finished",
                 _fixtureId, _teamId
             );
+
+            await _scheduleFinalizeFixtureJob();
 
             return null;
         }
@@ -302,7 +305,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
             }
         }
 
-        private bool _isFixtureCompleted(FixtureDto fixture) =>
+        private bool _isFixtureFinished(FixtureDto fixture) =>
             fixture.Status == "FT" || fixture.Status == "AET" || fixture.Status == "FT_PEN";
 
         private async Task _monitorLive() {
@@ -311,8 +314,8 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                 _fixtureId, _teamId
             );
 
-            var fixtureCompleted = false;
-            while (!_isCanceled && !fixtureCompleted) {
+            var fixtureFinished = false;
+            while (!_isCanceled && !fixtureFinished) {
                 var fixture = await _footballDataProvider.GetFixtureLivescore(
                     _fixtureId,
                     _teamId,
@@ -330,10 +333,10 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                     await _fixtureLivescoreNotifier.NotifyFixtureLiveUpdated(_fixtureId, _teamId, fixture);
 
                     if (
-                        !_emulateOngoing && _isFixtureCompleted(fixture) ||
+                        !_emulateOngoing && _isFixtureFinished(fixture) ||
                         _emulateOngoing && _emulateForMin == 0
                     ) {
-                        fixtureCompleted = true;
+                        fixtureFinished = true;
                     }
                 }
 
@@ -350,6 +353,29 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                     );
                 }
             }
+        }
+
+        private Task _scheduleFinalizeFixtureJob() {
+            var trigger = TriggerBuilder.Create()
+                .ForJob("Finalize fixture")
+                .WithSimpleSchedule(
+                    scheduleBuilder => scheduleBuilder.WithRepeatCount(0)
+                )
+                .StartAt(
+                    DateTime.UtcNow.AddHours(double.Parse(
+                        _context.MergedJobDataMap.GetString("FinishedFixtureStaysActiveForHours")
+                    ))
+                )
+                .UsingJobData(new JobDataMap(
+                    (IDictionary<string, object>)
+                    new Dictionary<string, object> {
+                        ["FixtureId"] = _fixtureId.ToString(),
+                        ["TeamId"] = _teamId.ToString()
+                    }
+                ))
+                .Build();
+
+            return _context.Scheduler.ScheduleJob(trigger);
         }
     }
 }

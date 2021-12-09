@@ -85,5 +85,17 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                 incrementRatingBy
             );
         }
+
+        public void DeleteAllFor(long fixtureId, long teamId) {
+            _ensureTransaction();
+
+            var keysToDelete = new RedisKey[] {
+                $"f:{fixtureId}.t:{teamId}.video-reactions",
+                $"f:{fixtureId}.t:{teamId}.video-reaction-author-ids.by-rating",
+                $"f:{fixtureId}.t:{teamId}.video-reaction-author-ids.by-date"
+            };
+
+            _transaction.KeyDeleteAsync(keysToDelete);
+        }
     }
 }

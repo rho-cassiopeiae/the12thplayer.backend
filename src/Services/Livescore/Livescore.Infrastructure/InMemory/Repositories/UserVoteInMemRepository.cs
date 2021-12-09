@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using StackExchange.Redis;
 
@@ -62,6 +63,43 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
             return userVote;
         }
 
+        public async Task<IEnumerable<UserVote>> FindAllFor(
+            long fixtureId, long teamId,
+            List<string> fixtureParticipantKeys
+        ) {
+            var fixtureIdentifier = $"f:{fixtureId}.t:{teamId}";
+
+            var db = _redis.GetDatabase();
+
+            var tasks = fixtureParticipantKeys.Select(
+                participantKey => db.HashGetAllAsync($"{fixtureIdentifier}.{participantKey}.user-votes")
+            );
+
+            HashEntry[][] results = await Task.WhenAll(tasks);
+
+            var userVotes = new List<UserVote>();
+
+            for (int i = 0; i < fixtureParticipantKeys.Count; ++i) {
+                var participantKey = fixtureParticipantKeys[i];
+                var entries = results[i];
+                foreach (var entry in entries) {
+                    var userId = long.Parse(entry.Name.ToString().Split(':')[1]);
+                    var userVote = userVotes.FirstOrDefault(uv => uv.UserId == userId);
+                    if (userVote == null) {
+                        userVote = new UserVote(
+                            userId: userId,
+                            fixtureId: fixtureId,
+                            teamId: teamId
+                        );
+                        userVotes.Add(userVote);
+                    }
+                    userVote.AddPlayerRating(participantKey, (float?) entry.Value);
+                }
+            }
+
+            return userVotes;
+        }
+
         public async Task<UserVote> FindOneForVideoReaction(
             long userId, long fixtureId, long teamId, long authorId
         ) {
@@ -115,6 +153,19 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
             } else {
                 _transaction.HashDeleteAsync(hashKey, hashField);
             }
+        }
+
+        public void DeleteAllFor(
+            long fixtureId, long teamId,
+            List<string> fixtureParticipantKeys
+        ) {
+            _ensureTransaction();
+
+            var keysToDelete = fixtureParticipantKeys.Select(
+                participantKey => (RedisKey) $"f:{fixtureId}.t:{teamId}.{participantKey}.user-votes"
+            );
+
+            _transaction.KeyDeleteAsync(keysToDelete.ToArray());
         }
     }
 }

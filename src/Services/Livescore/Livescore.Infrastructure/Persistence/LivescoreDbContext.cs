@@ -8,6 +8,8 @@ using Livescore.Domain.Aggregates.League;
 using Livescore.Domain.Aggregates.Player;
 using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Application.Livescore.Fixture.Common.Dto;
+using Livescore.Domain.Aggregates.PlayerRating;
+using Livescore.Domain.Aggregates.UserVote;
 
 namespace Livescore.Infrastructure.Persistence {
     public class LivescoreDbContext : DbContext {
@@ -18,6 +20,8 @@ namespace Livescore.Infrastructure.Persistence {
         public DbSet<League> Leagues { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<Fixture> Fixtures { get; set; }
+        public DbSet<PlayerRating> PlayerRatings { get; set; }
+        public DbSet<UserVote> UserVotes { get; set; }
 
         public DbSet<FixtureSummaryDto> FixtureSummaries { get; set; }
         public DbSet<FixtureFullDto> FixtureFullViews { get; set; }
@@ -190,6 +194,36 @@ namespace Livescore.Infrastructure.Persistence {
                 builder.Property(f => f.Events).HasColumnType("jsonb");
                 builder.Property(f => f.Stats).HasColumnType("jsonb");
                 builder.ToView(nameof(FixtureFullViews));
+            });
+
+            modelBuilder.Entity<PlayerRating>(builder => {
+                builder.HasKey(pr => new { pr.FixtureId, pr.TeamId, pr.ParticipantKey });
+                builder.Property(pr => pr.TotalRating).IsRequired();
+                builder.Property(pr => pr.TotalVoters).IsRequired();
+                builder
+                    .HasOne<Fixture>()
+                    .WithMany()
+                    .HasForeignKey(pr => new { pr.FixtureId, pr.TeamId })
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity<UserVote>(builder => {
+                builder.HasKey(uv => new { uv.UserId, uv.FixtureId, uv.TeamId });
+                builder
+                    .Property(uv => uv.FixtureParticipantKeyToRating)
+                    .HasColumnType("jsonb")
+                    .IsRequired(false)
+                    .UsePropertyAccessMode(PropertyAccessMode.Field);
+                builder
+                    .Property(uv => uv.LiveCommentaryAuthorIdToVote)
+                    .HasColumnType("jsonb")
+                    .IsRequired(false)
+                    .UsePropertyAccessMode(PropertyAccessMode.Field);
+                builder
+                    .Property(uv => uv.VideoReactionAuthorIdToVote)
+                    .HasColumnType("jsonb")
+                    .IsRequired(false)
+                    .UsePropertyAccessMode(PropertyAccessMode.Field);
             });
         }
     }

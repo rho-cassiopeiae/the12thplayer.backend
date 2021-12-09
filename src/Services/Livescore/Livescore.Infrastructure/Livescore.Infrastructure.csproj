@@ -8,12 +8,20 @@
     <None Remove="Persistence\Migrations\Livescore\Scripts\Functions\GetFixtureForTeam\GetFixtureForTeam.v0.sql" />
     <None Remove="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v0.sql" />
     <None Remove="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v1.sql" />
+    <None Remove="Persistence\Migrations\Livescore\Scripts\StoredProcedures\InsertOrIgnorePlayerRatingMulti\InsertOrIgnorePlayerRatingMulti.v0.sql" />
+    <None Remove="Persistence\Migrations\Livescore\Scripts\StoredProcedures\InsertOrIgnorePlayerRatingMulti\InsertOrIgnorePlayerRatingMulti.v1.sql" />
+    <None Remove="Persistence\Migrations\Livescore\Scripts\StoredProcedures\InsertOrIgnoreUserVoteMulti\InsertOrIgnoreUserVoteMulti.v0.sql" />
+    <None Remove="Persistence\Migrations\Livescore\Scripts\StoredProcedures\InsertOrIgnoreUserVoteMulti\InsertOrIgnoreUserVoteMulti.v1.sql" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\Functions\GetFixtureForTeam\GetFixtureForTeam.v0.sql" />
     <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v0.sql" />
     <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\Functions\GetFixturesForTeamInBetween\GetFixturesForTeamInBetween.v1.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\StoredProcedures\InsertOrIgnorePlayerRatingMulti\InsertOrIgnorePlayerRatingMulti.v0.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\StoredProcedures\InsertOrIgnorePlayerRatingMulti\InsertOrIgnorePlayerRatingMulti.v1.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\StoredProcedures\InsertOrIgnoreUserVoteMulti\InsertOrIgnoreUserVoteMulti.v0.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\Livescore\Scripts\StoredProcedures\InsertOrIgnoreUserVoteMulti\InsertOrIgnoreUserVoteMulti.v1.sql" />
   </ItemGroup>
 
   <ItemGroup>

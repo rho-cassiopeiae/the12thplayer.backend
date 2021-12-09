@@ -49,5 +49,13 @@ namespace Worker.Infrastructure.Livescore {
                 Fixture = _mapper.Map<FixtureDto, FixtureDtoMsg>(fixture)
             });
         }
+
+        public async Task NotifyFixtureDeactivated(long fixtureId, long teamId) {
+            await _bus.Publish(new FixtureDeactivated {
+                CorrelationId = Guid.NewGuid(),
+                FixtureId = fixtureId,
+                TeamId = teamId
+            });
+        }
     }
 }

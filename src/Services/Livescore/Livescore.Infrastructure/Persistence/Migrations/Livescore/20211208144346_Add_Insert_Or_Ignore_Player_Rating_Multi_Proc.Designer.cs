@@ -6,15 +6,17 @@ using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
 {
     [DbContext(typeof(LivescoreDbContext))]
-    partial class LivescoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211208144346_Add_Insert_Or_Ignore_Player_Rating_Multi_Proc")]
+    partial class Add_Insert_Or_Ignore_Player_Rating_Multi_Proc
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -375,31 +377,6 @@ namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
                     b.HasIndex("CountryId");
 
                     b.ToTable("Teams");
-                });
-
-            modelBuilder.Entity("Livescore.Domain.Aggregates.UserVote.UserVote", b =>
-                {
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("FixtureId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TeamId")
-                        .HasColumnType("bigint");
-
-                    b.Property<IReadOnlyDictionary<string, Nullable<float>>>("FixtureParticipantKeyToRating")
-                        .HasColumnType("jsonb");
-
-                    b.Property<IReadOnlyDictionary<string, Nullable<short>>>("LiveCommentaryAuthorIdToVote")
-                        .HasColumnType("jsonb");
-
-                    b.Property<IReadOnlyDictionary<string, Nullable<short>>>("VideoReactionAuthorIdToVote")
-                        .HasColumnType("jsonb");
-
-                    b.HasKey("UserId", "FixtureId", "TeamId");
-
-                    b.ToTable("UserVotes");
                 });
 
             modelBuilder.Entity("Livescore.Domain.Aggregates.Venue.Venue", b =>
