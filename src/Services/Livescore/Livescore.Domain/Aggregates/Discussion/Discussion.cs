@@ -24,6 +24,12 @@ namespace Livescore.Domain.Aggregates.Discussion {
             Active = active;
         }
 
+        public Discussion(long fixtureId, long teamId, Guid id) {
+            FixtureId = fixtureId;
+            TeamId = teamId;
+            Id = id;
+        }
+
         public void AddEntry(DiscussionEntry entry) {
             _entries.Add(entry);
         }

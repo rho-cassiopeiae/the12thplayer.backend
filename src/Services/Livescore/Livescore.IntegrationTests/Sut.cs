@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -10,10 +12,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using Respawn;
 using MediatR;
 using StackExchange.Redis;
+using Xunit.Abstractions;
 
 using Livescore.Api;
 using Livescore.Infrastructure.Persistence;
@@ -22,20 +27,30 @@ using Livescore.Application.Common.Dto;
 using Livescore.Application.Seed.Commands.AddTeamDetails;
 using Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures;
 using Livescore.Application.Common.Interfaces;
+using Livescore.Api.Services.FixtureDiscussionBroadcaster;
+using Livescore.IntegrationTests.Livescore.Discussion.HostedServices;
 
 namespace Livescore.IntegrationTests {
-    public class Sut {
+    public class Sut : IDisposable {
         private readonly IHost _host;
         private readonly IHostEnvironment _hostEnvironment;
         private readonly Checkpoint _checkpoint;
 
         private ClaimsPrincipal _user;
 
-        public Sut() {
+        public Sut(IMessageSink sink) {
             _host = Program
                 .CreateHostBuilder(args: null)
                 .ConfigureAppConfiguration((hostContext, builder) => {
                     builder.AddJsonFile("appsettings.Testing.json", optional: false);
+                })
+                .ConfigureLogging((hostContext, builder) => {
+                    builder.Services.TryAddEnumerable(
+                        ServiceDescriptor.Singleton<ILoggerProvider>(new XunitLoggerProvider(sink))
+                    );
+                })
+                .ConfigureServices(services => {
+                    services.AddSingleton<IFixtureDiscussionBroadcaster, FixtureDiscussionBroadcasterMock>();
                 })
                 .Build();
 
@@ -52,6 +67,37 @@ namespace Livescore.IntegrationTests {
             };
 
             _applyMigrations();
+        }
+
+        public void Dispose() => ResetState();
+
+        public async Task<TResult> ExecWithService<TService, TResult>(
+            Func<TService, Task<TResult>> func
+        ) {
+            using var scope = _host.Services.CreateScope();
+
+            var service = scope.ServiceProvider.GetRequiredService<TService>();
+            var result = await func(service);
+
+            return result;
+        }
+
+        public void StartHostedService<T>() where T : IHostedService {
+            _host.Services
+                .GetServices<IHostedService>()
+                .OfType<T>()
+                .First()
+                .StartAsync(CancellationToken.None)
+                .Wait();
+        }
+
+        public void StopHostedService<T>() where T : IHostedService {
+            _host.Services
+                .GetServices<IHostedService>()
+                .OfType<T>()
+                .First()
+                .StopAsync(CancellationToken.None)
+                .Wait();
         }
 
         private void _applyMigrations() {

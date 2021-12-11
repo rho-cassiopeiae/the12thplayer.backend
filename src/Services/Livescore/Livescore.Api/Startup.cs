@@ -1,12 +1,15 @@
-using Livescore.Api.Consumers.Worker;
-using Livescore.Application;
-using Livescore.Infrastructure;
-
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+using Livescore.Api.Consumers.Worker;
+using Livescore.Api.HostedServices;
+using Livescore.Application;
+using Livescore.Infrastructure;
+using Livescore.Api.Services.FixtureDiscussionBroadcaster;
 
 namespace Livescore.Api {
     public class Startup {
@@ -28,6 +31,10 @@ namespace Livescore.Api {
             );
 
             services.AddControllers();
+
+            services.TryAddSingleton<IFixtureDiscussionBroadcaster, FixtureDiscussionBroadcaster>();
+
+            services.AddHostedService<FixtureDiscussionUpdatesDispatcher>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {

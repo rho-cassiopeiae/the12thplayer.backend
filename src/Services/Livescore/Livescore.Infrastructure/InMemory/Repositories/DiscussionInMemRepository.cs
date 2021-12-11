@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+using Microsoft.Extensions.Configuration;
+
 using StackExchange.Redis;
 
 using Livescore.Domain.Aggregates.Discussion;
@@ -12,10 +14,16 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
     public class DiscussionInMemRepository : IDiscussionInMemRepository {
         private readonly ConnectionMultiplexer _redis;
 
+        private readonly int _postingIntervalSec;
+
         private IInMemUnitOfWork _unitOfWork;
         private ITransaction _transaction;
 
-        public DiscussionInMemRepository(ConnectionMultiplexer redis) {
+        public DiscussionInMemRepository(
+            IConfiguration configuration,
+            ConnectionMultiplexer redis
+        ) {
+            _postingIntervalSec = configuration.GetValue<int>("Discussion:PostingIntervalSec");
             _redis = redis;
         }
 
@@ -58,14 +66,7 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                     // d:E9FA698A-7060-4AF1-A57F-D2657B45C78B.Active
                     // d:E9FA698A-7060-4AF1-A57F-D2657B45C78B.Name
 
-                    var e1NameSplit = e1.Name.ToString().Split('.');
-                    var e2NameSplit = e2.Name.ToString().Split('.');
-                    var c = e1NameSplit[0].CompareTo(e2NameSplit[0]);
-                    if (c != 0) {
-                        return c;
-                    }
-
-                    return e1NameSplit[1].CompareTo(e2NameSplit[1]);
+                    return e1.Name.CompareTo(e2.Name);
                 }
             );
 
@@ -85,7 +86,18 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
 
             return discussions;
         }
-        
+
+        public void WatchStillActive(Discussion discussion) {
+            _ensureTransaction();
+
+            _transaction.AddCondition(Condition.HashEqual(
+                $"f:{discussion.FixtureId}.t:{discussion.TeamId}.discussions",
+                $"d:{discussion.Id}.{nameof(Discussion.Active)}",
+                1
+            ));
+        }
+
+
         public void Create(Discussion discussion) {
             _ensureTransaction();
 
@@ -94,8 +106,8 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
             _transaction.HashSetAsync(
                 $"{fixtureIdentifier}.discussions",
                 new[] {
-                    new HashEntry($"d:{discussion.Id}.{nameof(discussion.Name)}", discussion.Name),
-                    new HashEntry($"d:{discussion.Id}.{nameof(discussion.Active)}", discussion.Active ? 1 : 0)
+                    new HashEntry($"d:{discussion.Id}.{nameof(Discussion.Name)}", discussion.Name),
+                    new HashEntry($"d:{discussion.Id}.{nameof(Discussion.Active)}", discussion.Active ? 1 : 0)
                 }
             );
 
@@ -103,8 +115,8 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                 _transaction.StreamAddAsync(
                     $"{fixtureIdentifier}.d:{discussion.Id}",
                     new[] {
-                        new NameValueEntry(nameof(entry.Username), entry.Username),
-                        new NameValueEntry(nameof(entry.Body), entry.Body)
+                        new NameValueEntry(nameof(DiscussionEntry.Username), entry.Username),
+                        new NameValueEntry(nameof(DiscussionEntry.Body), entry.Body)
                     },
                     messageId: entry.Id
                 );
@@ -139,6 +151,38 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                     new NameValueEntry("command", "unsub")
                 }
             );
+        }
+
+        public void PostEntries(Discussion discussion) {
+            _ensureTransaction();
+
+            var fixtureIdentifier = $"f:{discussion.FixtureId}.t:{discussion.TeamId}";
+
+            var first = true;
+            foreach (var entry in discussion.Entries) {
+                // @@NOTE: We only ever invoke this method with entries from /one/ user, so we need to add a single condition.
+                if (first && _postingIntervalSec > 0) {
+                    _transaction.AddCondition(
+                        Condition.KeyNotExists($"{fixtureIdentifier}.dea:{entry.UserId}")
+                    );
+                    _transaction.StringSetAsync(
+                        $"{fixtureIdentifier}.dea:{entry.UserId}",
+                        1,
+                        TimeSpan.FromSeconds(_postingIntervalSec)
+                    );
+
+                    first = false;
+                }
+
+                _transaction.StreamAddAsync(
+                    $"{fixtureIdentifier}.d:{discussion.Id}",
+                    new[] {
+                        new NameValueEntry(nameof(DiscussionEntry.Username), entry.Username),
+                        new NameValueEntry(nameof(DiscussionEntry.Body), entry.Body)
+                    },
+                    messageId: entry.Id
+                );
+            }
         }
     }
 }

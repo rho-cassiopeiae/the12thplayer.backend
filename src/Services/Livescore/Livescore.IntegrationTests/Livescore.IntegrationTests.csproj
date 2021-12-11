@@ -13,6 +13,7 @@
     <None Remove="DummyData\seasons.json" />
     <None Remove="DummyData\team-details.json" />
     <None Remove="DummyData\upcoming-fixtures.json" />
+    <None Remove="xunit.runner.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="DummyData\upcoming-fixtures.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

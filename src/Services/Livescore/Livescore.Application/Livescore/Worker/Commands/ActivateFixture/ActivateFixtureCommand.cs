@@ -8,6 +8,7 @@ using Livescore.Application.Common.Results;
 using Livescore.Domain.Aggregates.FixtureLivescoreStatus;
 using Livescore.Domain.Aggregates.Discussion;
 using Livescore.Domain.Base;
+using DiscussionDm = Livescore.Domain.Aggregates.Discussion.Discussion;
 
 namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
     public class ActivateFixtureCommand : IRequest<VoidResult> {
@@ -50,7 +51,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
 
             _discussionInMemRepository.EnlistAsPartOf(_unitOfWork);
 
-            var prematchDiscussion = new Discussion(
+            var prematchDiscussion = new DiscussionDm(
                 fixtureId: command.FixtureId,
                 teamId: command.TeamId,
                 id: Guid.NewGuid(),
@@ -59,6 +60,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
             );
             prematchDiscussion.AddEntry(new DiscussionEntry(
                 id: "0-1",
+                userId: 1,
                 username: "The12thPlayer",
                 body:
                     $"Welcome to the {prematchDiscussion.Name} discussion room. Please keep it civil. " +
@@ -66,7 +68,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
                     "You can post once every 30 seconds. Thank you."
             ));
 
-            var matchDiscussion = new Discussion(
+            var matchDiscussion = new DiscussionDm(
                 fixtureId: command.FixtureId,
                 teamId: command.TeamId,
                 id: Guid.NewGuid(),
@@ -75,6 +77,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
             );
             matchDiscussion.AddEntry(new DiscussionEntry(
                 id: "0-1",
+                userId: 1,
                 username: "The12thPlayer",
                 body:
                     $"Welcome to the {matchDiscussion.Name} discussion room. Please keep it civil. " +
@@ -82,7 +85,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
                     "You can post once every 30 seconds. Thank you."
             ));
 
-            var postmatchDiscussion = new Discussion(
+            var postmatchDiscussion = new DiscussionDm(
                 fixtureId: command.FixtureId,
                 teamId: command.TeamId,
                 id: Guid.NewGuid(),
@@ -91,6 +94,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
             );
             postmatchDiscussion.AddEntry(new DiscussionEntry(
                 id: "0-1",
+                userId: 1,
                 username: "The12thPlayer",
                 body:
                     $"Welcome to the {postmatchDiscussion.Name} discussion room. Please keep it civil. " +

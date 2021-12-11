@@ -13,6 +13,7 @@ using MassTransit;
 using MassTransit.Definition;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
 using StackExchange.Redis;
+using ServiceStack.Redis;
 
 using MessageBus.Components.HostedServices;
 
@@ -37,6 +38,7 @@ using Livescore.Infrastructure.InMemory.Queryables;
 using Livescore.Domain.Aggregates.UserVote;
 using Livescore.Domain.Aggregates.VideoReaction;
 using Livescore.Infrastructure.Identity;
+using Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener;
 
 namespace Livescore.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -156,6 +158,17 @@ namespace Livescore.Infrastructure {
             services.AddScoped<IPlayerRatingInMemQueryable, PlayerRatingInMemQueryable>();
             services.AddScoped<IVideoReactionInMemQueryable, VideoReactionInMemQueryable>();
             services.AddScoped<IUserVoteInMemQueryable, UserVoteInMemQueryable>();
+            services.AddScoped<IDiscussionInMemQueryable, DiscussionInMemQueryable>();
+
+            services.AddSingleton<IRedisClientsManager>(sp => {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                var host = configuration["Redis:Host"];
+                var port = configuration["Redis:Port"];
+
+                return new BasicRedisClientManager($"{host}:{port}");
+            });
+
+            services.AddSingleton<IFixtureDiscussionListener, FixtureDiscussionListener>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
