@@ -63,6 +63,7 @@ namespace Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener 
                             foreach (var entry in stream.Entries) {
                                 discussionEntries.Add(new DiscussionEntryDto {
                                     Id = entry.Id,
+                                    UserId = long.Parse(entry.NamedValues.First(nv => nv.Key == nameof(DiscussionEntry.UserId)).Value),
                                     Username = entry.NamedValues.First(nv => nv.Key == nameof(DiscussionEntry.Username)).Value,
                                     Body = entry.NamedValues.First(nv => nv.Key == nameof(DiscussionEntry.Body)).Value
                                 });

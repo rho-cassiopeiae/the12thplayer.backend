@@ -1,40 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 
 using Xunit;
 using FluentAssertions;
 
-using Livescore.Api.Services.FixtureDiscussionBroadcaster;
 using Livescore.Application.Livescore.Discussion.Commands.PostDiscussionEntry;
 using Livescore.Application.Livescore.Discussion.Queries.GetDiscussionsForFixture;
+using Livescore.Application.Livescore.Discussion.Queries.GetMoreDiscussionEntries;
 using Livescore.Application.Livescore.Worker.Commands.ActivateFixture;
-using Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener;
-using Livescore.IntegrationTests.Livescore.Discussion.Mocks;
-using Livescore.Api.HostedServices;
 
-namespace Livescore.IntegrationTests.Livescore.Discussion.HostedServices {
+namespace Livescore.IntegrationTests.Livescore.Discussion.Queries {
     [Collection(nameof(LivescoreTestCollection))]
-    public class Fixture_Discussion_Updates_Dispatcher_Tests : IDisposable {
+    public class Get_More_Discussion_Entries_Query_Tests {
         private readonly Sut _sut;
 
         private readonly long _fixtureId;
         private readonly long _teamId;
         private readonly string _discussionId;
 
-        public Fixture_Discussion_Updates_Dispatcher_Tests(Sut sut) {
+        public Get_More_Discussion_Entries_Query_Tests(Sut sut) {
             _sut = sut;
             _sut.ResetState();
-
-            _sut.StartHostedService<FixtureDiscussionUpdatesDispatcher>();
-
-            _sut.ExecWithService<IFixtureDiscussionBroadcaster, object>(
-                fixtureDiscussionBroadcaster => {
-                    ((FixtureDiscussionBroadcasterMock) fixtureDiscussionBroadcaster).Reset();
-                    return Task.FromResult((object) null);
-                })
-                .Wait();
 
             (_fixtureId, _teamId) = _sut.SeedWithDummyUpcomingFixture();
 
@@ -56,12 +42,8 @@ namespace Livescore.IntegrationTests.Livescore.Discussion.HostedServices {
             _discussionId = result.Data.First().Id;
         }
 
-        public void Dispose() {
-            _sut.StopHostedService<FixtureDiscussionUpdatesDispatcher>();
-        }
-
         [Fact]
-        public async Task Should_Detect_Retrieve_And_Broadcast_New_Discussion_Entries() {
+        public async Task Should_Retrieve_Yet_Unretrieved_Discussion_Entries() {
             _sut.RunAs(userId: 2, username: "user-2");
 
             await _sut.SendRequest(new PostDiscussionEntryCommand {
@@ -85,20 +67,17 @@ namespace Livescore.IntegrationTests.Livescore.Discussion.HostedServices {
                 Body = "body-3"
             });
 
-            await Task.Delay(TimeSpan.FromMilliseconds(200));
+            var result = await _sut.SendRequest(new GetMoreDiscussionEntriesQuery {
+                FixtureId = _fixtureId,
+                TeamId = _teamId,
+                DiscussionId = _discussionId,
+                LastReceivedEntryId = null
+            });
 
-            var updates = await _sut.ExecWithService<IFixtureDiscussionBroadcaster, IReadOnlyList<FixtureDiscussionUpdateDto>>(
-                fixtureDiscussionBroadcaster => {
-                    var fixtureDiscussionBroadcasterMock = (FixtureDiscussionBroadcasterMock) fixtureDiscussionBroadcaster;
-                    return Task.FromResult(fixtureDiscussionBroadcasterMock.Updates);
-                }
-            );
+            var entries = result.Data;
 
-            var discussionEntries = updates
-                .Where(update => update.FixtureId == _fixtureId && update.TeamId == _teamId)
-                .SelectMany(update => update.Entries);
-
-            discussionEntries.Should().HaveCount(3);
+            entries.Should().HaveCount(4);
+            entries.First().Should().BeOfType<DiscussionEntryDto>().Which.Body.Should().Be("body-3");
         }
     }
 }

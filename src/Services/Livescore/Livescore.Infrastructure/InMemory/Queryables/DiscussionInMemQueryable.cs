@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Configuration;
 
 using StackExchange.Redis;
 
@@ -11,8 +14,14 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
     public class DiscussionInMemQueryable : IDiscussionInMemQueryable {
         private readonly ConnectionMultiplexer _redis;
 
-        public DiscussionInMemQueryable(ConnectionMultiplexer redis) {
+        private readonly int _getEntriesCount;
+
+        public DiscussionInMemQueryable(
+            IConfiguration configuration,
+            ConnectionMultiplexer redis
+        ) {
             _redis = redis;
+            _getEntriesCount = configuration.GetValue<int>("Discussion:GetEntriesCount") + 1;
         }
 
         public async Task<IEnumerable<Discussion>> GetAllFor(long fixtureId, long teamId) {
@@ -47,6 +56,25 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
             }
 
             return discussions;
+        }
+
+        public async Task<IEnumerable<DiscussionEntry>> GetEntriesFor(
+            long fixtureId, long teamId, Guid discussionId, string startFromEntryId
+        ) {
+            var entries = await _redis.GetDatabase().StreamRangeAsync(
+                $"f:{fixtureId}.t:{teamId}.d:{discussionId}",
+                "-",
+                startFromEntryId ?? "+",
+                _getEntriesCount,
+                Order.Descending
+            );
+
+            return entries.Select(e => new DiscussionEntry(
+                id: e.Id,
+                userId: (long) e.Values.First(nv => nv.Name == nameof(DiscussionEntry.UserId)).Value,
+                username: e.Values.First(nv => nv.Name == nameof(DiscussionEntry.Username)).Value,
+                body: e.Values.First(nv => nv.Name == nameof(DiscussionEntry.Body)).Value
+            ));
         }
     }
 }

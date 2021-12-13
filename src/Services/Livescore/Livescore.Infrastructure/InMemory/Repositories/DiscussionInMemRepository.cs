@@ -115,6 +115,7 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                 _transaction.StreamAddAsync(
                     $"{fixtureIdentifier}.d:{discussion.Id}",
                     new[] {
+                        new NameValueEntry(nameof(DiscussionEntry.UserId), entry.UserId),
                         new NameValueEntry(nameof(DiscussionEntry.Username), entry.Username),
                         new NameValueEntry(nameof(DiscussionEntry.Body), entry.Body)
                     },
@@ -177,6 +178,7 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                 _transaction.StreamAddAsync(
                     $"{fixtureIdentifier}.d:{discussion.Id}",
                     new[] {
+                        new NameValueEntry(nameof(DiscussionEntry.UserId), entry.UserId),
                         new NameValueEntry(nameof(DiscussionEntry.Username), entry.Username),
                         new NameValueEntry(nameof(DiscussionEntry.Body), entry.Body)
                     },
