@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 using Xunit;
-using Xunit.Abstractions;
 using FluentAssertions;
 
 using Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReaction;
@@ -12,16 +11,13 @@ using Livescore.Application.Livescore.Worker.Commands.ActivateFixture;
 namespace Livescore.IntegrationTests.Livescore.VideoReaction.Commands {
     [Collection(nameof(LivescoreTestCollection))]
     public class Vote_For_Video_Reaction_Command_Tests {
-        private readonly ITestOutputHelper _output;
         private readonly Sut _sut;
 
         private readonly long _fixtureId;
         private readonly long _teamId;
         private readonly long _authorId;
 
-        public Vote_For_Video_Reaction_Command_Tests(ITestOutputHelper output, Sut sut) {
-            _output = output;
-
+        public Vote_For_Video_Reaction_Command_Tests(Sut sut) {
             _sut = sut;
             _sut.ResetState();
 

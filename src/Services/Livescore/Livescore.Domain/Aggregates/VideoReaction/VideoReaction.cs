@@ -26,5 +26,28 @@ namespace Livescore.Domain.Aggregates.VideoReaction {
             PostedAt = postedAt;
             Rating = rating;
         }
+
+        public VideoReaction(long fixtureId, long teamId, long authorId, int rating) {
+            FixtureId = fixtureId;
+            TeamId = teamId;
+            AuthorId = authorId;
+            Rating = rating;
+        }
+
+        public void SetTitle(string title) {
+            Title = title;
+        }
+
+        public void SetAuthorUsername(string authorUsername) {
+            AuthorUsername = authorUsername;
+        }
+
+        public void SetVideoId(string videoId) {
+            VideoId = videoId;
+        }
+
+        public void SetThumbnail(string thumbnailUrl) {
+            ThumbnailUrl = thumbnailUrl;
+        }
     }
 }

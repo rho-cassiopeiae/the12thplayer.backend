@@ -69,6 +69,8 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
             long userId = _principalDataProvider.GetId(_authenticationContext.User);
             var username = _principalDataProvider.GetUsername(_authenticationContext.User);
 
+            long postedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
             bool active = await _fixtureLivescoreStatusInMemRepository.FindOutIfActive(
                 command.FixtureId, command.TeamId
             );
@@ -186,7 +188,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
                 title: formValues["title"],
                 videoId: videoId,
                 thumbnailUrl: thumbnailUrl,
-                postedAt: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                postedAt: postedAt,
                 rating: 1
             );
 

@@ -63,7 +63,6 @@ namespace Livescore.IntegrationTests {
                     );
                 })
                 .ConfigureServices(services => {
-                    services.AddSingleton<IRandomFileNameProvider, RandomFileNameProviderMock>();
                     services.AddScoped<IFileHosting, FileHostingMock>();
                     services.AddSingleton<IFixtureDiscussionBroadcaster, FixtureDiscussionBroadcasterMock>();
                 })

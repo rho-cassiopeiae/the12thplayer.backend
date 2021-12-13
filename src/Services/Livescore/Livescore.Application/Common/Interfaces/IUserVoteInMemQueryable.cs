@@ -9,5 +9,10 @@ namespace Livescore.Application.Common.Interfaces {
             long userId, long fixtureId, long teamId,
             List<string> fixtureParticipantKeys
         );
+
+        Task<UserVote> GetVideoReactionVotesFor(
+            long userId, long fixtureId, long teamId,
+            List<long> authorIds
+        );
     }
 }

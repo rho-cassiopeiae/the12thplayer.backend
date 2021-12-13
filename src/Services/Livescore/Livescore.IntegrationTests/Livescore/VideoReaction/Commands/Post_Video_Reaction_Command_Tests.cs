@@ -52,14 +52,14 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Commands {
                 ThumbnailUrl = FileHostingMock.ThumbnailUrl
             });
 
-            var filePath = Path.Combine(
+            var dirPath = Path.Combine(
                 _sut.GetConfigurationValue<string>("UserFiles:Path"),
-                $"video-reactions/f-{_fixtureId}-t-{_teamId}",
-                RandomFileNameProviderMock.Name + ".mp4"
+                $"video-reactions/f-{_fixtureId}-t-{_teamId}"
             );
+            var dirInfo = new DirectoryInfo(dirPath);
 
-            var fileInfo = new FileInfo(filePath);
-            fileInfo.Exists.Should().BeTrue();
+            dirInfo.Exists.Should().BeTrue();
+            dirInfo.GetFileSystemInfos("*.mp4").Should().HaveCount(1);
         }
     }
 }
