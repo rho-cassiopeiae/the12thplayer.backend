@@ -59,4 +59,10 @@
     <ProjectReference Include="..\Livescore.Api\Livescore.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DummyData\test-video.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

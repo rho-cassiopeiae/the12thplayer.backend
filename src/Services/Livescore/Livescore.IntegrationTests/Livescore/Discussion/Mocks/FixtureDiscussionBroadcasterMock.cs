@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Livescore.Api.Services.FixtureDiscussionBroadcaster;
 using Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener;
 
-namespace Livescore.IntegrationTests.Livescore.Discussion.HostedServices {
+namespace Livescore.IntegrationTests.Livescore.Discussion.Mocks {
     public class FixtureDiscussionBroadcasterMock : IFixtureDiscussionBroadcaster {
         private List<FixtureDiscussionUpdateDto> _updates = new();
         public IReadOnlyList<FixtureDiscussionUpdateDto> Updates => _updates;

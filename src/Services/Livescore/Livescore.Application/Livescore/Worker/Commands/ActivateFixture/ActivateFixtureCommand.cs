@@ -8,12 +8,14 @@ using Livescore.Application.Common.Results;
 using Livescore.Domain.Aggregates.FixtureLivescoreStatus;
 using Livescore.Domain.Aggregates.Discussion;
 using Livescore.Domain.Base;
+using Livescore.Domain.Aggregates.VideoReaction;
 using DiscussionDm = Livescore.Domain.Aggregates.Discussion.Discussion;
 
 namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
     public class ActivateFixtureCommand : IRequest<VoidResult> {
         public long FixtureId { get; init; }
         public long TeamId { get; init; }
+        public string VimeoProjectId { get; init; }
     }
 
     public class ActivateFixtureCommandHandler : IRequestHandler<
@@ -22,15 +24,18 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
         private readonly IInMemUnitOfWork _unitOfWork;
         private readonly IFixtureLivescoreStatusInMemRepository _fixtureLivescoreStatusInMemRepository;
         private readonly IDiscussionInMemRepository _discussionInMemRepository;
+        private readonly IVideoReactionInMemRepository _videoReactionInMemRepository;
 
         public ActivateFixtureCommandHandler(
             IInMemUnitOfWork unitOfWork,
             IFixtureLivescoreStatusInMemRepository fixtureLivescoreStatusInMemRepository,
-            IDiscussionInMemRepository discussionInMemRepository
+            IDiscussionInMemRepository discussionInMemRepository,
+            IVideoReactionInMemRepository videoReactionInMemRepository
         ) {
             _unitOfWork = unitOfWork;
             _fixtureLivescoreStatusInMemRepository = fixtureLivescoreStatusInMemRepository;
             _discussionInMemRepository = discussionInMemRepository;
+            _videoReactionInMemRepository = videoReactionInMemRepository;
         }
 
         public async Task<VoidResult> Handle(
@@ -105,6 +110,11 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
             _discussionInMemRepository.Create(prematchDiscussion);
             _discussionInMemRepository.Create(matchDiscussion);
             _discussionInMemRepository.Create(postmatchDiscussion);
+
+            _videoReactionInMemRepository.EnlistAsPartOf(_unitOfWork);
+            _videoReactionInMemRepository.SetVimeoProjectIdFor(
+                command.FixtureId, command.TeamId, command.VimeoProjectId
+            );
 
             await _unitOfWork.Commit();
 

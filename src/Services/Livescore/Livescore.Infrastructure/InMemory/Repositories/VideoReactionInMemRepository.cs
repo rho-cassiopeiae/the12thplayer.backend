@@ -43,15 +43,34 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
             }
         }
 
+        public void SetVimeoProjectIdFor(long fixtureId, long teamId, string vimeoProjectId) {
+            _ensureTransaction();
+
+            _transaction.StringSetAsync(
+                $"f:{fixtureId}.t:{teamId}.video-reactions-vimeo-project-id",
+                vimeoProjectId
+            );
+        }
+
+        public Task<bool> TryReserveSlotFor__immediate(long fixtureId, long teamId, long userId) {
+            return _redis.GetDatabase().SetAddAsync(
+                $"f:{fixtureId}.t:{teamId}.video-reaction-author-ids",
+                userId
+            );
+        }
+
+        public Task ReleaseSlotFor__immediate(long fixtureId, long teamId, long userId) {
+            return _redis.GetDatabase().SetRemoveAsync(
+                $"f:{fixtureId}.t:{teamId}.video-reaction-author-ids",
+                userId
+            );
+        }
+
         public void Create(VideoReaction videoReaction) {
             _ensureTransaction();
 
             var fixtureIdentifier = $"f:{videoReaction.FixtureId}.t:{videoReaction.TeamId}";
             var authorIdentifier = $"vra:{videoReaction.AuthorId}";
-
-            _transaction.AddCondition(Condition.SortedSetNotContains(
-                $"{fixtureIdentifier}.video-reaction-author-ids.by-rating", videoReaction.AuthorId
-            ));
 
             _transaction.SortedSetAddAsync(
                 $"{fixtureIdentifier}.video-reaction-author-ids.by-rating",
@@ -68,10 +87,10 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
             _transaction.HashSetAsync(
                 $"{fixtureIdentifier}.video-reactions",
                 new[] {
-                    new HashEntry($"{authorIdentifier}.{nameof(videoReaction.Title)}", videoReaction.Title),
-                    new HashEntry($"{authorIdentifier}.{nameof(videoReaction.AuthorUsername)}", videoReaction.AuthorUsername),
-                    new HashEntry($"{authorIdentifier}.{nameof(videoReaction.VideoId)}", videoReaction.VideoId),
-                    new HashEntry($"{authorIdentifier}.{nameof(videoReaction.ThumbnailUrl)}", videoReaction.ThumbnailUrl)
+                    new HashEntry($"{authorIdentifier}.{nameof(VideoReaction.Title)}", videoReaction.Title),
+                    new HashEntry($"{authorIdentifier}.{nameof(VideoReaction.AuthorUsername)}", videoReaction.AuthorUsername),
+                    new HashEntry($"{authorIdentifier}.{nameof(VideoReaction.VideoId)}", videoReaction.VideoId),
+                    new HashEntry($"{authorIdentifier}.{nameof(VideoReaction.ThumbnailUrl)}", videoReaction.ThumbnailUrl)
                 }
             );
         }
@@ -91,6 +110,8 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
 
             var keysToDelete = new RedisKey[] {
                 $"f:{fixtureId}.t:{teamId}.video-reactions",
+                $"f:{fixtureId}.t:{teamId}.video-reactions-vimeo-project-id",
+                $"f:{fixtureId}.t:{teamId}.video-reaction-author-ids",
                 $"f:{fixtureId}.t:{teamId}.video-reaction-author-ids.by-rating",
                 $"f:{fixtureId}.t:{teamId}.video-reaction-author-ids.by-date"
             };

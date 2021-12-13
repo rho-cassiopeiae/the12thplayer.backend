@@ -30,7 +30,8 @@ namespace Livescore.Api.Consumers.Worker {
         public async Task Consume(ConsumeContext<FixtureActivated> context) {
             var command = new ActivateFixtureCommand {
                 FixtureId = context.Message.FixtureId,
-                TeamId = context.Message.TeamId
+                TeamId = context.Message.TeamId,
+                VimeoProjectId = context.Message.VimeoProjectId
             };
 
             await _mediator.Send(command);

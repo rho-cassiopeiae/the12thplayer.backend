@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using MassTransit;
 using MassTransit.Definition;
@@ -16,6 +17,7 @@ using StackExchange.Redis;
 using ServiceStack.Redis;
 
 using MessageBus.Components.HostedServices;
+using MessageBus.Contracts.Requests.Livescore;
 
 using Livescore.Infrastructure.Persistence;
 using Livescore.Domain.Aggregates.Country;
@@ -39,6 +41,7 @@ using Livescore.Domain.Aggregates.UserVote;
 using Livescore.Domain.Aggregates.VideoReaction;
 using Livescore.Infrastructure.Identity;
 using Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener;
+using Livescore.Infrastructure.FileUpload;
 
 namespace Livescore.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -170,8 +173,17 @@ namespace Livescore.Infrastructure {
 
             services.AddSingleton<IFixtureDiscussionListener, FixtureDiscussionListener>();
 
+            services.AddSingleton<MultipartRequestHelper>();
+            services.AddSingleton<ImageFileValidator>();
+            services.AddSingleton<VideoFileValidator>();
+            services.TryAddSingleton<IRandomFileNameProvider, RandomFileNameProvider>();
+            services.AddSingleton<IFileReceiver, FileReceiver>();
+            services.TryAddScoped<IFileHosting, FileHosting>();
+
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
+
+                busCfg.AddRequestClient<UploadVideo>(new Uri("queue:file-hosting-gateway-upload-requests"));
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
                     rabbitCfg.Host(configuration["RabbitMQ:Host"]);

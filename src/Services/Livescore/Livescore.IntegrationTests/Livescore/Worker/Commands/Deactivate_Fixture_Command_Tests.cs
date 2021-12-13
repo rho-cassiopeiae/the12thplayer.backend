@@ -29,7 +29,8 @@ namespace Livescore.IntegrationTests.Livescore.Worker.Commands {
             _sut.SendRequest(
                 new ActivateFixtureCommand {
                     FixtureId = _fixtureId,
-                    TeamId = _teamId
+                    TeamId = _teamId,
+                    VimeoProjectId = "789456"
                 }
             ).Wait();
 

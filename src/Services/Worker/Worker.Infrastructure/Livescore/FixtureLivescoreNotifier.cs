@@ -20,11 +20,12 @@ namespace Worker.Infrastructure.Livescore {
             _mapper = mapper;
         }
 
-        public async Task NotifyFixtureActivated(long fixtureId, long teamId) {
+        public async Task NotifyFixtureActivated(long fixtureId, long teamId, string vimeoProjectId) {
             await _bus.Publish(new FixtureActivated {
                 CorrelationId = Guid.NewGuid(),
                 FixtureId = fixtureId,
-                TeamId = teamId
+                TeamId = teamId,
+                VimeoProjectId = vimeoProjectId
             });
         }
 
@@ -50,11 +51,12 @@ namespace Worker.Infrastructure.Livescore {
             });
         }
 
-        public async Task NotifyFixtureDeactivated(long fixtureId, long teamId) {
+        public async Task NotifyFixtureDeactivated(long fixtureId, long teamId, string vimeoProjectId) {
             await _bus.Publish(new FixtureDeactivated {
                 CorrelationId = Guid.NewGuid(),
                 FixtureId = fixtureId,
-                TeamId = teamId
+                TeamId = teamId,
+                VimeoProjectId = vimeoProjectId
             });
         }
     }

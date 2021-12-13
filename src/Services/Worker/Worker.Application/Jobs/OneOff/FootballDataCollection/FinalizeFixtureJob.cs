@@ -19,8 +19,9 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
         protected override async Task<IDictionary<string, object>> _execute() {
             var fixtureId = long.Parse(_context.MergedJobDataMap.GetString("FixtureId"));
             var teamId = long.Parse(_context.MergedJobDataMap.GetString("TeamId"));
+            var vimeoProjectId = _context.MergedJobDataMap.GetString("VimeoProjectId");
 
-            await _fixtureLivescoreNotifier.NotifyFixtureDeactivated(fixtureId, teamId);
+            await _fixtureLivescoreNotifier.NotifyFixtureDeactivated(fixtureId, teamId, vimeoProjectId);
 
             return null;
         }

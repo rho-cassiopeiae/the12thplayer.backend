@@ -28,7 +28,8 @@ namespace Livescore.IntegrationTests.Livescore.PlayerRating.Queries {
             _sut.SendRequest(
                 new ActivateFixtureCommand {
                     FixtureId = _fixtureId,
-                    TeamId = _teamId
+                    TeamId = _teamId,
+                    VimeoProjectId = "789456"
                 }
             ).Wait();
 

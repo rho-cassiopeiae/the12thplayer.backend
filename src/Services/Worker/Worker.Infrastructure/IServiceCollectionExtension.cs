@@ -9,6 +9,7 @@ using MassTransit.Definition;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
 
 using MessageBus.Components.HostedServices;
+using MessageBus.Contracts.Requests.Worker;
 
 using Worker.Application.Common.Interfaces;
 using Worker.Infrastructure.FootballDataProvider;
@@ -27,11 +28,16 @@ namespace Worker.Infrastructure {
             services.AddScoped<ILivescoreSeeder, LivescoreSeeder>();
             services.AddScoped<IFixtureLivescoreNotifier, FixtureLivescoreNotifier>();
             services.AddScoped<ILivescoreSvcQueryable, LivescoreSvcQueryable>();
+            services.AddScoped<IFileHostingSeeder, FileHostingSeeder>();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
+
+                busCfg.AddRequestClient<AddFileFoldersForFixture>(
+                    new Uri("queue:file-hosting-gateway-folder-requests")
+                );
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
                     rabbitCfg.Host("rabbit");

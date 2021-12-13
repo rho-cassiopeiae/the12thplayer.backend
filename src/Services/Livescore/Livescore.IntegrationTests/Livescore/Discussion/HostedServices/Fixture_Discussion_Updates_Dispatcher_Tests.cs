@@ -11,6 +11,7 @@ using Livescore.Application.Livescore.Discussion.Commands.PostDiscussionEntry;
 using Livescore.Application.Livescore.Discussion.Queries.GetDiscussionsForFixture;
 using Livescore.Application.Livescore.Worker.Commands.ActivateFixture;
 using Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener;
+using Livescore.IntegrationTests.Livescore.Discussion.Mocks;
 using Livescore.Api.HostedServices;
 
 namespace Livescore.IntegrationTests.Livescore.Discussion.HostedServices {
@@ -40,7 +41,8 @@ namespace Livescore.IntegrationTests.Livescore.Discussion.HostedServices {
             _sut.SendRequest(
                 new ActivateFixtureCommand {
                     FixtureId = _fixtureId,
-                    TeamId = _teamId
+                    TeamId = _teamId,
+                    VimeoProjectId = "789456"
                 }
             ).Wait();
 

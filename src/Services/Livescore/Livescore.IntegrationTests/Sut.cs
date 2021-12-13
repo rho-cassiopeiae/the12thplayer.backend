@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,10 +30,21 @@ using Livescore.Application.Seed.Commands.AddTeamDetails;
 using Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures;
 using Livescore.Application.Common.Interfaces;
 using Livescore.Api.Services.FixtureDiscussionBroadcaster;
-using Livescore.IntegrationTests.Livescore.Discussion.HostedServices;
+using Livescore.IntegrationTests.Livescore.VideoReaction.Mocks;
+using Livescore.IntegrationTests.Livescore.Discussion.Mocks;
+using Livescore.Infrastructure.FileUpload;
 
 namespace Livescore.IntegrationTests {
-    public class Sut : IDisposable {
+    public class Sut {
+        public class HttpRequestForFileUpload : IDisposable {
+            public HttpRequest Request { get; init; }
+            public Action DisposeCallback { get; init; }
+
+            public void Dispose() {
+                DisposeCallback();
+            }
+        }
+
         private readonly IHost _host;
         private readonly IHostEnvironment _hostEnvironment;
         private readonly Checkpoint _checkpoint;
@@ -50,6 +63,8 @@ namespace Livescore.IntegrationTests {
                     );
                 })
                 .ConfigureServices(services => {
+                    services.AddSingleton<IRandomFileNameProvider, RandomFileNameProviderMock>();
+                    services.AddScoped<IFileHosting, FileHostingMock>();
                     services.AddSingleton<IFixtureDiscussionBroadcaster, FixtureDiscussionBroadcasterMock>();
                 })
                 .Build();
@@ -68,8 +83,6 @@ namespace Livescore.IntegrationTests {
 
             _applyMigrations();
         }
-
-        public void Dispose() => ResetState();
 
         public async Task<TResult> ExecWithService<TService, TResult>(
             Func<TService, Task<TResult>> func
@@ -117,6 +130,16 @@ namespace Livescore.IntegrationTests {
             var redis = scope.ServiceProvider.GetRequiredService<ConnectionMultiplexer>();
             redis.GetServer(redis.Configuration.Split(',').First()).FlushDatabase();
 
+            var videoReactionsDirPath = Path.Combine(
+                GetConfigurationValue<string>("UserFiles:Path"),
+                "video-reactions"
+            );
+
+            var dirInfo = new DirectoryInfo(videoReactionsDirPath);
+            if (dirInfo.Exists) {
+                dirInfo.Delete(true);
+            }
+
             RunAsGuest();
         }
 
@@ -142,6 +165,48 @@ namespace Livescore.IntegrationTests {
             }
 
             throw new FileNotFoundException();
+        }
+
+        private Stream _getFile(string path) {
+            var fileInfo = _hostEnvironment.ContentRootFileProvider.GetFileInfo(path);
+            if (fileInfo.Exists) {
+                return fileInfo.CreateReadStream();
+            }
+
+            throw new FileNotFoundException();
+        }
+
+        public HttpRequestForFileUpload PrepareHttpRequestForFileUpload(
+            string fileName, params KeyValuePair<string, string>[] formValues
+        ) {
+            var fs = _getFile($"DummyData/{fileName}");
+            var fileContent = new StreamContent(fs);
+
+            var boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
+
+            var form = new MultipartFormDataContent(boundary);
+            form.Add(fileContent, Path.GetFileNameWithoutExtension(fileName), fileName);
+            foreach (var kv in formValues) {
+                form.Add(new StringContent(kv.Value), kv.Key);
+            }
+
+            var context = new DefaultHttpContext();
+            context.Request.Headers.Add("Content-Type", $"multipart/form-data; boundary={boundary}");
+            context.Request.Body = form.ReadAsStream();
+
+            return new HttpRequestForFileUpload {
+                Request = context.Request,
+                DisposeCallback = () => {
+                    form.Dispose();
+                    fileContent.Dispose();
+                    fs.Dispose();
+                }
+            };
+        }
+
+        public T GetConfigurationValue<T>(string key) {
+            var configuration = _host.Services.GetRequiredService<IConfiguration>();
+            return configuration.GetValue<T>(key);
         }
 
         public (long FixtureId, long TeamId) SeedWithDummyUpcomingFixture() {

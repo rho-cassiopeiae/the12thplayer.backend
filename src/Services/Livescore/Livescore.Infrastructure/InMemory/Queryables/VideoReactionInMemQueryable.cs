@@ -12,6 +12,14 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
             _redis = redis;
         }
 
+        public async Task<string> GetVimeoProjectIdFor(long fixtureId, long teamId) {
+            var result = await _redis.GetDatabase().StringGetAsync(
+                $"f:{fixtureId}.t:{teamId}.video-reactions-vimeo-project-id"
+            );
+
+            return result;
+        }
+
         public async Task<int> GetRatingFor(long fixtureId, long teamId, long authorId) {
             return (int) (
                 await _redis.GetDatabase().SortedSetScoreAsync(

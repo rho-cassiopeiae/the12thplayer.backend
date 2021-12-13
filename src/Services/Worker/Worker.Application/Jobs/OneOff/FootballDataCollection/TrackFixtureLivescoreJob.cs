@@ -13,6 +13,7 @@ using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
 namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
     public class TrackFixtureLivescoreJob : OneOffJob {
         private readonly IFootballDataProvider _footballDataProvider;
+        private readonly IFileHostingSeeder _fileHostingSeeder;
         private readonly IFixtureLivescoreNotifier _fixtureLivescoreNotifier;
         private readonly ILivescoreSvcQueryable _livescoreSvcQueryable;
         private readonly ILivescoreSeeder _livescoreSeeder;
@@ -20,6 +21,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
         private long _fixtureId;
         private long _teamId;
         private long _opponentTeamId;
+        private string _vimeoProjectId;
 
         private bool _emulateOngoing;
         private int _kickOffInMin;
@@ -28,11 +30,13 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
         public TrackFixtureLivescoreJob(
             ILogger<TrackFixtureLivescoreJob> logger,
             IFootballDataProvider footballDataProvider,
+            IFileHostingSeeder fileHostingSeeder,
             IFixtureLivescoreNotifier fixtureLivescoreNotifier,
             ILivescoreSvcQueryable livescoreSvcQueryable,
             ILivescoreSeeder livescoreSeeder
         ) : base(logger) {
             _footballDataProvider = footballDataProvider;
+            _fileHostingSeeder = fileHostingSeeder;
             _fixtureLivescoreNotifier = fixtureLivescoreNotifier;
             _livescoreSvcQueryable = livescoreSvcQueryable;
             _livescoreSeeder = livescoreSeeder;
@@ -43,9 +47,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
             _teamId = long.Parse(_context.MergedJobDataMap.GetString("TeamId"));
 
             _emulateOngoing = false;
-            if (_context.MergedJobDataMap.TryGetValue(
-                "EmulateOngoing", out var value
-            )) {
+            if (_context.MergedJobDataMap.TryGetValue("EmulateOngoing", out var value)) {
                 _emulateOngoing = bool.Parse((string) value);
             }
 
@@ -60,7 +62,22 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                 return null;
             }
 
-            await _fixtureLivescoreNotifier.NotifyFixtureActivated(_fixtureId, _teamId);
+            try {
+                _vimeoProjectId = await _fileHostingSeeder.AddFoldersFor(_fixtureId, _teamId);
+            } catch (Exception e) {
+                _logger.LogError(
+                    e,
+                    "Fixture {FixtureId} Team {TeamId}: Failed to create a Vimeo project",
+                    _fixtureId, _teamId
+                );
+
+                throw;
+                // @@??: What to do if for some reason can't create a vimeo project ?
+                // Send a notification via slack, create a project manually, submit the id via admin panel.
+                // Wait here for it ?
+            }
+
+            await _fixtureLivescoreNotifier.NotifyFixtureActivated(_fixtureId, _teamId, _vimeoProjectId);
 
             await _monitorPrematch(startTime.Value);
 
@@ -370,7 +387,8 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                     (IDictionary<string, object>)
                     new Dictionary<string, object> {
                         ["FixtureId"] = _fixtureId.ToString(),
-                        ["TeamId"] = _teamId.ToString()
+                        ["TeamId"] = _teamId.ToString(),
+                        ["VimeoProjectId"] = _vimeoProjectId
                     }
                 ))
                 .Build();
