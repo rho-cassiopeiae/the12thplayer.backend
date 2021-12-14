@@ -12,12 +12,12 @@ using NpgsqlTypes;
 using MassTransit;
 
 using MessageBus.Contracts;
-using MessageBus.Contracts.Events.Identity;
+using MessageBus.Contracts.Events.Profile;
 
-using Identity.Infrastructure.Persistence;
-using Identity.Application.Common.Integration;
+using Profile.Infrastructure.Persistence;
+using Profile.Application.Common.Integration;
 
-namespace Identity.Infrastructure.Integration {
+namespace Profile.Infrastructure.Integration {
     public class IntegrationEventPublisher : IIntegrationEventPublisher {
         private readonly string _connectionString;
         private NpgsqlConnection _connection;
@@ -28,7 +28,7 @@ namespace Identity.Infrastructure.Integration {
             IConfiguration configuration,
             IBus bus
         ) {
-            _connectionString = configuration.GetConnectionString("Identity");
+            _connectionString = configuration.GetConnectionString("Profile");
             _bus = bus;
         }
 
@@ -70,7 +70,7 @@ namespace Identity.Infrastructure.Integration {
                         ""{nameof(IntegrationEvent.Id)}"",
                         ""{nameof(IntegrationEvent.Type)}"",
                         ""{nameof(IntegrationEvent.Payload)}""
-                    FROM identity.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
+                    FROM profile.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
                     WHERE ""{nameof(IntegrationEvent.Status)}"" = @{cmd.Parameters.First().ParameterName}
                     FOR NO KEY UPDATE;
                 ";
@@ -109,7 +109,7 @@ namespace Identity.Infrastructure.Integration {
                 );
 
                 cmd.CommandText = $@"
-                    UPDATE identity.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
+                    UPDATE profile.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
                     SET ""{nameof(IntegrationEvent.Status)}"" = @{cmd.Parameters.First().ParameterName}
                     WHERE ""{nameof(IntegrationEvent.Id)}"" = ANY(@{cmd.Parameters.Last().ParameterName});
                 ";
@@ -145,7 +145,7 @@ namespace Identity.Infrastructure.Integration {
                     SELECT
                         ""{nameof(IntegrationEvent.Type)}"",
                         ""{nameof(IntegrationEvent.Payload)}""
-                    FROM identity.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
+                    FROM profile.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
                     WHERE
                         ""{nameof(IntegrationEvent.Id)}"" = @{cmd.Parameters.First().ParameterName} AND
                         ""{nameof(IntegrationEvent.Status)}"" = @{cmd.Parameters.Last().ParameterName}
@@ -182,7 +182,7 @@ namespace Identity.Infrastructure.Integration {
                 );
 
                 cmd.CommandText = $@"
-                    UPDATE identity.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
+                    UPDATE profile.""{nameof(IntegrationEventDbContext.IntegrationEvents)}""
                     SET ""{nameof(IntegrationEvent.Status)}"" = @{cmd.Parameters.Last().ParameterName}
                     WHERE ""{nameof(IntegrationEvent.Id)}"" = @{cmd.Parameters.First().ParameterName};
                 ";
@@ -198,14 +198,9 @@ namespace Identity.Infrastructure.Integration {
 
         private async Task _publishEvent(IntegrationEvent @event) {
             switch (@event.Type) {
-                case IntegrationEventType.UserAccountCreated:
+                case IntegrationEventType.ProfilePermissionsGranted:
                     await _bus.Publish(
-                        _convertIntegrationEventTo<UserAccountCreated>(@event)
-                    );
-                    break;
-                case IntegrationEventType.UserAccountConfirmed:
-                    await _bus.Publish(
-                        _convertIntegrationEventTo<UserAccountConfirmed>(@event)
+                        _convertIntegrationEventTo<ProfilePermissionsGranted>(@event)
                     );
                     break;
             }
@@ -214,17 +209,10 @@ namespace Identity.Infrastructure.Integration {
         private async Task _publishEvents(List<IntegrationEvent> events) {
             foreach (var group in events.GroupBy(@event => @event.Type)) {
                 switch (group.Key) {
-                    case IntegrationEventType.UserAccountCreated:
+                    case IntegrationEventType.ProfilePermissionsGranted:
                         await _bus.PublishBatch(
                             group.Select(@event =>
-                                _convertIntegrationEventTo<UserAccountCreated>(@event)
-                            )
-                        );
-                        break;
-                    case IntegrationEventType.UserAccountConfirmed:
-                        await _bus.PublishBatch(
-                            group.Select(@event =>
-                                _convertIntegrationEventTo<UserAccountConfirmed>(@event)
+                                _convertIntegrationEventTo<ProfilePermissionsGranted>(@event)
                             )
                         );
                         break;

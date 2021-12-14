@@ -22,6 +22,7 @@ using Profile.Infrastructure.Persistence.Queryables;
 using Profile.Infrastructure.Identity;
 using Profile.Domain.Base;
 using Profile.Application.Common.Integration;
+using Profile.Infrastructure.Integration;
 
 namespace Profile.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -101,6 +102,9 @@ namespace Profile.Infrastructure {
             services.AddScoped<IProfileQueryable, ProfileQueryable>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IIntegrationEventRepository, IntegrationEventRepository>();
+
+            services.AddTransient<IIntegrationEventPublisher, IntegrationEventPublisher>();
+            services.AddTransient<IIntegrationEventTracker, IntegrationEventTracker>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);

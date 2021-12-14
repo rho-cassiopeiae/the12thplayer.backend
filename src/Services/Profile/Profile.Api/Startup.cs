@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Profile.Api.Consumers.Identity;
+using Profile.Api.HostedServices;
 using Profile.Application;
 using Profile.Infrastructure;
 
@@ -27,6 +28,8 @@ namespace Profile.Api {
             );
 
             services.AddControllers();
+
+            services.AddHostedService<IntegrationEventDispatcher>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {

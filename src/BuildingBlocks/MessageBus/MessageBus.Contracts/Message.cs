@@ -7,9 +7,7 @@ namespace MessageBus.Contracts {
     public abstract class Message {
         public Guid CorrelationId { get; set; }
 
-        public static T FromJson<T>(
-            JsonDocument doc, Guid correlationId
-        ) where T : Message {
+        public static T FromJson<T>(JsonDocument doc, Guid correlationId) where T : Message {
             using var stream = new MemoryStream();
             using var writer = new Utf8JsonWriter(stream);
             
