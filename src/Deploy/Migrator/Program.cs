@@ -1,29 +1,25 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using Identity.Infrastructure.Persistence;
-
-using Profile.Infrastructure.Persistence;
-
-using Livescore.Infrastructure.Persistence;
+using IdentitySvc  = Identity.Infrastructure.Persistence;
+using ProfileSvc   = Profile.Infrastructure.Persistence;
+using LivescoreSvc = Livescore.Infrastructure.Persistence;
 
 namespace Migrator {
     class Program {
-        static void Main(string[] args) {
+        public static void Main(string[] args) {
             var host = Identity.Api.Program.CreateHostBuilder(args).Build();
 
             using (var scope = host.Services.CreateScope()) {
                 var userDbContext = scope
                     .ServiceProvider
-                    .GetRequiredService<UserDbContext>();
+                    .GetRequiredService<IdentitySvc.UserDbContext>();
 
                 userDbContext.Database.Migrate();
-            }
 
-            using (var scope = host.Services.CreateScope()) {
                 var integrationEventDbContext = scope
                     .ServiceProvider
-                    .GetRequiredService<IntegrationEventDbContext>();
+                    .GetRequiredService<IdentitySvc.IntegrationEventDbContext>();
 
                 integrationEventDbContext.Database.Migrate();
             }
@@ -33,9 +29,15 @@ namespace Migrator {
             using (var scope = host.Services.CreateScope()) {
                 var profileDbContext = scope
                     .ServiceProvider
-                    .GetRequiredService<ProfileDbContext>();
+                    .GetRequiredService<ProfileSvc.ProfileDbContext>();
 
                 profileDbContext.Database.Migrate();
+
+                var integrationEventDbContext = scope
+                    .ServiceProvider
+                    .GetRequiredService<ProfileSvc.IntegrationEventDbContext>();
+
+                integrationEventDbContext.Database.Migrate();
             }
 
             host = Livescore.Api.Program.CreateHostBuilder(args).Build();
@@ -43,7 +45,7 @@ namespace Migrator {
             using (var scope = host.Services.CreateScope()) {
                 var livescoreDbContext = scope
                     .ServiceProvider
-                    .GetRequiredService<LivescoreDbContext>();
+                    .GetRequiredService<LivescoreSvc.LivescoreDbContext>();
 
                 livescoreDbContext.Database.Migrate();
             }

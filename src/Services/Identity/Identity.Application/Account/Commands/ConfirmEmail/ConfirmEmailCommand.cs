@@ -97,7 +97,7 @@ namespace Identity.Application.Account.Commands.ConfirmEmail {
                     };
                 }
 
-                await _userService.DispatchDomainEvents(user, cancellationToken);
+                await _userService.DispatchDomainEvents(cancellationToken);
 
                 await _unitOfWork.Commit();
 

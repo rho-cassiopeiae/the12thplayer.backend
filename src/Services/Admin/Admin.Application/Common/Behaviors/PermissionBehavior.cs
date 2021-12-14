@@ -18,16 +18,16 @@ namespace Admin.Application.Common.Behaviors {
 
         private readonly IAuthenticationContext _authenticationContext;
         private readonly IPrincipalDataProvider _principalDataProvider;
-        private readonly IProfilePermissionChecker _profilePermissionChecker;
+        private readonly IProfileSvcQueryable _profileSvcQueryable;
 
         public PermissionBehavior(
             IAuthenticationContext authenticationContext,
             IPrincipalDataProvider principalDataProvider,
-            IProfilePermissionChecker profilePermissionChecker
+            IProfileSvcQueryable profileSvcQueryable
         ) {
             _authenticationContext = authenticationContext;
             _principalDataProvider = principalDataProvider;
-            _profilePermissionChecker = profilePermissionChecker;
+            _profileSvcQueryable = profileSvcQueryable;
         }
 
         public async Task<TResponse> Handle(
@@ -40,12 +40,11 @@ namespace Admin.Application.Common.Behaviors {
                 .GetCustomAttributes<RequirePermissionAttribute>();
 
             if (permissionAttributes.Any()) {
-                var userId = _principalDataProvider.GetId(
-                    _authenticationContext.User
-                );
+                long userId = _principalDataProvider.GetId(_authenticationContext.User);
 
-                var hasRequiredPermissions = await _profilePermissionChecker
-                    .HasPermissions(userId, permissionAttributes);
+                bool hasRequiredPermissions = await _profileSvcQueryable.CheckHasPermissions(
+                    userId, permissionAttributes
+                );
 
                 if (!hasRequiredPermissions) {
                     return new TResponse {

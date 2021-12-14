@@ -10,6 +10,8 @@ namespace Identity.Infrastructure.Persistence.Repositories {
     public class IntegrationEventRepository : IIntegrationEventRepository {
         private readonly IntegrationEventDbContext _integrationEventDbContext;
 
+        private IUnitOfWork _unitOfWork;
+
         public IntegrationEventRepository(
             IntegrationEventDbContext integrationEventDbContext
         ) {
@@ -17,6 +19,7 @@ namespace Identity.Infrastructure.Persistence.Repositories {
         }
 
         public void EnlistAsPartOf(IUnitOfWork unitOfWork) {
+            _unitOfWork = unitOfWork;
             _integrationEventDbContext.Database.SetDbConnection(unitOfWork.Connection);
             _integrationEventDbContext.Database.UseTransaction(unitOfWork.Transaction);
         }

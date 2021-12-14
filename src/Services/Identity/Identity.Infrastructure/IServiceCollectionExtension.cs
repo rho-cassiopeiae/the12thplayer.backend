@@ -78,30 +78,22 @@ namespace Identity.Infrastructure {
 
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<ISecurityTokenProvider, SecurityTokenProvider>();
-            services.AddTransient<
-                IProfilePermissionCollector, ProfilePermissionCollector
-            >();
+            services.AddScoped<IProfileSvcQueryable, ProfileSvcQueryable>();
 
-            services.AddScoped<
-                IIntegrationEventRepository, IntegrationEventRepository
-            >();
+            services.AddScoped<IIntegrationEventRepository, IntegrationEventRepository>();
 
-            services.AddTransient<
-                IIntegrationEventPublisher, IntegrationEventPublisher
-            >();
-            services.AddTransient<
-                IIntegrationEventTracker, IntegrationEventTracker
-            >();
+            services.AddTransient<IIntegrationEventPublisher, IntegrationEventPublisher>();
+            services.AddTransient<IIntegrationEventTracker, IntegrationEventTracker>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
 
-                busCfg.AddRequestClient<CollectProfilePermissions>(
+                busCfg.AddRequestClient<GetProfilePermissions>(
                     new Uri("queue:profile-permission-requests")
                 );
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
-                    rabbitCfg.Host("rabbit");
+                    rabbitCfg.Host(configuration["RabbitMQ:Host"]);
 
                     rabbitCfg.ConfigureEndpoints(
                         context,

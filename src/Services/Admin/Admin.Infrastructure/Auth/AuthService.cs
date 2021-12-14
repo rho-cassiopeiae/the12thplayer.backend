@@ -21,13 +21,13 @@ namespace Admin.Infrastructure.Auth {
         public async Task<Either<AuthError, string>> LogInAsAdmin(
             string email, string password
         ) {
-            var response = await _logInClient.GetResponse<
-                LogInAsAdminSuccess, LogInAsAdminError
-            >(new LogInAsAdmin {
-                CorrelationId = Guid.NewGuid(),
-                Email = email,
-                Password = password
-            });
+            var response = await _logInClient.GetResponse<LogInAsAdminSuccess, LogInAsAdminError>(
+                new LogInAsAdmin {
+                    CorrelationId = Guid.NewGuid(),
+                    Email = email,
+                    Password = password
+                }
+            );
 
             if (response.Is<LogInAsAdminError>(out var errorResult)) {
                 return new AuthError(errorResult.Message.Message);

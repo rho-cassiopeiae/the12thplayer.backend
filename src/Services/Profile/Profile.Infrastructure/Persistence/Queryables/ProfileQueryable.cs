@@ -14,9 +14,7 @@ namespace Profile.Infrastructure.Persistence.Queryables {
             _profileDbContext = profileDbContext;
         }
 
-        public async Task<IEnumerable<ProfilePermission>> GetPermissionsFor(
-            long userId
-        ) {
+        public async Task<IEnumerable<ProfilePermission>> GetPermissionsFor(long userId) {
             var profile = await _profileDbContext.Profiles
                 .AsNoTracking()
                 .Include(p => p.Permissions)

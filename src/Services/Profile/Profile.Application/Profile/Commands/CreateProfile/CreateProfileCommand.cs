@@ -11,9 +11,9 @@ using ProfileDm = Profile.Domain.Aggregates.Profile.Profile;
 
 namespace Profile.Application.Profile.Commands.CreateProfile {
     public class CreateProfileCommand : IRequest<VoidResult> {
-        public long UserId { get; set; }
-        public string Email { get; set; }
-        public string Username { get; set; }
+        public long UserId { get; init; }
+        public string Email { get; init; }
+        public string Username { get; init; }
     }
 
     public class CreateProfileCommandHandler : IRequestHandler<
@@ -37,28 +37,6 @@ namespace Profile.Application.Profile.Commands.CreateProfile {
                 userId: command.UserId,
                 email: command.Email,
                 username: command.Username
-            );
-
-            profile.AddPermission(
-                PermissionScope.AdminPanel,
-                (int) AdminPanelPermissions.LogIn
-            );
-
-            profile.AddPermission(
-                PermissionScope.UserManagement,
-                (int) (
-                    UserManagementPermissions.ListUsers |
-                    UserManagementPermissions.GrantPermission |
-                    UserManagementPermissions.RevokePermission
-                )
-            );
-
-            profile.AddPermission(
-                PermissionScope.JobManagement,
-                (int) (
-                    JobManagementPermissions.ExecuteOneOffJobs |
-                    JobManagementPermissions.SchedulePeriodicJobs
-                )
             );
 
             _profileRepository.Create(profile);

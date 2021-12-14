@@ -7,9 +7,7 @@ using Admin.Application.Common.Interfaces;
 using Admin.Application.Common.Results;
 
 namespace Admin.Application.Auth.Commands.LogInToAdminPanel {
-    public class LogInToAdminPanelCommand : IRequest<
-        HandleResult<SecurityCredentials>
-    > {
+    public class LogInToAdminPanelCommand : IRequest<HandleResult<SecurityCredentials>> {
         public string Email { get; set; }
         public string Password { get; set; }
     }

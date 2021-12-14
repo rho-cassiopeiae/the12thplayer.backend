@@ -1,7 +1,9 @@
 ﻿using System;
 
+using Identity.Domain.Base;
+
 namespace Identity.Domain.Aggregates.User {
-    public class RefreshToken {
+    public class RefreshToken : Entity {
         public string Value { get; private set; }
         public bool IsActive { get; private set; }
         public DateTimeOffset ExpiresAt { get; private set; }

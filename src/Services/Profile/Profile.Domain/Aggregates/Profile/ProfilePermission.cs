@@ -1,5 +1,7 @@
-﻿namespace Profile.Domain.Aggregates.Profile {
-    public class ProfilePermission {
+﻿using Profile.Domain.Base;
+
+namespace Profile.Domain.Aggregates.Profile {
+    public class ProfilePermission : Entity {
         public long UserId { get; private set; }
         public PermissionScope Scope { get; private set; }
         public int Flags { get; private set; }

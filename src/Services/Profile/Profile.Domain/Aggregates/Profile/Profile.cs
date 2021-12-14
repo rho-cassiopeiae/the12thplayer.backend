@@ -4,7 +4,7 @@ using System.Linq;
 using Profile.Domain.Base;
 
 namespace Profile.Domain.Aggregates.Profile {
-    public class Profile : IAggregateRoot {
+    public class Profile : Entity, IAggregateRoot {
         public long UserId { get; private set; }
         public string Email { get; private set; }
         public string Username { get; private set; }

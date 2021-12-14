@@ -27,6 +27,8 @@ namespace Identity.Infrastructure.Account {
         private readonly SignInManager<UserPm> _signInManager;
         private readonly IPublisher _mediator;
 
+        private IUnitOfWork _unitOfWork;
+
         private readonly Dictionary<UserDm, UserPm> _userDmToPm = new();
         
         public UserService(
@@ -42,24 +44,27 @@ namespace Identity.Infrastructure.Account {
         }
 
         public void EnlistConnectionFrom(IUnitOfWork unitOfWork) {
+            _unitOfWork = unitOfWork;
             _userDbContext.Database.SetDbConnection(unitOfWork.Connection);
         }
 
         public void EnlistTransactionFrom(IUnitOfWork unitOfWork) {
+            _unitOfWork = unitOfWork;
             _userDbContext.Database.UseTransaction(unitOfWork.Transaction);
         }
 
         public void EnlistAsPartOf(IUnitOfWork unitOfWork) {
+            _unitOfWork = unitOfWork;
             _userDbContext.Database.SetDbConnection(unitOfWork.Connection);
             _userDbContext.Database.UseTransaction(unitOfWork.Transaction);
         }
 
-        public async Task DispatchDomainEvents(
-            UserDm user, CancellationToken cancellationToken
-        ) {
-            if (user.DomainEvents != null) {
-                foreach (var @event in user.DomainEvents) {
-                    await _mediator.Publish(@event);
+        public async Task DispatchDomainEvents(CancellationToken cancellationToken) {
+            foreach (var userDm in _userDmToPm.Keys) {
+                if (userDm.DomainEvents != null) {
+                    foreach (var @event in userDm.DomainEvents) {
+                        await _mediator.Publish(@event);
+                    }
                 }
             }
         }
@@ -104,6 +109,8 @@ namespace Identity.Infrastructure.Account {
                 Username = userPm.UserName,
                 ConfirmationCode = code
             });
+
+            _userDmToPm[userDm] = userPm;
 
             return null;
         }

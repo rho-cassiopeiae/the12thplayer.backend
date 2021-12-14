@@ -78,10 +78,11 @@ namespace Admin.Infrastructure {
             services.AddTransient<IAuthorizationService, AuthorizationService>();
             services.AddSingleton<IPrincipalDataProvider, PrincipalDataProvider>();
 
-            services.AddTransient<IAuthService, AuthService>();
-            services.AddTransient<
-                IProfilePermissionChecker, ProfilePermissionChecker
-            >();
+            services.AddSingleton<ISuperuserSignatureVerifier, SuperuserSignatureVerifier>();
+            services.AddSingleton<IProfilePermissionManager, ProfilePermissionManager>();
+
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IProfileSvcQueryable, ProfileSvcQueryable>();
 
             services.AddSingleton<IJobScheduler, JobScheduler>();
 
@@ -101,7 +102,7 @@ namespace Admin.Infrastructure {
                 );
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
-                    rabbitCfg.Host("rabbit");
+                    rabbitCfg.Host(configuration["RabbitMQ:Host"]);
                 });
             });
 

@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
 
+using MessageBus.Contracts.Common.Dto;
+
 namespace MessageBus.Contracts.Requests.Admin {
     public class CheckProfileHasPermissions : Message {
-        public class ProfilePermission {
-            public int Scope { get; set; }
-            public int Flags { get; set; }
-        }
-
         public long UserId { get; set; }
-        public IEnumerable<ProfilePermission> Permissions { get; set; }
+        public IEnumerable<ProfilePermissionDto> Permissions { get; set; }
     }
 }

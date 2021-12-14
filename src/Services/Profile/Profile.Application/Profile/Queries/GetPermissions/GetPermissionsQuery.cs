@@ -9,9 +9,7 @@ using Profile.Application.Common.Results;
 using Profile.Domain.Aggregates.Profile;
 
 namespace Profile.Application.Profile.Queries.GetPermissions {
-    public class GetPermissionsQuery : IRequest<
-        HandleResult<IEnumerable<ProfilePermission>>
-    > {
+    public class GetPermissionsQuery : IRequest<HandleResult<IEnumerable<ProfilePermission>>> {
         public long UserId { get; init; }
     }
 

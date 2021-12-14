@@ -53,17 +53,17 @@ namespace Identity.Application.Account.Commands.SignUp {
                     };
                 }
 
-                await _userService.DispatchDomainEvents(user, cancellationToken);
+                await _userService.DispatchDomainEvents(cancellationToken);
 
                 await _unitOfWork.Commit();
+
+                _logger.LogInformation("User {Email} signed up successfully", user.Email);
+
+                return VoidResult.Instance;
             } catch {
                 await _unitOfWork.Rollback();
                 throw;
             }
-
-            _logger.LogInformation("User {Email} signed up successfully", user.Email);
-
-            return VoidResult.Instance;
         }
     }
 }

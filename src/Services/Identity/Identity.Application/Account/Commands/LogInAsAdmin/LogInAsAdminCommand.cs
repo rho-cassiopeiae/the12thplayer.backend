@@ -20,16 +20,16 @@ namespace Identity.Application.Account.Commands.LogInAsAdmin {
         LogInAsAdminCommand, HandleResult<string>
     > {
         private readonly IUserService _userService;
-        private readonly IProfilePermissionCollector _profilePermissionCollector;
+        private readonly IProfileSvcQueryable _profileSvcQueryable;
         private readonly ISecurityTokenProvider _securityTokenProvider;
 
         public LogInAsAdminCommandHandler(
             IUserService userService,
-            IProfilePermissionCollector profilePermissionCollector,
+            IProfileSvcQueryable profileSvcQueryable,
             ISecurityTokenProvider securityTokenProvider
         ) {
             _userService = userService;
-            _profilePermissionCollector = profilePermissionCollector;
+            _profileSvcQueryable = profileSvcQueryable;
             _securityTokenProvider = securityTokenProvider;
         }
 
@@ -54,23 +54,20 @@ namespace Identity.Application.Account.Commands.LogInAsAdmin {
                 };
             }
 
-            var permissions =
-                await _profilePermissionCollector.CollectPermissionsFor(user.Id);
+            var permissions = await _profileSvcQueryable.GetPermissionsFor(user.Id);
 
-            if (!permissions.Any(p =>
-                p.Scope == PermissionScope.AdminPanel && (
-                    (AdminPanelPermissions) p.Flags &
-                    AdminPanelPermissions.LogIn
-                ) > 0
-            )) {
+            if (
+                !permissions.Any(p =>
+                    p.Scope == PermissionScope.AdminPanel &&
+                    ((AdminPanelPermissions) p.Flags & AdminPanelPermissions.LogIn) > 0
+                )
+            ) {
                 return new HandleResult<string> {
                     Error = new AccountError("Unauthorized")
                 };
             }
 
-            var claims = new List<Claim> {
-                new Claim("__Admin", "1")
-            };
+            var claims = new List<Claim> { new("__Admin", "1") };
 
             return new HandleResult<string> {
                 Data = _securityTokenProvider.GenerateJwt(user.Id, claims)

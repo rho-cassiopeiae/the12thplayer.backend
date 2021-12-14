@@ -12,7 +12,7 @@ using Profile.Application.Profile.Common.Dto;
 namespace Profile.Application.Profile.Queries.CheckHasPermissions {
     public class CheckHasPermissionsQuery : IRequest<HandleResult<bool>> {
         public long UserId { get; init; }
-        public IEnumerable<ProfilePermission> Permissions { get; init; }
+        public IEnumerable<ProfilePermissionDto> Permissions { get; init; }
     }
 
     public class CheckHasPermissionsQueryHandler : IRequestHandler<
