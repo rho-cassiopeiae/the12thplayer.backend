@@ -208,7 +208,7 @@ namespace Livescore.Infrastructure.Persistence {
             });
 
             modelBuilder.Entity<UserVote>(builder => {
-                builder.HasKey(uv => new { uv.UserId, uv.FixtureId, uv.TeamId });
+                builder.HasKey(uv => new { uv.UserId, uv.FixtureId, uv.TeamId }); // @@TODO: Configure fk.
                 builder
                     .Property(uv => uv.FixtureParticipantKeyToRating)
                     .HasColumnType("jsonb")

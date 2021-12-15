@@ -83,15 +83,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileHostingGateway.Infrastr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Feed", "Feed", "{49CB95FB-5AD2-4364-B339-80B1D830A452}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Feed.Api", "Services\Feed\Feed.Api\Feed.Api.csproj", "{E4E944ED-D662-4BC0-9F31-75D5B309DD39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Feed.Api", "Services\Feed\Feed.Api\Feed.Api.csproj", "{E4E944ED-D662-4BC0-9F31-75D5B309DD39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Feed.Application", "Services\Feed\Feed.Application\Feed.Application.csproj", "{8AB47AA6-CA59-41B5-AE40-FEEA10C6A82E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Feed.Application", "Services\Feed\Feed.Application\Feed.Application.csproj", "{8AB47AA6-CA59-41B5-AE40-FEEA10C6A82E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Feed.Infrastructure", "Services\Feed\Feed.Infrastructure\Feed.Infrastructure.csproj", "{FFA2F5E4-CD07-468C-96CE-2B871193B7D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Feed.Infrastructure", "Services\Feed\Feed.Infrastructure\Feed.Infrastructure.csproj", "{FFA2F5E4-CD07-468C-96CE-2B871193B7D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Feed.Domain", "Services\Feed\Feed.Domain\Feed.Domain.csproj", "{7288A429-52F0-483C-BC3E-6F188A00604F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Feed.Domain", "Services\Feed\Feed.Domain\Feed.Domain.csproj", "{7288A429-52F0-483C-BC3E-6F188A00604F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Superuser", "Deploy\Superuser\Superuser.csproj", "{9F761B27-60F9-49DD-B9DB-28B995768BA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Superuser", "Deploy\Superuser\Superuser.csproj", "{9F761B27-60F9-49DD-B9DB-28B995768BA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Feed.IntegrationTests", "Services\Feed\Feed.IntegrationTests\Feed.IntegrationTests.csproj", "{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -499,6 +501,18 @@ Global
 		{9F761B27-60F9-49DD-B9DB-28B995768BA1}.Release|x64.Build.0 = Release|Any CPU
 		{9F761B27-60F9-49DD-B9DB-28B995768BA1}.Release|x86.ActiveCfg = Release|Any CPU
 		{9F761B27-60F9-49DD-B9DB-28B995768BA1}.Release|x86.Build.0 = Release|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Debug|x64.Build.0 = Debug|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Debug|x86.Build.0 = Debug|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Release|x64.ActiveCfg = Release|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Release|x64.Build.0 = Release|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Release|x86.ActiveCfg = Release|Any CPU
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -545,6 +559,7 @@ Global
 		{FFA2F5E4-CD07-468C-96CE-2B871193B7D7} = {49CB95FB-5AD2-4364-B339-80B1D830A452}
 		{7288A429-52F0-483C-BC3E-6F188A00604F} = {49CB95FB-5AD2-4364-B339-80B1D830A452}
 		{9F761B27-60F9-49DD-B9DB-28B995768BA1} = {189B5B9C-8540-44F4-B86E-23F162AF21E4}
+		{A1EDBC2A-1D3C-46D8-8DAA-76C3B7F12EDD} = {49CB95FB-5AD2-4364-B339-80B1D830A452}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B1C3BF53-FCCB-42E6-8034-50D26A6785FA}

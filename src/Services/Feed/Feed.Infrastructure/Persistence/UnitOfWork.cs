@@ -29,7 +29,7 @@ namespace Feed.Infrastructure.Persistence {
             }
         }
 
-        public async Task Begin() {
+        public async Task Begin(IsolationLevel isolationLevel = IsolationLevel.Serializable) {
             if (_transaction != null) {
                 throw new InvalidOperationException(
                     "Cannot start a transaction while another is still in progress"
@@ -38,9 +38,7 @@ namespace Feed.Infrastructure.Persistence {
 
             await Setup();
 
-            _transaction = await _connection.BeginTransactionAsync(
-                IsolationLevel.Serializable // @@TODO: Make it tunable.
-            );
+            _transaction = await _connection.BeginTransactionAsync(isolationLevel);
         }
 
         public async Task Commit() {

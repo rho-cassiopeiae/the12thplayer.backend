@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
 
@@ -7,7 +8,7 @@ namespace Feed.Domain.Base {
         DbConnection Connection { get; }
         DbTransaction Transaction { get; }
         ValueTask Setup();
-        Task Begin();
+        Task Begin(IsolationLevel isolationLevel = IsolationLevel.Serializable);
         Task Commit();
         Task Rollback();
     }

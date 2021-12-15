@@ -4,15 +4,17 @@ using System.Collections.Generic;
 using Feed.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Feed.Infrastructure.Persistence.Migrations.Feed
 {
     [DbContext(typeof(FeedDbContext))]
-    partial class FeedDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211215153525_Add_Article_And_User_Vote")]
+    partial class Add_Article_And_User_Vote
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
