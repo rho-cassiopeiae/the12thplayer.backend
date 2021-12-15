@@ -25,6 +25,12 @@ services:
       context: .
       dockerfile: Services/Livescore/Livescore.Api/Dockerfile
 
+  feed:
+    image: ${REGISTRY:-the12thplayer}/feed.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/Feed/Feed.Api/Dockerfile
+
   notification:
     image: ${REGISTRY:-the12thplayer}/notification.host:${PLATFORM:-linux}-${TAG:-latest}
     build:

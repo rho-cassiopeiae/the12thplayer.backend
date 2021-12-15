@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Services\Feed\Feed.Api\Feed.Api.csproj" />
     <ProjectReference Include="..\..\Services\Identity\Identity.Api\Identity.Api.csproj" />
     <ProjectReference Include="..\..\Services\Livescore\Livescore.Api\Livescore.Api.csproj" />
     <ProjectReference Include="..\..\Services\Profile\Profile.Api\Profile.Api.csproj" />

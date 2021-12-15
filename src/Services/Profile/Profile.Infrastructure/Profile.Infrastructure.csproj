@@ -5,6 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Persistence\Migrations\IntegrationEvent\Scripts\Functions\NotifyAboutIntegrationEvent\NotifyAboutIntegrationEvent.v0.sql" />
+    <None Remove="Persistence\Migrations\IntegrationEvent\Scripts\Triggers\OnNewIntegrationEvent\OnNewIntegrationEvent.v0.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Persistence\Migrations\IntegrationEvent\Scripts\Functions\NotifyAboutIntegrationEvent\NotifyAboutIntegrationEvent.v0.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\IntegrationEvent\Scripts\Triggers\OnNewIntegrationEvent\OnNewIntegrationEvent.v0.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.10">
       <PrivateAssets>all</PrivateAssets>

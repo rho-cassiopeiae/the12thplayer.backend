@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using IdentitySvc  = Identity.Infrastructure.Persistence;
 using ProfileSvc   = Profile.Infrastructure.Persistence;
 using LivescoreSvc = Livescore.Infrastructure.Persistence;
+using FeedSvc      = Feed.Infrastructure.Persistence;
 
 namespace Migrator {
     class Program {
@@ -48,6 +49,16 @@ namespace Migrator {
                     .GetRequiredService<LivescoreSvc.LivescoreDbContext>();
 
                 livescoreDbContext.Database.Migrate();
+            }
+
+            host = Feed.Api.Program.CreateHostBuilder(args).Build();
+
+            using (var scope = host.Services.CreateScope()) {
+                var feedDbContext = scope
+                    .ServiceProvider
+                    .GetRequiredService<FeedSvc.FeedDbContext>();
+
+                feedDbContext.Database.Migrate();
             }
         }
     }
