@@ -30,9 +30,7 @@ namespace Feed.Application.Author.Commands.CreateAuthor {
                 username: command.Username
             );
 
-            _authorRepository.Create(author);
-
-            await _authorRepository.SaveChanges(cancellationToken);
+            await _authorRepository.Create(author);
 
             return VoidResult.Instance;
         }

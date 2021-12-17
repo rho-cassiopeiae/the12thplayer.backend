@@ -2,76 +2,77 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using NpgsqlTypes;
 
-using MediatR;
-
-using Feed.Domain.Base;
 using Feed.Domain.Aggregates.Author;
-using AuthorDm = Feed.Domain.Aggregates.Author.Author;
 
 namespace Feed.Infrastructure.Persistence.Repositories {
     public class AuthorRepository : IAuthorRepository {
         private readonly FeedDbContext _feedDbContext;
-        private readonly IPublisher _mediator;
 
-        private IUnitOfWork _unitOfWork;
-
-        public AuthorRepository(
-            FeedDbContext feedDbContext,
-            IPublisher mediator
-        ) {
+        public AuthorRepository(FeedDbContext feedDbContext) {
             _feedDbContext = feedDbContext;
-            _mediator = mediator;
         }
 
-        public void EnlistAsPartOf(IUnitOfWork unitOfWork) {
-            _unitOfWork = unitOfWork;
-            _feedDbContext.Database.SetDbConnection(unitOfWork.Connection);
-            _feedDbContext.Database.UseTransaction(unitOfWork.Transaction);
+        public Task SaveChanges(CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public async Task Create(Author author) {
+            await using var cmd = new NpgsqlCommand();
+            cmd.Connection = await _feedDbContext.Database.GetDbConnection();
+
+            var parameters = new NpgsqlParameter[] {
+                new NpgsqlParameter<long>(nameof(Author.UserId), NpgsqlDbType.Bigint) {
+                    TypedValue = author.UserId
+                },
+                new NpgsqlParameter<string>(nameof(Author.Email), NpgsqlDbType.Text) {
+                    TypedValue = author.Email
+                },
+                new NpgsqlParameter<string>(nameof(Author.Username), NpgsqlDbType.Text) {
+                    TypedValue = author.Username
+                }
+            };
+
+            cmd.Parameters.AddRange(parameters);
+
+            int i = 0;
+            cmd.CommandText = $@"
+                INSERT INTO feed.""Authors"" (""UserId"", ""Email"", ""Username"")
+                VALUES (@{parameters[i++].ParameterName}, @{parameters[i++].ParameterName}, @{parameters[i++].ParameterName});
+            ";
+
+            await cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task SaveChanges(CancellationToken cancellationToken) {
-            var entities = _feedDbContext.ChangeTracker
-                .Entries<Entity>()
-                .Select(entry => entry.Entity)
-                .Where(entity => entity.DomainEvents != null && entity.DomainEvents.Any())
-                .ToList();
+        public async Task UpdatePermissions(Author author) {
+            await using var cmd = new NpgsqlCommand();
+            cmd.Connection = await _feedDbContext.Database.GetDbConnection();
 
-            var events = entities
-                .SelectMany(entity => entity.DomainEvents)
-                .ToList();
+            var parameters = new NpgsqlParameter[] {
+                new NpgsqlParameter<long>(nameof(AuthorPermission.UserId), NpgsqlDbType.Bigint) {
+                    TypedValue = author.UserId
+                },
+                new NpgsqlParameter<int[]>(nameof(AuthorPermission.Scope), NpgsqlDbType.Array | NpgsqlDbType.Integer) {
+                    TypedValue = author.Permissions.Select(p => (int) p.Scope).ToArray()
+                },
+                new NpgsqlParameter<int[]>(nameof(AuthorPermission.Flags), NpgsqlDbType.Array | NpgsqlDbType.Integer) {
+                    TypedValue = author.Permissions.Select(p => p.Flags).ToArray()
+                }
+            };
 
-            foreach (var entity in entities) {
-                entity.ClearDomainEvents();
-            }
+            cmd.Parameters.AddRange(parameters);
 
-            foreach (var @event in events) {
-                await _mediator.Publish(@event);
-            }
+            int i = 0;
+            cmd.CommandText = $@"
+                INSERT INTO feed.""AuthorPermissions"" (""UserId"", ""Scope"", ""Flags"")
+                    SELECT @{parameters[i++].ParameterName}, vals.s, vals.f
+                    FROM UNNEST (@{parameters[i++].ParameterName}, @{parameters[i++].ParameterName}) AS vals (s, f)
+                ON CONFLICT (""UserId"", ""Scope"") DO
+                    UPDATE
+                    SET ""Flags"" = ""AuthorPermissions"".""Flags"" | EXCLUDED.""Flags"";
+            ";
 
-            await _feedDbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        public Task<AuthorDm> FindByUserId(long userId) {
-            return _feedDbContext.Authors
-                .Include(a => a.Permissions)
-                .SingleAsync(a => a.UserId == userId);
-        }
-
-        public void Create(AuthorDm author) {
-            _feedDbContext.Authors.Add(author);
-        }
-
-        public void UpdatePermissions(AuthorDm author) {
-            var trackedPermissions = _feedDbContext.ChangeTracker
-                .Entries<Entity>()
-                .Select(entry => entry.Entity)
-                .OfType<AuthorPermission>()
-                .ToList();
-
-            var newPermissions = author.Permissions.Where(p => !trackedPermissions.Contains(p));
-            _feedDbContext.AddRange(newPermissions);
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 }

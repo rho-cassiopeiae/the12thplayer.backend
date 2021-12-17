@@ -1,6 +1,5 @@
 ﻿using System;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,14 +23,7 @@ namespace Feed.Infrastructure {
             IConfiguration configuration,
             Action<IServiceCollectionBusConfigurator> busCfgCallback
         ) {
-            services.AddDbContext<FeedDbContext>(optionsBuilder =>
-                optionsBuilder.UseNpgsql(
-                    configuration.GetConnectionString("Feed"),
-                    pgOptionsBuilder => pgOptionsBuilder.MigrationsHistoryTable(
-                        "__EFMigrationsHistory_FeedDbContext", "feed"
-                    )
-                )
-            );
+            services.AddScoped<FeedDbContext>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

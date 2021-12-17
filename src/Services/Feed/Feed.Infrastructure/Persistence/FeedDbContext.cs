@@ -1,80 +1,185 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Data;
+using System.Data.Common;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
-using Feed.Domain.Aggregates.Author;
-using Feed.Domain.Aggregates.Article;
-using Feed.Domain.Aggregates.UserVote;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+
+using Npgsql;
+using NpgsqlTypes;
+
+using Feed.Infrastructure.Persistence.Migrations;
 
 namespace Feed.Infrastructure.Persistence {
-    public class FeedDbContext : DbContext {
-        public DbSet<Author> Authors { get; set; }
-        public DbSet<Article> Articles { get; set; }
-        public DbSet<UserVote> UserVotes { get; set; }
+    public class FeedDbContext : IDisposable, IAsyncDisposable {
+        public class DbSession : IDisposable, IAsyncDisposable {
+            private readonly ILogger<DbSession> _logger;
+            private readonly string _connectionString;
+            private readonly string _migrationHistorySchema;
+            private readonly string _migrationHistoryTable;
 
-        public FeedDbContext(DbContextOptions<FeedDbContext> options) : base(options) { }
+            private NpgsqlConnection _connection;
+            private bool _connectionExternallyProvided;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            modelBuilder.HasDefaultSchema("feed");
+            public DbSession(IConfiguration configuration, ILogger<DbSession> logger) {
+                _logger = logger;
+                _connectionString = configuration.GetConnectionString("Feed");
+                _migrationHistorySchema = configuration["Migrations:Schema"];
+                _migrationHistoryTable = configuration["Migrations:Table"];
+                _connectionExternallyProvided = false;
+            }
 
-            modelBuilder.Entity<Author>(builder => {
-                builder.HasKey(a => a.UserId);
-                builder.Property(a => a.UserId).ValueGeneratedNever();
-                builder.Property(a => a.Email).IsRequired();
-                builder.Property(a => a.Username).IsRequired();
+            public void Dispose() {
+                if (_connection != null && !_connectionExternallyProvided) {
+                    _connection.Dispose();
+                }
+            }
 
-                builder.Metadata
-                    .FindNavigation(nameof(Author.Permissions))
-                    .SetPropertyAccessMode(PropertyAccessMode.Field);
-            });
+            public async ValueTask DisposeAsync() {
+                if (_connection != null && !_connectionExternallyProvided) {
+                    await _connection.DisposeAsync();
+                }
+            }
 
-            modelBuilder.Entity<AuthorPermission>(builder => {
-                builder.HasKey(ap => new { ap.UserId, ap.Scope });
-                builder.Property(ap => ap.Flags).IsRequired();
+            public void SetDbConnection(DbConnection connection) {
+                if (_connection != null) {
+                    throw new Exception("The DbSession instance already has an underlying connection");
+                }
 
-                builder
-                    .HasOne<Author>()
-                    .WithMany(a => a.Permissions)
-                    .HasForeignKey(ap => ap.UserId)
-                    .IsRequired();
-            });
+                _connection = (NpgsqlConnection) connection;
+                _connectionExternallyProvided = true;
+            }
 
-            modelBuilder.Entity<Article>(builder => {
-                builder.HasKey(a => a.Id);
-                builder.Property(a => a.TeamId).IsRequired();
-                builder.Property(a => a.AuthorUsername).IsRequired();
-                builder.Property(a => a.PostedAt).IsRequired();
-                builder.Property(a => a.Type).IsRequired();
-                builder.Property(a => a.Title).IsRequired();
-                builder.Property(a => a.PreviewImageUrl).IsRequired(false);
-                builder.Property(a => a.Summary).IsRequired(false);
-                builder.Property(a => a.Content).IsRequired();
-                builder.Property(a => a.Rating).IsRequired();
-                builder
-                    .HasOne<Author>()
-                    .WithMany()
-                    .HasForeignKey(a => a.AuthorId)
-                    .IsRequired();
-            });
+            public void UseTransaction(DbTransaction transaction) { } // @@NOTE: no-op since postgres doesn't support nested transactions
 
-            modelBuilder.Entity<UserVote>(builder => {
-                builder.HasKey(uv => new { uv.UserId, uv.ArticleId });
-                builder.Property(uv => uv.ArticleVote).IsRequired(false);
-                builder
-                    .Property(uv => uv.CommentIdToVote)
-                    .HasColumnType("jsonb")
-                    .IsRequired(false)
-                    .UsePropertyAccessMode(PropertyAccessMode.Field);
-                builder
-                    .HasOne<Author>()
-                    .WithMany()
-                    .HasForeignKey(uv => uv.UserId)
-                    .IsRequired();
-                builder
-                    .HasOne<Article>()
-                    .WithMany()
-                    .HasForeignKey(uv => uv.ArticleId)
-                    .IsRequired();
-                builder.Property<short?>("OldVote");
-            });
+            public async ValueTask<NpgsqlConnection> GetDbConnection() {
+                if (_connectionExternallyProvided) {
+                    return _connection;
+                }
+
+                if (_connection == null) {
+                    _connection = new NpgsqlConnection(_connectionString);
+                }
+                if (_connection.State != ConnectionState.Open) {
+                    await _connection.OpenAsync();
+                }
+
+                return _connection;
+            }
+
+            public void Migrate() {
+                if (_migrationHistorySchema == null || _migrationHistoryTable == null) {
+                    throw new Exception("Unspecified migration history table schema and/or name");
+                }
+
+                using var transaction = GetDbConnection().Result.BeginTransaction(IsolationLevel.Serializable);
+
+                bool migrationHistoryTableExists;
+                using (var cmd = new NpgsqlCommand()) {
+                    cmd.Connection = _connection;
+                    cmd.AllResultTypesAreUnknown = true; // @@NOTE: Npgsql doesn't know regclass type.
+                    cmd.CommandText = $@"
+                        SELECT to_regclass('{_migrationHistorySchema}.""{_migrationHistoryTable}""');
+                    ";
+
+                    var result = cmd.ExecuteScalar();
+                    migrationHistoryTableExists = result is not DBNull;
+                }
+
+                string lastAppliedMigrationName = null;
+                if (!migrationHistoryTableExists) {
+                    using (var cmd = new NpgsqlCommand()) {
+                        cmd.Connection = _connection;
+                        cmd.CommandText = $@"
+                            CREATE SCHEMA IF NOT EXISTS {_migrationHistorySchema};
+                        ";
+
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    using (var cmd = new NpgsqlCommand()) {
+                        cmd.Connection = _connection;
+                        cmd.CommandText = $@"
+                            CREATE TABLE {_migrationHistorySchema}.""{_migrationHistoryTable}"" (
+                                ""Name"" TEXT PRIMARY KEY
+                            );
+                        ";
+
+                        cmd.ExecuteNonQuery();
+                    }
+                } else {
+                    using (var cmd = new NpgsqlCommand()) {
+                        cmd.Connection = _connection;
+                        cmd.CommandText = $@"
+                            SELECT ""Name""
+                            FROM {_migrationHistorySchema}.""{_migrationHistoryTable}""
+                            ORDER BY ""Name"" DESC
+                            LIMIT 1;
+                        ";
+
+                        using var reader = cmd.ExecuteReader(CommandBehavior.SingleRow);
+                        if (reader.Read()) {
+                            lastAppliedMigrationName = reader.GetString(0);
+                        }
+                    }
+                }
+
+                var migrationTypesToApply = Assembly.GetExecutingAssembly()
+                    .GetTypes()
+                    .Where(t => t.IsSubclassOf(typeof(Migration)))
+                    .Where(t =>
+                        lastAppliedMigrationName == null || t.Name.CompareTo(lastAppliedMigrationName) > 0
+                    )
+                    .OrderBy(t => t.Name)
+                    .ToList();
+
+                foreach (var t in migrationTypesToApply) {
+                    _logger.LogInformation("Applying migration {Migration}", t.Name);
+
+                    var migration = (Migration) Activator.CreateInstance(t);
+                    migration.Up(_connection);
+                }
+
+                if (migrationTypesToApply.Any()) {
+                    using (var cmd = new NpgsqlCommand()) {
+                        cmd.Connection = _connection;
+
+                        cmd.Parameters.Add(new NpgsqlParameter<string[]>("Name", NpgsqlDbType.Array | NpgsqlDbType.Text) {
+                            TypedValue = migrationTypesToApply.Select(t => t.Name).ToArray()
+                        });
+
+                        cmd.CommandText = $@"
+                            INSERT INTO {_migrationHistorySchema}.""{_migrationHistoryTable}"" (""Name"")
+                                SELECT *
+                                FROM UNNEST (@{cmd.Parameters.First().ParameterName});
+                        ";
+
+                        cmd.ExecuteNonQuery();
+                    }
+                } else {
+                    _logger.LogInformation("No new migrations to apply");
+                }
+
+                transaction.Commit();
+            }
+        }
+
+        private readonly DbSession _dbSession;
+        public DbSession Database => _dbSession;
+
+        public FeedDbContext(IConfiguration configuration, ILoggerFactory loggerFactory) {
+            _dbSession = new DbSession(configuration, loggerFactory.CreateLogger<DbSession>());
+        }
+
+        public void Dispose() {
+            _dbSession.Dispose();
+        }
+
+        public ValueTask DisposeAsync() {
+            return _dbSession.DisposeAsync();
         }
     }
 }

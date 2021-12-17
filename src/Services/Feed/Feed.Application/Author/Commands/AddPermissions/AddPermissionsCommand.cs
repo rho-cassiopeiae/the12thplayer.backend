@@ -7,6 +7,7 @@ using MediatR;
 using Feed.Application.Author.Common.Dto;
 using Feed.Application.Common.Results;
 using Feed.Domain.Aggregates.Author;
+using AuthorDm = Feed.Domain.Aggregates.Author.Author;
 
 namespace Feed.Application.Author.Commands.AddPermissions {
     public class AddPermissionsCommand : IRequest<VoidResult> {
@@ -24,17 +25,12 @@ namespace Feed.Application.Author.Commands.AddPermissions {
         public async Task<VoidResult> Handle(
             AddPermissionsCommand command, CancellationToken cancellationToken
         ) {
-            // @@TODO: Potential concurrency issues.
-
-            var author = await _authorRepository.FindByUserId(command.UserId);
-
+            var author = new AuthorDm(userId: command.UserId);
             foreach (var permission in command.Permissions) {
                 author.AddPermission((PermissionScope) permission.Scope, permission.Flags);
             }
 
-            _authorRepository.UpdatePermissions(author);
-
-            await _authorRepository.SaveChanges(cancellationToken);
+            await _authorRepository.UpdatePermissions(author);
 
             return VoidResult.Instance;
         }

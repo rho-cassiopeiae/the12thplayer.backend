@@ -18,6 +18,10 @@ namespace Feed.Domain.Aggregates.Author {
             Username = username;
         }
 
+        public Author(long userId) {
+            UserId = userId;
+        }
+
         public void AddPermission(PermissionScope scope, int flags) {
             // @@TODO: Check validity.
             var valid = false;

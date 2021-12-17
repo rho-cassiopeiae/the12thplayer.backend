@@ -7,6 +7,9 @@ using Feed.Application.Author.Commands.CreateAuthor;
 using Feed.Application.Article.Commands.PostArticle;
 using Feed.Domain.Aggregates.Article;
 using Feed.Application.Article.Commands.VoteForArticle;
+using Feed.Application.Author.Commands.AddPermissions;
+using Feed.Application.Author.Common.Dto;
+using Feed.Domain.Aggregates.Author;
 
 namespace Feed.IntegrationTests.Article.Commands {
     [Collection(nameof(FeedTestCollection))]
@@ -24,6 +27,47 @@ namespace Feed.IntegrationTests.Article.Commands {
                     Username = "user-1"
                 }
             ).Wait();
+
+            _sut.SendRequest(
+                new AddPermissionsCommand {
+                    UserId = 1,
+                    Permissions = new[] {
+                        new AuthorPermissionDto {
+                            Scope = (int) PermissionScope.AdminPanel,
+                            Flags = (int) AdminPanelPermissions.LogIn
+                        },
+                        new AuthorPermissionDto {
+                            Scope = (int) PermissionScope.Article,
+                            Flags = (int) (
+                                ArticlePermissions.Publish |
+                                ArticlePermissions.Delete
+                            )
+                        },
+                        new AuthorPermissionDto {
+                            Scope = (int) PermissionScope.Article,
+                            Flags = (int) (
+                                ArticlePermissions.Publish |
+                                ArticlePermissions.Review
+                            )
+                        },
+                    }
+                }
+            ).Wait();
+
+            _sut.SendRequest(
+                new AddPermissionsCommand {
+                    UserId = 1,
+                    Permissions = new[] {
+                        new AuthorPermissionDto {
+                            Scope = (int) PermissionScope.Article,
+                            Flags = (int) (
+                                ArticlePermissions.Publish |
+                                ArticlePermissions.Edit
+                            )
+                        }
+                    }
+                }
+            ).Wait();
         }
 
         [Fact]
@@ -33,7 +77,7 @@ namespace Feed.IntegrationTests.Article.Commands {
                 Type = (int) ArticleType.News,
                 Title = "title",
                 PreviewImageUrl = "previewImageUrl",
-                Summary = "summary",
+                Summary = null,
                 Content = "content"
             });
 

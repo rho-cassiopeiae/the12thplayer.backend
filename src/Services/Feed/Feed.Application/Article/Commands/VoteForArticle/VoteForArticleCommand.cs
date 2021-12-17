@@ -51,8 +51,6 @@ namespace Feed.Application.Article.Commands.VoteForArticle {
                     command.ArticleId, incrementRatingBy
                 );
 
-                await _userVoteRepository.SaveChanges(cancellationToken);
-
                 await _unitOfWork.Commit();
 
                 return new HandleResult<ArticleRatingDto> {

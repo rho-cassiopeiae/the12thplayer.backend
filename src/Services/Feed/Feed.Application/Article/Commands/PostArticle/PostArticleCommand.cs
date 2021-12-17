@@ -41,12 +41,10 @@ namespace Feed.Application.Article.Commands.PostArticle {
                 rating: 0
             );
 
-            _articleRepository.Create(article);
-
-            await _articleRepository.SaveChanges(cancellationToken);
+            int articleId = await _articleRepository.Create(article);
 
             return new HandleResult<int> {
-                Data = article.Id
+                Data = articleId
             };
         }
     }

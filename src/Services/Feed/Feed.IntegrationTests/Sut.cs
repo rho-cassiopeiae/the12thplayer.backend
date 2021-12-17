@@ -9,7 +9,6 @@ using System.Security.Claims;
 //using System.IdentityModel.Tokens.Jwt;
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,7 +17,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using Respawn;
 using MediatR;
-//using StackExchange.Redis;
 using Xunit.Abstractions;
 
 using Feed.Api;
@@ -59,10 +57,10 @@ namespace Feed.IntegrationTests {
             _checkpoint = new Checkpoint {
                 DbAdapter = DbAdapter.Postgres,
                 SchemasToInclude = new[] {
-                    "feed"
+                    GetConfigurationValue<string>("Migrations:Schema")
                 },
                 TablesToIgnore = new[] {
-                    "__EFMigrationsHistory_FeedDbContext"
+                    GetConfigurationValue<string>("Migrations:Table")
                 }
             };
 
@@ -109,8 +107,7 @@ namespace Feed.IntegrationTests {
             using var scope = _host.Services.CreateScope();
 
             var context = scope.ServiceProvider.GetRequiredService<FeedDbContext>();
-            context.Database.OpenConnection();
-            _checkpoint.Reset(context.Database.GetDbConnection()).Wait();
+            _checkpoint.Reset(context.Database.GetDbConnection().Result).Wait();
 
             RunAsGuest();
         }

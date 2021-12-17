@@ -5,21 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Persistence\Migrations\Feed\Scripts\Functions\UpdateAndGetOldUserVoteForArticle\UpdateAndGetOldUserVoteForArticle.v0.sql" />
-    <None Remove="Persistence\Migrations\Feed\Scripts\Functions\UpdateArticleRating\UpdateArticleRating.v0.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Persistence\Migrations\Feed\Scripts\Functions\UpdateAndGetOldUserVoteForArticle\UpdateAndGetOldUserVoteForArticle.v0.sql" />
-    <EmbeddedResource Include="Persistence\Migrations\Feed\Scripts\Functions\UpdateArticleRating\UpdateArticleRating.v0.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.10">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
+    <PackageReference Include="Npgsql" Version="5.0.10" />
   </ItemGroup>
 
   <ItemGroup>
