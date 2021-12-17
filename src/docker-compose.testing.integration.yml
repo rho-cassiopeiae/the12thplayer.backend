@@ -23,6 +23,16 @@ services:
     - "26257:26257"
     - "8080:8080"
     command: start-single-node --insecure
+
+  cockroach-init:
+    image: cockroachdb-init:latest
+    environment:
+    - COCKROACH_HOST=cockroach-test:26257
+    - COCKROACH_INSECURE=true
+    - DATABASE_NAME=The12thPlayerTest
+    - DATABASE_USER=The12thPlayerUser
+    depends_on:
+    - cockroach-test
   
   rabbit-test:
     image: masstransit/rabbitmq:3.9.7

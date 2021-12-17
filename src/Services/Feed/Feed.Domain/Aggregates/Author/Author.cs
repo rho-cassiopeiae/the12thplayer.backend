@@ -22,7 +22,7 @@ namespace Feed.Domain.Aggregates.Author {
             UserId = userId;
         }
 
-        public void AddPermission(PermissionScope scope, int flags) {
+        public void AddPermission(PermissionScope scope, short flags) {
             // @@TODO: Check validity.
             var valid = false;
             switch (scope) {

@@ -27,7 +27,7 @@ namespace Feed.Infrastructure.Persistence.Migrations {
             using (var cmd = new NpgsqlCommand()) {
                 cmd.Connection = connection;
                 cmd.CommandText = $@"
-                    CREATE INDEX IF NOT EXISTS ""Comments_ArticleId_And_RootId_Idx"" ON feed.""Comments"" (""ArticleId"", ""RootId"");
+                    CREATE INDEX IF NOT EXISTS ""Comments_ArticleId_RootId_Idx"" ON feed.""Comments"" (""ArticleId"", ""RootId"");
                 ";
 
                 cmd.ExecuteNonQuery();

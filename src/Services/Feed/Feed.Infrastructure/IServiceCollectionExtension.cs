@@ -15,6 +15,9 @@ using Feed.Domain.Aggregates.Author;
 using Feed.Infrastructure.Persistence.Repositories;
 using Feed.Domain.Aggregates.Article;
 using Feed.Domain.Aggregates.UserVote;
+using Feed.Domain.Aggregates.Comment;
+using Feed.Application.Common.Interfaces;
+using Feed.Infrastructure.Persistence.Queryables;
 
 namespace Feed.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -29,7 +32,10 @@ namespace Feed.Infrastructure {
 
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IArticleRepository, ArticleRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<IUserVoteRepository, UserVoteRepository>();
+
+            services.AddScoped<ICommentQueryable, CommentQueryable>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
