@@ -36,6 +36,7 @@ namespace Feed.Infrastructure {
             services.AddScoped<IUserVoteRepository, UserVoteRepository>();
 
             services.AddScoped<ICommentQueryable, CommentQueryable>();
+            services.AddScoped<IArticleQueryable, ArticleQueryable>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
