@@ -36,6 +36,8 @@ namespace Feed.Api {
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
             });

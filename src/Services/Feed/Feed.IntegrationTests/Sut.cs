@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security.Claims;
-//using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +21,7 @@ using Xunit.Abstractions;
 
 using Feed.Api;
 using Feed.Infrastructure.Persistence;
+using Feed.Application.Common.Interfaces;
 
 namespace Feed.IntegrationTests {
     public class Sut {
@@ -113,13 +114,13 @@ namespace Feed.IntegrationTests {
         }
 
         public void RunAs(long userId, string username) {
-            //_user = new ClaimsPrincipal(new ClaimsIdentity(
-            //    new[] {
-            //        new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-            //        new Claim("__Username", username)
-            //    },
-            //    "Bearer"
-            //));
+            _user = new ClaimsPrincipal(new ClaimsIdentity(
+                new[] {
+                    new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                    new Claim("__Username", username)
+                },
+                "Bearer"
+            ));
         }
 
         public void RunAsGuest() {
@@ -181,10 +182,10 @@ namespace Feed.IntegrationTests {
         public async Task<T> SendRequest<T>(IRequest<T> request) {
             using var scope = _host.Services.CreateScope();
 
-            //if (_user != null) {
-            //    var context = scope.ServiceProvider.GetRequiredService<IAuthenticationContext>();
-            //    context.User = _user;
-            //}
+            if (_user != null) {
+                var context = scope.ServiceProvider.GetRequiredService<IAuthenticationContext>();
+                context.User = _user;
+            }
 
             var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
             var result = await mediator.Send(request);
