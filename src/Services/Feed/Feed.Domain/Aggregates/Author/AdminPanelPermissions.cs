@@ -2,7 +2,7 @@
 
 namespace Feed.Domain.Aggregates.Author {
     [Flags]
-    public enum AdminPanelPermissions {
+    public enum AdminPanelPermissions : short {
         LogIn = 1 << 0
     }
 }

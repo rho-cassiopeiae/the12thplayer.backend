@@ -33,19 +33,19 @@ namespace Feed.IntegrationTests.Article.Commands {
                     UserId = 1,
                     Permissions = new[] {
                         new AuthorPermissionDto {
-                            Scope = (int) PermissionScope.AdminPanel,
-                            Flags = (int) AdminPanelPermissions.LogIn
+                            Scope = (short) PermissionScope.AdminPanel,
+                            Flags = (short) AdminPanelPermissions.LogIn
                         },
                         new AuthorPermissionDto {
-                            Scope = (int) PermissionScope.Article,
-                            Flags = (int) (
+                            Scope = (short) PermissionScope.Article,
+                            Flags = (short) (
                                 ArticlePermissions.Publish |
                                 ArticlePermissions.Delete
                             )
                         },
                         new AuthorPermissionDto {
-                            Scope = (int) PermissionScope.Article,
-                            Flags = (int) (
+                            Scope = (short) PermissionScope.Article,
+                            Flags = (short) (
                                 ArticlePermissions.Publish |
                                 ArticlePermissions.Review
                             )
@@ -59,8 +59,8 @@ namespace Feed.IntegrationTests.Article.Commands {
                     UserId = 1,
                     Permissions = new[] {
                         new AuthorPermissionDto {
-                            Scope = (int) PermissionScope.Article,
-                            Flags = (int) (
+                            Scope = (short) PermissionScope.Article,
+                            Flags = (short) (
                                 ArticlePermissions.Publish |
                                 ArticlePermissions.Edit
                             )
@@ -74,14 +74,14 @@ namespace Feed.IntegrationTests.Article.Commands {
         public async Task Should_Update_Article_Rating_According_To_A_Sequence_Of_Vote_Commands() {
             var postArticleResult = await _sut.SendRequest(new PostArticleCommand {
                 TeamId = 53,
-                Type = (int) ArticleType.News,
+                Type = (short) ArticleType.News,
                 Title = "title",
                 PreviewImageUrl = "previewImageUrl",
                 Summary = null,
                 Content = "content"
             });
 
-            int articleId = postArticleResult.Data;
+            long articleId = postArticleResult.Data;
 
             await _sut.SendRequest(new VoteForArticleCommand {
                 ArticleId = articleId,

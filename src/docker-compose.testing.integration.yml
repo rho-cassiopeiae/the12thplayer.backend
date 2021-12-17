@@ -16,6 +16,13 @@ services:
     - PG_PRIMARY_PORT=5432
     ports:
     - "5432:5432"
+
+  cockroach-test:
+    image: cockroachdb/cockroach:v21.2.3
+    ports:
+    - "26257:26257"
+    - "8080:8080"
+    command: start-single-node --insecure
   
   rabbit-test:
     image: masstransit/rabbitmq:3.9.7

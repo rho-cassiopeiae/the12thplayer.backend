@@ -16,7 +16,7 @@ namespace Feed.Infrastructure.Persistence.Repositories {
 
         public Task SaveChanges(CancellationToken cancellationToken) => Task.CompletedTask;
 
-        public async Task<int> Create(Article article) {
+        public async Task<long> Create(Article article) {
             await using var cmd = new NpgsqlCommand();
             cmd.Connection = await _feedDbContext.Database.GetDbConnection();
 
@@ -33,8 +33,8 @@ namespace Feed.Infrastructure.Persistence.Repositories {
                 new NpgsqlParameter<long>(nameof(Article.PostedAt), NpgsqlDbType.Bigint) {
                     TypedValue = article.PostedAt
                 },
-                new NpgsqlParameter<int>(nameof(Article.Type), NpgsqlDbType.Integer) {
-                    TypedValue = (int) article.Type
+                new NpgsqlParameter<short>(nameof(Article.Type), NpgsqlDbType.Smallint) {
+                    TypedValue = (short) article.Type
                 },
                 new NpgsqlParameter<string>(nameof(Article.Title), NpgsqlDbType.Text) {
                     TypedValue = article.Title
@@ -48,7 +48,7 @@ namespace Feed.Infrastructure.Persistence.Repositories {
                 new NpgsqlParameter<string>(nameof(Article.Content), NpgsqlDbType.Text) {
                     TypedValue = article.Content
                 },
-                new NpgsqlParameter<int>(nameof(Article.Rating), NpgsqlDbType.Integer) {
+                new NpgsqlParameter<long>(nameof(Article.Rating), NpgsqlDbType.Bigint) {
                     TypedValue = article.Rating
                 }
             };
@@ -70,12 +70,12 @@ namespace Feed.Infrastructure.Persistence.Repositories {
                 RETURNING ""Id"";
             ";
 
-            var articleId = (int) await cmd.ExecuteScalarAsync();
+            var articleId = (long) await cmd.ExecuteScalarAsync();
 
             return articleId;
         }
 
-        public async Task<int> UpdateRatingFor(int articleId, int incrementRatingBy) {
+        public async Task<long> UpdateRatingFor(long articleId, int incrementRatingBy) {
             await using var cmd = new NpgsqlCommand();
             cmd.Connection = await _feedDbContext.Database.GetDbConnection();
 
@@ -83,7 +83,7 @@ namespace Feed.Infrastructure.Persistence.Repositories {
                 new NpgsqlParameter<int>(nameof(incrementRatingBy), NpgsqlDbType.Integer) {
                     TypedValue = incrementRatingBy
                 },
-                new NpgsqlParameter<int>(nameof(Article.Id), NpgsqlDbType.Integer) {
+                new NpgsqlParameter<long>(nameof(Article.Id), NpgsqlDbType.Bigint) {
                     TypedValue = articleId
                 }
             };
@@ -98,7 +98,7 @@ namespace Feed.Infrastructure.Persistence.Repositories {
                 RETURNING ""Rating"";
             ";
 
-            var updatedRating = (int) await cmd.ExecuteScalarAsync();
+            var updatedRating = (long) await cmd.ExecuteScalarAsync();
 
             return updatedRating;
         }

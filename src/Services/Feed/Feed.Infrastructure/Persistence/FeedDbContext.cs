@@ -80,13 +80,29 @@ namespace Feed.Infrastructure.Persistence {
                 bool migrationHistoryTableExists;
                 using (var cmd = new NpgsqlCommand()) {
                     cmd.Connection = _connection;
-                    cmd.AllResultTypesAreUnknown = true; // @@NOTE: Npgsql doesn't know regclass type.
+
+                    var parameters = new NpgsqlParameter<string>[] {
+                        new("table_schema", NpgsqlDbType.Text) {
+                            TypedValue = _migrationHistorySchema
+                        },
+                        new("table_name", NpgsqlDbType.Text) {
+                            TypedValue = _migrationHistoryTable
+                        }
+                    };
+
+                    cmd.Parameters.AddRange(parameters);
+
+                    int i = 0;
                     cmd.CommandText = $@"
-                        SELECT to_regclass('{_migrationHistorySchema}.""{_migrationHistoryTable}""');
+                        SELECT 1
+                        FROM information_schema.tables
+                        WHERE
+                            table_schema = @{parameters[i++].ParameterName} AND
+                            table_name = @{parameters[i++].ParameterName};
                     ";
 
-                    var result = cmd.ExecuteScalar();
-                    migrationHistoryTableExists = result is not DBNull;
+                    using var reader = cmd.ExecuteReader(CommandBehavior.SingleRow);
+                    migrationHistoryTableExists = reader.Read();
                 }
 
                 string lastAppliedMigrationName = null;

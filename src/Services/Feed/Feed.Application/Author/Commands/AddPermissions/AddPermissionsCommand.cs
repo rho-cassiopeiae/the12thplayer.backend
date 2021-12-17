@@ -27,7 +27,7 @@ namespace Feed.Application.Author.Commands.AddPermissions {
         ) {
             var author = new AuthorDm(userId: command.UserId);
             foreach (var permission in command.Permissions) {
-                author.AddPermission((PermissionScope) permission.Scope, permission.Flags);
+                author.AddPermission((PermissionScope) permission.Scope, (short) permission.Flags);
             }
 
             await _authorRepository.UpdatePermissions(author);

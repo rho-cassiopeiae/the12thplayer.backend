@@ -52,10 +52,10 @@ namespace Feed.Infrastructure.Persistence.Repositories {
                 new NpgsqlParameter<long>(nameof(AuthorPermission.UserId), NpgsqlDbType.Bigint) {
                     TypedValue = author.UserId
                 },
-                new NpgsqlParameter<int[]>(nameof(AuthorPermission.Scope), NpgsqlDbType.Array | NpgsqlDbType.Integer) {
-                    TypedValue = author.Permissions.Select(p => (int) p.Scope).ToArray()
+                new NpgsqlParameter<short[]>(nameof(AuthorPermission.Scope), NpgsqlDbType.Array | NpgsqlDbType.Smallint) {
+                    TypedValue = author.Permissions.Select(p => (short) p.Scope).ToArray()
                 },
-                new NpgsqlParameter<int[]>(nameof(AuthorPermission.Flags), NpgsqlDbType.Array | NpgsqlDbType.Integer) {
+                new NpgsqlParameter<short[]>(nameof(AuthorPermission.Flags), NpgsqlDbType.Array | NpgsqlDbType.Smallint) {
                     TypedValue = author.Permissions.Select(p => p.Flags).ToArray()
                 }
             };

@@ -1,5 +1,5 @@
 ﻿namespace Feed.Domain.Aggregates.Article {
-    public enum ArticleType {
+    public enum ArticleType : short {
         News,
         Interview,
         MatchPreview,

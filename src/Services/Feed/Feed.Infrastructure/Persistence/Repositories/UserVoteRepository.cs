@@ -26,7 +26,7 @@ namespace Feed.Infrastructure.Persistence.Repositories {
 
         public Task SaveChanges(CancellationToken cancellationToken) => Task.CompletedTask;
 
-        public async Task<UserVote> UpdateOneAndGetOldForArticle(long userId, int articleId, short vote) {
+        public async Task<UserVote> UpdateOneAndGetOldForArticle(long userId, long articleId, short vote) {
             await using var cmd = new NpgsqlCommand();
             cmd.Connection = await _feedDbContext.Database.GetDbConnection();
 
@@ -34,7 +34,7 @@ namespace Feed.Infrastructure.Persistence.Repositories {
                 new NpgsqlParameter<long>(nameof(UserVote.UserId), NpgsqlDbType.Bigint) {
                     TypedValue = userId
                 },
-                new NpgsqlParameter<int>(nameof(UserVote.ArticleId), NpgsqlDbType.Integer) {
+                new NpgsqlParameter<long>(nameof(UserVote.ArticleId), NpgsqlDbType.Bigint) {
                     TypedValue = articleId
                 },
                 new NpgsqlParameter<short>(nameof(UserVote.ArticleVote), NpgsqlDbType.Smallint) {

@@ -9,17 +9,17 @@ namespace Feed.Infrastructure.Persistence.Migrations {
                 cmd.Connection = connection;
                 cmd.CommandText = @"
                     CREATE TABLE IF NOT EXISTS feed.""Articles"" (
-                        ""Id"" INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+                        ""Id"" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
                         ""TeamId"" BIGINT NOT NULL,
                         ""AuthorId"" BIGINT NOT NULL REFERENCES feed.""Authors"" (""UserId""),
                         ""AuthorUsername"" TEXT NOT NULL,
                         ""PostedAt"" BIGINT NOT NULL,
-                        ""Type"" INTEGER NOT NULL,
+                        ""Type"" SMALLINT NOT NULL,
                         ""Title"" TEXT NOT NULL,
                         ""PreviewImageUrl"" TEXT,
                         ""Summary"" TEXT,
                         ""Content"" TEXT NOT NULL,
-                        ""Rating"" INTEGER NOT NULL
+                        ""Rating"" BIGINT NOT NULL
                     );
                 ";
 
@@ -40,7 +40,7 @@ namespace Feed.Infrastructure.Persistence.Migrations {
                 cmd.CommandText = @"
                     CREATE TABLE IF NOT EXISTS feed.""UserVotes"" (
                         ""UserId"" BIGINT REFERENCES feed.""Authors"" (""UserId""),
-                        ""ArticleId"" INTEGER REFERENCES feed.""Articles"" (""Id""),
+                        ""ArticleId"" BIGINT REFERENCES feed.""Articles"" (""Id""),
                         ""ArticleVote"" SMALLINT,
                         ""CommentIdToVote"" JSONB,
                         ""OldVote"" SMALLINT,

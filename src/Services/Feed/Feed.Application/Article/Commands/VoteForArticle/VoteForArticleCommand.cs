@@ -11,7 +11,7 @@ using MediatR;
 
 namespace Feed.Application.Article.Commands.VoteForArticle {
     public class VoteForArticleCommand : IRequest<HandleResult<ArticleRatingDto>> {
-        public int ArticleId { get; set; }
+        public long ArticleId { get; set; }
         public short Vote { get; set; }
     }
 
@@ -47,7 +47,7 @@ namespace Feed.Application.Article.Commands.VoteForArticle {
 
                 int incrementRatingBy = userVote.ChangeArticleVote(command.Vote);
 
-                int updatedRating = await _articleRepository.UpdateRatingFor(
+                long updatedRating = await _articleRepository.UpdateRatingFor(
                     command.ArticleId, incrementRatingBy
                 );
 

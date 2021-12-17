@@ -4,6 +4,6 @@ using Feed.Domain.Base;
 
 namespace Feed.Domain.Aggregates.UserVote {
     public interface IUserVoteRepository : IRepository<UserVote> {
-        Task<UserVote> UpdateOneAndGetOldForArticle(long userId, int articleId, short vote);
+        Task<UserVote> UpdateOneAndGetOldForArticle(long userId, long articleId, short vote);
     }
 }

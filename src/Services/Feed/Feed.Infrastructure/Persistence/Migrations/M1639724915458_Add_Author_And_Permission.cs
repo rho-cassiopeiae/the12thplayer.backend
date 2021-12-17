@@ -23,8 +23,8 @@ namespace Feed.Infrastructure.Persistence.Migrations {
                 cmd.CommandText = @"
                     CREATE TABLE IF NOT EXISTS feed.""AuthorPermissions"" (
                         ""UserId"" BIGINT,
-                        ""Scope"" INTEGER,
-                        ""Flags"" INTEGER NOT NULL,
+                        ""Scope"" SMALLINT,
+                        ""Flags"" SMALLINT NOT NULL,
                         PRIMARY KEY (""UserId"", ""Scope"")
                     );
                 ";

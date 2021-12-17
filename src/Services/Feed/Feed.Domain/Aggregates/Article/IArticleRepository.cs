@@ -4,7 +4,7 @@ using Feed.Domain.Base;
 
 namespace Feed.Domain.Aggregates.Article {
     public interface IArticleRepository : IRepository<Article> {
-        Task<int> Create(Article article);
-        Task<int> UpdateRatingFor(int articleId, int incrementRatingBy);
+        Task<long> Create(Article article);
+        Task<long> UpdateRatingFor(long articleId, int incrementRatingBy);
     }
 }

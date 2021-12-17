@@ -2,7 +2,7 @@
 
 namespace Feed.Domain.Aggregates.Article {
     public class Article : Entity, IAggregateRoot {
-        public int Id { get; private set; }
+        public long Id { get; private set; }
         public long TeamId { get; private set; }
         public long AuthorId { get; private set; }
         public string AuthorUsername { get; private set; }
@@ -12,12 +12,12 @@ namespace Feed.Domain.Aggregates.Article {
         public string PreviewImageUrl { get; private set; }
         public string Summary { get; private set; }
         public string Content { get; private set; }
-        public int Rating { get; private set; }
+        public long Rating { get; private set; }
 
         public Article(
             long teamId, long authorId, string authorUsername,
             long postedAt, ArticleType type, string title, string previewImageUrl,
-            string summary, string content, int rating
+            string summary, string content, long rating
         ) {
             TeamId = teamId;
             AuthorId = authorId;

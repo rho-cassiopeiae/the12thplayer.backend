@@ -5,13 +5,13 @@ using Feed.Domain.Base;
 namespace Feed.Domain.Aggregates.UserVote {
     public class UserVote : Entity, IAggregateRoot {
         public long UserId { get; private set; }
-        public int ArticleId { get; private set; }
+        public long ArticleId { get; private set; }
         public short? ArticleVote { get; private set; }
 
         private Dictionary<string, short?> _commentIdToVote;
         public IReadOnlyDictionary<string, short?> CommentIdToVote => _commentIdToVote;
 
-        public UserVote(long userId, int articleId, short? articleVote) {
+        public UserVote(long userId, long articleId, short? articleVote) {
             UserId = userId;
             ArticleId = articleId;
             ArticleVote = articleVote;

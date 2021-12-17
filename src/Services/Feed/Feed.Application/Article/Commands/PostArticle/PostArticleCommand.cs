@@ -9,7 +9,7 @@ using Feed.Domain.Aggregates.Article;
 using ArticleDm = Feed.Domain.Aggregates.Article.Article;
 
 namespace Feed.Application.Article.Commands.PostArticle {
-    public class PostArticleCommand : IRequest<HandleResult<int>> {
+    public class PostArticleCommand : IRequest<HandleResult<long>> {
         public long TeamId { get; set; }
         public int Type { get; set; }
         public string Title { get; set; }
@@ -18,14 +18,14 @@ namespace Feed.Application.Article.Commands.PostArticle {
         public string Content { get; set; }
     }
 
-    public class PostArticleCommandHandler : IRequestHandler<PostArticleCommand, HandleResult<int>> {
+    public class PostArticleCommandHandler : IRequestHandler<PostArticleCommand, HandleResult<long>> {
         private readonly IArticleRepository _articleRepository;
 
         public PostArticleCommandHandler(IArticleRepository articleRepository) {
             _articleRepository = articleRepository;
         }
 
-        public async Task<HandleResult<int>> Handle(
+        public async Task<HandleResult<long>> Handle(
             PostArticleCommand command, CancellationToken cancellationToken
         ) {
             var article = new ArticleDm(
@@ -41,9 +41,9 @@ namespace Feed.Application.Article.Commands.PostArticle {
                 rating: 0
             );
 
-            int articleId = await _articleRepository.Create(article);
+            long articleId = await _articleRepository.Create(article);
 
-            return new HandleResult<int> {
+            return new HandleResult<long> {
                 Data = articleId
             };
         }
