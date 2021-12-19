@@ -4,46 +4,47 @@ using System.Threading.Tasks;
 
 using MediatR;
 
-using Feed.Application.Common.Attributes;
 using Feed.Application.Common.Interfaces;
 using Feed.Application.Common.Results;
-using Feed.Domain.Aggregates.Article;
+using Feed.Application.Common.Attributes;
+using Feed.Domain.Aggregates.Comment;
 using Feed.Domain.Aggregates.UserVote;
 using Feed.Domain.Base;
 
-namespace Feed.Application.Article.Commands.VoteForArticle {
+namespace Feed.Application.Comment.Commands.VoteForComment {
     [RequireAuthorization]
-    public class VoteForArticleCommand : IRequest<HandleResult<ArticleRatingDto>> {
+    public class VoteForCommentCommand : IRequest<HandleResult<CommentRatingDto>> {
         public long ArticleId { get; set; }
+        public string CommentId { get; set; }
         public short Vote { get; set; }
     }
 
-    public class VoteForArticleCommandHandler : IRequestHandler<
-        VoteForArticleCommand, HandleResult<ArticleRatingDto>
+    public class VoteForCommentCommandHandler : IRequestHandler<
+        VoteForCommentCommand, HandleResult<CommentRatingDto>
     > {
         private readonly IAuthenticationContext _authenticationContext;
         private readonly IPrincipalDataProvider _principalDataProvider;
 
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserVoteRepository _userVoteRepository;
-        private readonly IArticleRepository _articleRepository;
+        private readonly ICommentRepository _commentRepository;
 
-        public VoteForArticleCommandHandler(
+        public VoteForCommentCommandHandler(
             IAuthenticationContext authenticationContext,
             IPrincipalDataProvider principalDataProvider,
             IUnitOfWork unitOfWork,
             IUserVoteRepository userVoteRepository,
-            IArticleRepository articleRepository
+            ICommentRepository commentRepository
         ) {
             _authenticationContext = authenticationContext;
             _principalDataProvider = principalDataProvider;
             _unitOfWork = unitOfWork;
             _userVoteRepository = userVoteRepository;
-            _articleRepository = articleRepository;
+            _commentRepository = commentRepository;
         }
 
-        public async Task<HandleResult<ArticleRatingDto>> Handle(
-            VoteForArticleCommand command, CancellationToken cancellationToken
+        public async Task<HandleResult<CommentRatingDto>> Handle(
+            VoteForCommentCommand command, CancellationToken cancellationToken
         ) {
             long userId = _principalDataProvider.GetId(_authenticationContext.User);
 
@@ -51,22 +52,22 @@ namespace Feed.Application.Article.Commands.VoteForArticle {
             try {
                 _userVoteRepository.EnlistAsPartOf(_unitOfWork);
 
-                var userVote = await _userVoteRepository.UpdateOneAndGetOldForArticle(
-                    userId, command.ArticleId, command.Vote
+                var userVote = await _userVoteRepository.UpdateOneAndGetOldForComment(
+                    userId, command.ArticleId, command.CommentId, command.Vote
                 );
 
-                int incrementRatingBy = userVote.ChangeArticleVote(command.Vote);
+                int incrementRatingBy = userVote.ChangeCommentVote(command.CommentId, command.Vote);
 
-                long updatedRating = await _articleRepository.UpdateRatingFor(
-                    command.ArticleId, incrementRatingBy
+                long updatedRating = await _commentRepository.UpdateRatingFor(
+                    command.ArticleId, command.CommentId, incrementRatingBy
                 );
 
                 await _unitOfWork.Commit();
 
-                return new HandleResult<ArticleRatingDto> {
-                    Data = new ArticleRatingDto {
+                return new HandleResult<CommentRatingDto> {
+                    Data = new CommentRatingDto {
                         Rating = updatedRating,
-                        Vote = userVote.ArticleVote
+                        Vote = userVote.CommentIdToVote[command.CommentId]
                     }
                 };
             } catch {

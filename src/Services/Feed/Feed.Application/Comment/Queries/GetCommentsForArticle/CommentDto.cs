@@ -5,7 +5,6 @@
         public string ParentId { get; init; }
         public long AuthorId { get; init; }
         public string AuthorUsername { get; init; }
-        public long PostedAt { get; init; }
         public long Rating { get; init; }
         public string Body { get; init; }
     }

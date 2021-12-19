@@ -17,6 +17,16 @@ namespace Feed.Domain.Aggregates.UserVote {
             ArticleVote = articleVote;
         }
 
+        public UserVote(long userId, long articleId) {
+            UserId = userId;
+            ArticleId = articleId;
+        }
+
+        public void AddCommentVote(string commentId, short? vote) {
+            _commentIdToVote ??= new Dictionary<string, short?>();
+            _commentIdToVote[commentId] = vote;
+        }
+
         public int ChangeArticleVote(short? vote) {
             int incrementRatingBy;
             if (ArticleVote == null) {
@@ -38,6 +48,32 @@ namespace Feed.Domain.Aggregates.UserVote {
             }
 
             ArticleVote = vote;
+
+            return incrementRatingBy;
+        }
+
+        public int ChangeCommentVote(string commentId, short? vote) {
+            short? currentVote = _commentIdToVote[commentId];
+            int incrementRatingBy;
+            if (currentVote == null) {
+                incrementRatingBy = vote.Value;
+            } else if (currentVote == 1) {
+                if (vote == 1) {
+                    incrementRatingBy = -1;
+                    vote = null;
+                } else {
+                    incrementRatingBy = -2;
+                }
+            } else {
+                if (vote == -1) {
+                    incrementRatingBy = 1;
+                    vote = null;
+                } else {
+                    incrementRatingBy = 2;
+                }
+            }
+
+            _commentIdToVote[commentId] = vote;
 
             return incrementRatingBy;
         }

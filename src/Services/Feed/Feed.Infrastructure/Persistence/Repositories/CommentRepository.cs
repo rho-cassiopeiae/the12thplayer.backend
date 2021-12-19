@@ -63,5 +63,38 @@ namespace Feed.Infrastructure.Persistence.Repositories {
 
             await cmd.ExecuteNonQueryAsync();
         }
+
+        public async Task<long> UpdateRatingFor(long articleId, string commentId, int incrementRatingBy) {
+            await using var cmd = new NpgsqlCommand();
+            cmd.Connection = await _feedDbContext.Database.GetDbConnection();
+
+            var parameters = new NpgsqlParameter[] {
+                new NpgsqlParameter<int>(nameof(incrementRatingBy), NpgsqlDbType.Integer) {
+                    TypedValue = incrementRatingBy
+                },
+                new NpgsqlParameter<long>(nameof(Comment.ArticleId), NpgsqlDbType.Bigint) {
+                    TypedValue = articleId
+                },
+                new NpgsqlParameter<string>(nameof(Comment.Id), NpgsqlDbType.Text) {
+                    TypedValue = commentId
+                }
+            };
+
+            cmd.Parameters.AddRange(parameters);
+
+            int i = 0;
+            cmd.CommandText = $@"
+                UPDATE feed.""Comments""
+                SET ""Rating"" = ""Rating"" + @{parameters[i++].ParameterName}
+                WHERE
+                    ""ArticleId"" = @{parameters[i++].ParameterName} AND
+                    ""Id"" = @{parameters[i++].ParameterName}
+                RETURNING ""Rating"";
+            ";
+
+            var updatedRating = (long) await cmd.ExecuteScalarAsync();
+
+            return updatedRating;
+        }
     }
 }

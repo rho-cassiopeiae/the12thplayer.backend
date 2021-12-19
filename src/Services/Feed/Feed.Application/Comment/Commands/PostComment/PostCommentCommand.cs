@@ -5,10 +5,13 @@ using System.Threading.Tasks;
 using MediatR;
 
 using Feed.Application.Common.Results;
+using Feed.Application.Common.Attributes;
+using Feed.Application.Common.Interfaces;
 using Feed.Domain.Aggregates.Comment;
 using CommentDm = Feed.Domain.Aggregates.Comment.Comment;
 
 namespace Feed.Application.Comment.Commands.PostComment {
+    [RequireAuthorization]
     public class PostCommentCommand : IRequest<HandleResult<string>> {
         public long ArticleId { get; set; }
         public string ThreadRootCommentId { get; set; }
@@ -17,26 +20,32 @@ namespace Feed.Application.Comment.Commands.PostComment {
     }
 
     public class PostCommentCommandHandler : IRequestHandler<PostCommentCommand, HandleResult<string>> {
+        private readonly IAuthenticationContext _authenticationContext;
+        private readonly IPrincipalDataProvider _principalDataProvider;
+
         private readonly ICommentRepository _commentRepository;
 
-        public PostCommentCommandHandler(ICommentRepository commentRepository) {
+        public PostCommentCommandHandler(
+            IAuthenticationContext authenticationContext,
+            IPrincipalDataProvider principalDataProvider,
+            ICommentRepository commentRepository
+        ) {
+            _authenticationContext = authenticationContext;
+            _principalDataProvider = principalDataProvider;
             _commentRepository = commentRepository;
         }
 
         public async Task<HandleResult<string>> Handle(
             PostCommentCommand command, CancellationToken cancellationToken
         ) {
-            long userId = 1;
-            var username = "user-1";
-
             var commentId = Ulid.NewUlid().ToString();
             var comment = new CommentDm(
                 articleId: command.ArticleId,
                 id: commentId,
                 rootId: command.ThreadRootCommentId ?? commentId,
                 parentId: command.ParentCommentId,
-                authorId: userId,
-                authorUsername: username,
+                authorId: _principalDataProvider.GetId(_authenticationContext.User),
+                authorUsername: _principalDataProvider.GetUsername(_authenticationContext.User),
                 rating: 0,
                 body: command.Body
             );

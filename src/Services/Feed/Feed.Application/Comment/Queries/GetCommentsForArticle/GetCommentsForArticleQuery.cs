@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +38,6 @@ namespace Feed.Application.Comment.Queries.GetCommentsForArticle {
                     ParentId = c.ParentId,
                     AuthorId = c.AuthorId,
                     AuthorUsername = c.AuthorUsername,
-                    PostedAt = Ulid.Parse(c.Id).Time.ToUnixTimeMilliseconds(),
                     Rating = c.Rating,
                     Body = c.Body
                 })

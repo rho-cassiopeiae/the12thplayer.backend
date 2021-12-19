@@ -15,21 +15,29 @@ namespace Feed.IntegrationTests.Article.Queries {
     public class Get_Articles_For_Team_Query_Tests {
         private readonly Sut _sut;
 
+        private readonly long _authorId;
+        private readonly string _authorUsername;
+
         public Get_Articles_For_Team_Query_Tests(Sut sut) {
             _sut = sut;
             _sut.ResetState();
 
+            _authorId = 1;
+            _authorUsername = "user-1";
+
             _sut.SendRequest(
                 new CreateAuthorCommand {
-                    UserId = 1,
+                    UserId = _authorId,
                     Email = "user@email.com",
-                    Username = "user-1"
+                    Username = _authorUsername
                 }
             ).Wait();
         }
 
         [Fact]
         public async Task Should_Retrieve_Top_Articles_With_Comment_Count() {
+            _sut.RunAs(userId: _authorId, username: _authorUsername);
+
             long articleId = (await _sut.SendRequest(
                 new PostArticleCommand {
                     TeamId = 53,

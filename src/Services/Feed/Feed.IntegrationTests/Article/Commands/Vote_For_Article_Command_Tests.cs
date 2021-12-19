@@ -16,21 +16,27 @@ namespace Feed.IntegrationTests.Article.Commands {
     public class Vote_For_Article_Command_Tests {
         private readonly Sut _sut;
 
+        private readonly long _authorId;
+        private readonly string _authorUsername;
+
         public Vote_For_Article_Command_Tests(Sut sut) {
             _sut = sut;
             _sut.ResetState();
 
+            _authorId = 1;
+            _authorUsername = "user-1";
+
             _sut.SendRequest(
                 new CreateAuthorCommand {
-                    UserId = 1,
+                    UserId = _authorId,
                     Email = "user@email.com",
-                    Username = "user-1"
+                    Username = _authorUsername
                 }
             ).Wait();
 
             _sut.SendRequest(
                 new AddPermissionsCommand {
-                    UserId = 1,
+                    UserId = _authorId,
                     Permissions = new[] {
                         new AuthorPermissionDto {
                             Scope = (short) PermissionScope.AdminPanel,
@@ -56,7 +62,7 @@ namespace Feed.IntegrationTests.Article.Commands {
 
             _sut.SendRequest(
                 new AddPermissionsCommand {
-                    UserId = 1,
+                    UserId = _authorId,
                     Permissions = new[] {
                         new AuthorPermissionDto {
                             Scope = (short) PermissionScope.Article,
@@ -72,6 +78,8 @@ namespace Feed.IntegrationTests.Article.Commands {
 
         [Fact]
         public async Task Should_Update_Article_Rating_According_To_A_Sequence_Of_Vote_Commands() {
+            _sut.RunAs(userId: _authorId, username: _authorUsername);
+
             var postArticleResult = await _sut.SendRequest(new PostArticleCommand {
                 TeamId = 53,
                 Type = (short) ArticleType.News,

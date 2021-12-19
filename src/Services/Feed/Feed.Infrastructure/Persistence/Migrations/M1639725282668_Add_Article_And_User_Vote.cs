@@ -42,7 +42,7 @@ namespace Feed.Infrastructure.Persistence.Migrations {
                         ""UserId"" BIGINT REFERENCES feed.""Authors"" (""UserId""),
                         ""ArticleId"" BIGINT REFERENCES feed.""Articles"" (""Id""),
                         ""ArticleVote"" SMALLINT,
-                        ""CommentIdToVote"" JSONB,
+                        ""CommentIdToVote"" JSONB NOT NULL DEFAULT '{}'::JSONB,
                         ""OldVote"" SMALLINT,
                         PRIMARY KEY (""UserId"", ""ArticleId"")
                     );

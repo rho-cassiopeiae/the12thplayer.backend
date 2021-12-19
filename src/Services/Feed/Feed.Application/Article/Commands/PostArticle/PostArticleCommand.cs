@@ -5,10 +5,13 @@ using System.Threading.Tasks;
 using MediatR;
 
 using Feed.Application.Common.Results;
+using Feed.Application.Common.Interfaces;
+using Feed.Application.Common.Attributes;
 using Feed.Domain.Aggregates.Article;
 using ArticleDm = Feed.Domain.Aggregates.Article.Article;
 
 namespace Feed.Application.Article.Commands.PostArticle {
+    [RequireAuthorization]
     public class PostArticleCommand : IRequest<HandleResult<long>> {
         public long TeamId { get; set; }
         public int Type { get; set; }
@@ -19,9 +22,18 @@ namespace Feed.Application.Article.Commands.PostArticle {
     }
 
     public class PostArticleCommandHandler : IRequestHandler<PostArticleCommand, HandleResult<long>> {
+        private readonly IAuthenticationContext _authenticationContext;
+        private readonly IPrincipalDataProvider _principalDataProvider;
+
         private readonly IArticleRepository _articleRepository;
 
-        public PostArticleCommandHandler(IArticleRepository articleRepository) {
+        public PostArticleCommandHandler(
+            IAuthenticationContext authenticationContext,
+            IPrincipalDataProvider principalDataProvider,
+            IArticleRepository articleRepository
+        ) {
+            _authenticationContext = authenticationContext;
+            _principalDataProvider = principalDataProvider;
             _articleRepository = articleRepository;
         }
 
@@ -30,8 +42,8 @@ namespace Feed.Application.Article.Commands.PostArticle {
         ) {
             var article = new ArticleDm(
                 teamId: command.TeamId,
-                authorId: 1,
-                authorUsername: "user-1",
+                authorId: _principalDataProvider.GetId(_authenticationContext.User),
+                authorUsername: _principalDataProvider.GetUsername(_authenticationContext.User),
                 postedAt: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 type: (ArticleType) command.Type,
                 title: command.Title,

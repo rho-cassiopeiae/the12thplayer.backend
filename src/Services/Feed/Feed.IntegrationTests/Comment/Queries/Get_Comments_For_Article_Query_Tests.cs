@@ -15,19 +15,26 @@ namespace Feed.IntegrationTests.Comment.Queries {
     public class Get_Comments_For_Article_Query_Tests {
         private readonly Sut _sut;
 
-        private long _articleId;
+        private readonly long _authorId;
+        private readonly string _authorUsername;
+        private readonly long _articleId;
 
         public Get_Comments_For_Article_Query_Tests(Sut sut) {
             _sut = sut;
             _sut.ResetState();
 
+            _authorId = 1;
+            _authorUsername = "user-1";
+
             _sut.SendRequest(
                 new CreateAuthorCommand {
-                    UserId = 1,
+                    UserId = _authorId,
                     Email = "user@email.com",
-                    Username = "user-1"
+                    Username = _authorUsername
                 }
             ).Wait();
+
+            _sut.RunAs(userId: _authorId, username: _authorUsername);
 
             _articleId = _sut.SendRequest(
                 new PostArticleCommand {
@@ -43,6 +50,8 @@ namespace Feed.IntegrationTests.Comment.Queries {
 
         [Fact]
         public async Task Should_Retrieve_Top_Comments() {
+            _sut.RunAs(userId: _authorId, username: _authorUsername);
+
             var commentId1 = (await _sut.SendRequest(new PostCommentCommand {
                 ArticleId = _articleId,
                 ThreadRootCommentId = null,
