@@ -7,12 +7,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using MassTransit;
 using MassTransit.Definition;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
 
 using MessageBus.Components.HostedServices;
+using MessageBus.Contracts.Requests.Profile;
 
 using Profile.Infrastructure.Persistence;
 using Profile.Domain.Aggregates.Profile;
@@ -23,6 +25,7 @@ using Profile.Infrastructure.Identity;
 using Profile.Domain.Base;
 using Profile.Application.Common.Integration;
 using Profile.Infrastructure.Integration;
+using Profile.Infrastructure.FileUpload;
 
 namespace Profile.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -106,8 +109,15 @@ namespace Profile.Infrastructure {
             services.AddTransient<IIntegrationEventPublisher, IntegrationEventPublisher>();
             services.AddTransient<IIntegrationEventTracker, IntegrationEventTracker>();
 
+            services.AddSingleton<MultipartRequestHelper>();
+            services.AddSingleton<ImageFileValidator>();
+            services.AddSingleton<IFileReceiver, FileReceiver>();
+            services.TryAddScoped<IFileHosting, FileHosting>();
+
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
+
+                busCfg.AddRequestClient<UploadImage>(new Uri("queue:file-hosting-gateway-profile-upload-requests"));
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
                     rabbitCfg.Host(configuration["RabbitMQ:Host"]);

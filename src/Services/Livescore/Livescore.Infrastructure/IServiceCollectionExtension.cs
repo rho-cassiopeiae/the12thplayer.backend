@@ -183,7 +183,7 @@ namespace Livescore.Infrastructure {
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
 
-                busCfg.AddRequestClient<UploadVideo>(new Uri("queue:file-hosting-gateway-upload-requests"));
+                busCfg.AddRequestClient<UploadVideo>(new Uri("queue:file-hosting-gateway-livescore-upload-requests"));
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
                     rabbitCfg.Host(configuration["RabbitMQ:Host"]);

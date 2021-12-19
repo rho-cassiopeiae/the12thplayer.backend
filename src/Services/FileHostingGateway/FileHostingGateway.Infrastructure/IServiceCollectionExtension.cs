@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 using MassTransit;
 using MassTransit.Definition;
@@ -11,11 +12,13 @@ using MessageBus.Components.HostedServices;
 
 using FileHostingGateway.Application.Common.Interfaces;
 using FileHostingGateway.Infrastructure.Vimeo;
+using FileHostingGateway.Infrastructure.S3;
 
 namespace FileHostingGateway.Infrastructure {
     public static class IServiceCollectionExtension {
         public static IServiceCollection AddInfrastructure(
             this IServiceCollection services,
+            IHostEnvironment hostEnvironment,
             IConfiguration configuration,
             Action<IServiceCollectionBusConfigurator> busCfgCallback
         ) {
@@ -32,11 +35,17 @@ namespace FileHostingGateway.Infrastructure {
 
             services.AddSingleton<IVimeoGateway, VimeoGateway>();
 
+            if (hostEnvironment.IsDevelopment()) {
+                services.AddSingleton<IS3Gateway, S3GatewayMock>();
+            } else {
+                services.AddSingleton<IS3Gateway, S3Gateway>();
+            }
+
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
-                    rabbitCfg.Host("rabbit");
+                    rabbitCfg.Host(configuration["RabbitMQ:Host"]);
 
                     rabbitCfg.ConfigureEndpoints(
                         context,

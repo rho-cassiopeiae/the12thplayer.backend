@@ -91,25 +91,25 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
 
             FormCollection formValues = null;
             try {
-                var result = await _fileReceiver.ReceiveVideoAndFormValues(
+                var outcome = await _fileReceiver.ReceiveVideoAndFormValues(
                     command.Request,
                     maxSize: 50 * 1024 * 1024, // @@TODO: Config.
                     filePrefix: $"video-reactions/f-{command.FixtureId}-t-{command.TeamId}"
                 );
-                if (result.IsError) {
+                if (outcome.IsError) {
                     return new HandleResult<VideoReactionStreamingInfoDto> {
-                        Error = result.Error
+                        Error = outcome.Error
                     };
                 }
-                if (!result.Data.ContainsKey("title")) { // @@TODO: Validate title.
-                    _fileReceiver.DeleteFile(result.Data["filePath"]);
+                if (!outcome.Data.ContainsKey("title")) { // @@TODO: Validate title.
+                    _fileReceiver.DeleteFile(outcome.Data["filePath"]);
 
                     return new HandleResult<VideoReactionStreamingInfoDto> {
                         Error = new VideoReactionError("No title provided")
                     };
                 }
 
-                formValues = result.Data;
+                formValues = outcome.Data;
             } catch (Exception e) {
                 _logger.LogError("Error receiving user video", e);
 

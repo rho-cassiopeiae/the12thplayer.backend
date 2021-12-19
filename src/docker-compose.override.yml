@@ -92,6 +92,8 @@ services:
     - ASPNETCORE_URLS=http://0.0.0.0:80
     ports:
     - "6000:80"
+    volumes:
+    - "user_files_data:/app/wwwroot"
     depends_on:
     - migrator
     - rabbit
@@ -102,6 +104,8 @@ services:
     - ASPNETCORE_URLS=http://0.0.0.0:80
     ports:
     - "8000:80"
+    volumes:
+    - "user_files_data:/app/wwwroot"
     depends_on:
     - migrator
     - rabbit
@@ -134,3 +138,5 @@ services:
 volumes:
   pgdata:
   pgreport:
+  user_files_data:
+    driver: local

@@ -11,10 +11,10 @@ using MessageBus.Contracts.Responses.FileHostingGateway;
 using FileHostingGateway.Application.Commands.UploadVideo;
 
 namespace FileHostingGateway.Host.Consumers.Livescore {
-    public class UploadRequestsConsumer : IConsumer<UploadVideo> {
+    public class LivescoreUploadRequestsConsumer : IConsumer<UploadVideo> {
         private readonly ISender _mediator;
 
-        public UploadRequestsConsumer(ISender mediator) {
+        public LivescoreUploadRequestsConsumer(ISender mediator) {
             _mediator = mediator;
         }
 

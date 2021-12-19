@@ -35,6 +35,10 @@ namespace Profile.Api {
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
             if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
+
+                // @@NOTE: In dev, user-uploaded images get saved to the wwwroot and served by the service.
+                // But in prod, the intent is to upload images to an S3 bucket and serve from there.
+                app.UseStaticFiles();
             }
 
             app.UseRouting();

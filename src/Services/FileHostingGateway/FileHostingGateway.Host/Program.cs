@@ -5,6 +5,7 @@ using FileHostingGateway.Application;
 using FileHostingGateway.Host.Consumers.Worker;
 using FileHostingGateway.Infrastructure;
 using FileHostingGateway.Host.Consumers.Livescore;
+using FileHostingGateway.Host.Consumers.Profile;
 
 namespace FileHostingGateway.Host {
     public class Program {
@@ -19,10 +20,12 @@ namespace FileHostingGateway.Host {
 
                     services.AddApplication();
                     services.AddInfrastructure(
+                        hostContext.HostingEnvironment,
                         configuration,
                         busCfg => {
                             busCfg.AddConsumer<FolderRequestsConsumer>();
-                            busCfg.AddConsumer<UploadRequestsConsumer>();
+                            busCfg.AddConsumer<LivescoreUploadRequestsConsumer>();
+                            busCfg.AddConsumer<ProfileUploadRequestsConsumer>();
                         }
                     );
                 });
