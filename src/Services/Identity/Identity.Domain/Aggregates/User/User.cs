@@ -43,5 +43,13 @@ namespace Identity.Domain.Aggregates.User {
         public void AddRefreshToken(RefreshToken token) {
             _refreshTokens.Add(token);
         }
+
+        public void RemoveRefreshToken(RefreshToken token) {
+            _refreshTokens.Remove(token);
+        }
+
+        public void RemoveAllRefreshTokensForDevice(string deviceId) {
+            _refreshTokens.RemoveAll(t => t.DeviceId == deviceId);
+        }
     }
 }

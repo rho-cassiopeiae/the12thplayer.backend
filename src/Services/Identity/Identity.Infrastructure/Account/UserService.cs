@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Identity;
@@ -13,12 +15,13 @@ using Identity.Application.Common.Interfaces;
 using Identity.Application.Common.Results;
 using Identity.Infrastructure.Persistence;
 using Identity.Application.Account.Common.Errors;
-using Identity.Infrastructure.Persistence.Models;
 using Identity.Application.Account.DomainEvents.UserAccountCreated;
 using Identity.Application.Account.DomainEvents.UserAccountConfirmed;
 using Identity.Domain.Base;
 using UserDm = Identity.Domain.Aggregates.User.User;
 using UserPm = Identity.Infrastructure.Persistence.Models.User;
+using RefreshTokenDm = Identity.Domain.Aggregates.User.RefreshToken;
+using RefreshTokenPm = Identity.Infrastructure.Persistence.Models.RefreshToken;
 
 namespace Identity.Infrastructure.Account {
     public class UserService : IUserService {
@@ -69,10 +72,25 @@ namespace Identity.Infrastructure.Account {
             }
         }
 
-        public async Task<Either<AccountError, UserDm>> FindByEmail(string email) {
-            var userPm = await _userManager.FindByEmailAsync(email);
+        public async Task<Either<AccountError, UserDm>> FindByEmail(
+            string email, bool includeRefreshTokensAndClaims = false
+        ) {
+            UserPm userPm;
+            if (includeRefreshTokensAndClaims) {
+                userPm = await _userDbContext.Users
+                    .Include(u => u.RefreshTokens)
+                    .FirstOrDefaultAsync(u => u.Email == email);
+            } else {
+                userPm = await _userManager.FindByEmailAsync(email);
+            }
+
             if (userPm == null) {
                 return new AccountError($"Account {email} does not exist");
+            }
+
+            IEnumerable<Claim> claims = null;
+            if (includeRefreshTokensAndClaims) {
+                claims = await _userManager.GetClaimsAsync(userPm);
             }
 
             var userDm = new UserDm(
@@ -82,14 +100,73 @@ namespace Identity.Infrastructure.Account {
                 isConfirmed: userPm.EmailConfirmed
             );
 
+            if (includeRefreshTokensAndClaims) {
+                foreach (var token in userPm.RefreshTokens) {
+                    userDm.AddRefreshToken(new RefreshTokenDm(
+                        deviceId: token.DeviceId,
+                        value: token.Value,
+                        isActive: token.IsActive,
+                        expiresAt: DateTimeOffset.FromUnixTimeMilliseconds(token.ExpiresAt)
+                    ));
+                }
+                foreach (var claim in claims) {
+                    userDm.AddClaim(claim.Type, claim.Value);
+                }
+            }
+
             _userDmToPm[userDm] = userPm;
 
             return userDm;
         }
 
-        public async Task<Maybe<AccountError>> Create(
-            UserDm userDm, string password
+        public async Task<Either<AccountError, UserDm>> FindById(
+            long id, bool includeRefreshTokensAndClaims = false
         ) {
+            UserPm userPm;
+            if (includeRefreshTokensAndClaims) {
+                userPm = await _userDbContext.Users
+                    .Include(u => u.RefreshTokens)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+            } else {
+                userPm = await _userManager.FindByIdAsync(id.ToString());
+            }
+
+            if (userPm == null) {
+                return new AccountError($"Account does not exist");
+            }
+
+            IEnumerable<Claim> claims = null;
+            if (includeRefreshTokensAndClaims) {
+                claims = await _userManager.GetClaimsAsync(userPm);
+            }
+
+            var userDm = new UserDm(
+                id: userPm.Id,
+                email: userPm.Email,
+                username: userPm.UserName,
+                isConfirmed: userPm.EmailConfirmed
+            );
+
+            if (includeRefreshTokensAndClaims) {
+                foreach (var token in userPm.RefreshTokens) {
+                    userDm.AddRefreshToken(new RefreshTokenDm(
+                        deviceId: token.DeviceId,
+                        value: token.Value,
+                        isActive: token.IsActive,
+                        expiresAt: DateTimeOffset.FromUnixTimeMilliseconds(token.ExpiresAt)
+                    ));
+                }
+                foreach (var claim in claims) {
+                    userDm.AddClaim(claim.Type, claim.Value);
+                }
+            }
+
+            _userDmToPm[userDm] = userPm;
+
+            return userDm;
+        }
+
+        public async Task<Maybe<AccountError>> Create(UserDm userDm, string password) {
             var userPm = new UserPm {
                 Email = userDm.Email,
                 UserName = userDm.Username
@@ -115,13 +192,9 @@ namespace Identity.Infrastructure.Account {
             return null;
         }
 
-        public Task<bool> VerifyEmailConfirmationCode(
-            UserDm userDm, string confirmationCode
-        ) {
-            var userPm = _userDmToPm[userDm];
-
+        public virtual Task<bool> VerifyEmailConfirmationCode(UserDm userDm, string confirmationCode) {
             return _userManager.VerifyUserTokenAsync(
-                userPm,
+                _userDmToPm[userDm],
                 "ConfirmationCodeProvider",
                 UserManager<UserPm>.ConfirmEmailTokenPurpose,
                 confirmationCode
@@ -132,27 +205,6 @@ namespace Identity.Infrastructure.Account {
             var userPm = _userDmToPm[userDm];
 
             userPm.EmailConfirmed = userDm.IsConfirmed;
-            userPm.RefreshTokens.AddRange(userDm.RefreshTokens.Select(
-                token => new RefreshToken {
-                    UserId = userPm.Id,
-                    Value = token.Value,
-                    IsActive = token.IsActive,
-                    ExpiresAt = token.ExpiresAt.ToUnixTimeMilliseconds()
-                }
-            ));
-
-            _userDbContext.AddRange(userPm.RefreshTokens);
-
-            // @@NOTE: Need to explicitly start tracking refresh tokens in Added state
-            // because UpdateAsync under the hood does this:
-            //
-            // Context.Attach(user);
-            // user.ConcurrencyStamp = Guid.NewGuid().ToString();
-            // Context.Update(user);
-            //
-            // Attaching the user will attach his refresh tokens in Unchanged state,
-            // since tokens have non-generated keys. The following update will see
-            // that the tokens are already being tracked, so will do nothing.
 
             var result = await _userManager.UpdateAsync(userPm);
             if (!result.Succeeded) {
@@ -173,16 +225,55 @@ namespace Identity.Infrastructure.Account {
             return null;
         }
 
-        public async Task<Maybe<AccountError>> VerifyPassword(
-            UserDm userDm, string password
-        ) {
-            var userPm = _userDmToPm[userDm];
-
+        public async Task<Maybe<AccountError>> VerifyPassword(UserDm userDm, string password) {
             var result = await _signInManager.CheckPasswordSignInAsync(
-                userPm, password, lockoutOnFailure: true
+                _userDmToPm[userDm], password, lockoutOnFailure: true
             );
 
             return !result.Succeeded ? new AccountError(result.ToString()) : null;
+        }
+
+        public async Task FinalizeSignIn(UserDm userDm) {
+            var userPm = _userDmToPm[userDm];
+            var newRefreshToken = userDm.RefreshTokens.Last();
+
+            _userDbContext.RemoveRange(
+                userPm.RefreshTokens.Where(t => t.DeviceId == newRefreshToken.DeviceId)
+            );
+            _userDbContext.Add(new RefreshTokenPm {
+                UserId = userPm.Id,
+                DeviceId = newRefreshToken.DeviceId,
+                Value = newRefreshToken.Value,
+                IsActive = newRefreshToken.IsActive,
+                ExpiresAt = newRefreshToken.ExpiresAt.ToUnixTimeMilliseconds()
+            });
+
+            await _userDbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateRefreshTokens(UserDm userDm) {
+            var userPm = _userDmToPm[userDm];
+
+            _userDbContext.RemoveRange(userPm.RefreshTokens.Where(
+                t => !userDm.RefreshTokens.Any(
+                    token => token.DeviceId == t.DeviceId && token.Value == t.Value
+                )
+            ));
+            _userDbContext.AddRange(
+                userDm.RefreshTokens
+                    .Where(t => !userPm.RefreshTokens.Any(
+                        token => token.DeviceId == t.DeviceId && token.Value == t.Value
+                    ))
+                    .Select(t => new RefreshTokenPm {
+                        UserId = userPm.Id,
+                        DeviceId = t.DeviceId,
+                        Value = t.Value,
+                        IsActive = t.IsActive,
+                        ExpiresAt = t.ExpiresAt.ToUnixTimeMilliseconds()
+                    })
+            );
+
+            await _userDbContext.SaveChangesAsync();
         }
     }
 }

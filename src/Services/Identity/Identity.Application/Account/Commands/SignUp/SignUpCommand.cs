@@ -35,8 +35,6 @@ namespace Identity.Application.Account.Commands.SignUp {
         public async Task<VoidResult> Handle(
             SignUpCommand command, CancellationToken cancellationToken
         ) {
-            _logger.LogInformation("User {Email} is signing up", command.Email);
-
             var user = new User(
                 email: command.Email,
                 username: command.Username
@@ -56,8 +54,6 @@ namespace Identity.Application.Account.Commands.SignUp {
                 await _userService.DispatchDomainEvents(cancellationToken);
 
                 await _unitOfWork.Commit();
-
-                _logger.LogInformation("User {Email} signed up successfully", user.Email);
 
                 return VoidResult.Instance;
             } catch {

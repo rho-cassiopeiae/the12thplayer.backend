@@ -13,10 +13,13 @@ namespace Identity.Application.Common.Interfaces {
         void EnlistAsPartOf(IUnitOfWork unitOfWork);
 
         Task DispatchDomainEvents(CancellationToken cancellationToken);
-        Task<Either<AccountError, User>> FindByEmail(string email);
+        Task<Either<AccountError, User>> FindByEmail(string email, bool includeRefreshTokensAndClaims = false);
+        Task<Either<AccountError, User>> FindById(long id, bool includeRefreshTokensAndClaims = false);
         Task<Maybe<AccountError>> Create(User user, string password);
         Task<bool> VerifyEmailConfirmationCode(User user, string confirmationCode);
         Task<Maybe<AccountError>> FinalizeAccountCreation(User user);
         Task<Maybe<AccountError>> VerifyPassword(User user, string password);
+        Task FinalizeSignIn(User user);
+        Task UpdateRefreshTokens(User user);
     }
 }

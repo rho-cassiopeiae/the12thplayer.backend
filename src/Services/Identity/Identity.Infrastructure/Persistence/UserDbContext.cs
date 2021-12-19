@@ -14,7 +14,7 @@ namespace Identity.Infrastructure.Persistence {
             modelBuilder.HasDefaultSchema("identity");
 
             modelBuilder.Entity<RefreshToken>(builder => {
-                builder.HasKey(t => new { t.UserId, t.Value });
+                builder.HasKey(t => new { t.UserId, t.DeviceId, t.Value });
                 builder
                     .HasOne<User>()
                     .WithMany(u => u.RefreshTokens)

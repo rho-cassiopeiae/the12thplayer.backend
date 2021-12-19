@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 using Identity.Application.Common.Interfaces;
+using Identity.Application.Common.Results;
+using Identity.Application.Account.Common.Errors;
 
 namespace Identity.Infrastructure.Account {
     public class SecurityTokenProvider : ISecurityTokenProvider {
@@ -53,10 +55,42 @@ namespace Identity.Infrastructure.Account {
 
         public string GenerateRefreshToken() {
             var randomNumber = new byte[32];
-            var generator = RandomNumberGenerator.Create();
+            using var generator = RandomNumberGenerator.Create();
             generator.GetBytes(randomNumber);
 
             return Convert.ToBase64String(randomNumber);
+        }
+
+        public Either<AccountError, ClaimsPrincipal> CreatePrincipalFromAccessToken(string accessToken) {
+            var validationParams = new TokenValidationParameters {
+                ValidateIssuer = true,
+                ValidIssuer = _issuer,
+                ValidateAudience = true,
+                ValidAudience = _audience,
+                ValidateLifetime = false,
+                IssuerSigningKey = _publicKey
+            };
+
+            ClaimsPrincipal principal;
+            SecurityToken validatedToken;
+            try {
+                principal = new JwtSecurityTokenHandler().ValidateToken(
+                    accessToken, validationParams, out validatedToken
+                );
+            } catch {
+                return new AccountError("Invalid access token");
+            }
+
+            if (
+                validatedToken is not JwtSecurityToken securityToken ||
+                !securityToken.Header.Alg.Equals(
+                    SecurityAlgorithms.RsaSha256, StringComparison.InvariantCultureIgnoreCase
+                )
+            ) {
+                return new AccountError("Invalid access token");
+            }
+
+            return principal;
         }
     }
 }

@@ -52,19 +52,16 @@ namespace Identity.Infrastructure {
 
             services
                 .AddIdentityCore<User>(options => {
-                    options.Tokens.EmailConfirmationTokenProvider =
-                        "ConfirmationCodeProvider";
-                    options.Tokens.PasswordResetTokenProvider =
-                        "ConfirmationCodeProvider";
-                    options.ClaimsIdentity.UserIdClaimType =
-                        JwtRegisteredClaimNames.Sub;
+                    options.Tokens.EmailConfirmationTokenProvider = "ConfirmationCodeProvider";
+                    options.Tokens.PasswordResetTokenProvider = "ConfirmationCodeProvider";
+                    options.ClaimsIdentity.UserIdClaimType = JwtRegisteredClaimNames.Sub;
                     options.User.RequireUniqueEmail = true;
-                    options.User.AllowedUserNameCharacters =
-                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -._";
+                    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -._";
                     options.Password.RequiredLength = 8;
                     options.Password.RequireDigit = false;
                     options.Password.RequireUppercase = false;
                     options.Password.RequireNonAlphanumeric = false;
+                    options.SignIn.RequireConfirmedAccount = true;
                 })
                 .AddEntityFrameworkStores<UserDbContext>()
                 .AddDefaultTokenProviders()
@@ -76,8 +73,9 @@ namespace Identity.Infrastructure {
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<IUserService, UserService>();
+            services.TryAddScoped<IUserService, UserService>();
             services.AddSingleton<ISecurityTokenProvider, SecurityTokenProvider>();
+            services.AddSingleton<IPrincipalDataProvider, PrincipalDataProvider>();
             services.AddScoped<IProfileSvcQueryable, ProfileSvcQueryable>();
 
             services.AddScoped<IIntegrationEventRepository, IntegrationEventRepository>();
