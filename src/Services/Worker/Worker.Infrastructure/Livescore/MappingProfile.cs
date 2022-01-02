@@ -21,6 +21,7 @@ namespace Worker.Infrastructure.Livescore {
     public class MappingProfile : Profile {
         public MappingProfile() {
             CreateMap<CountryDto, CountryDtoMsg>();
+
             CreateMap<TeamDto, TeamDtoMsg>();
             CreateMap<VenueDto, VenueDtoMsg>();
             CreateMap<ManagerDto, ManagerDtoMsg>();

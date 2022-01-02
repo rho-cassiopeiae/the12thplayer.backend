@@ -102,10 +102,13 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
                 FixtureId = _fixtureId,
                 TeamId = _teamId,
                 Filter = (int) VideoReactionFilter.Top,
-                Start = 0
+                Page = 1
             });
 
-            var videoReactions = result.Data;
+            result.Data.Page.Should().Be(1);
+            result.Data.TotalPages.Should().Be(1);
+
+            var videoReactions = result.Data.VideoReactions;
 
             videoReactions.Should().HaveCount(6);
 
@@ -115,7 +118,6 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
                 AuthorUsername = _authorUsernames[0],
                 Rating = 2,
                 VideoId = FileHostingMock.VideoId,
-                ThumbnailUrl = FileHostingMock.ThumbnailUrl,
                 UserVote = 1
             });
 
@@ -125,7 +127,6 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
                 AuthorUsername = _authorUsernames[2],
                 Rating = 0,
                 VideoId = FileHostingMock.VideoId,
-                ThumbnailUrl = FileHostingMock.ThumbnailUrl,
                 UserVote = -1
             });
 
@@ -136,7 +137,6 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
                     AuthorUsername = _authorUsernames[1],
                     Rating = 1,
                     VideoId = FileHostingMock.VideoId,
-                    ThumbnailUrl = FileHostingMock.ThumbnailUrl,
                     UserVote = null
                 }
             );
@@ -178,10 +178,13 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
                 FixtureId = _fixtureId,
                 TeamId = _teamId,
                 Filter = (int) VideoReactionFilter.Newest,
-                Start = 0
+                Page = 1
             });
 
-            var videoReactions = result.Data;
+            result.Data.Page.Should().Be(1);
+            result.Data.TotalPages.Should().Be(1);
+
+            var videoReactions = result.Data.VideoReactions;
 
             videoReactions.Should().HaveCount(6);
 
@@ -191,7 +194,6 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
                 AuthorUsername = _authorUsernames[5],
                 Rating = 2,
                 VideoId = FileHostingMock.VideoId,
-                ThumbnailUrl = FileHostingMock.ThumbnailUrl,
                 UserVote = 1
             });
 
@@ -201,7 +203,6 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
                 AuthorUsername = _authorUsernames[4],
                 Rating = 1,
                 VideoId = FileHostingMock.VideoId,
-                ThumbnailUrl = FileHostingMock.ThumbnailUrl,
                 UserVote = null
             });
 
@@ -212,7 +213,6 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
                     AuthorUsername = _authorUsernames[3],
                     Rating = 0,
                     VideoId = FileHostingMock.VideoId,
-                    ThumbnailUrl = FileHostingMock.ThumbnailUrl,
                     UserVote = -1
                 }
             );

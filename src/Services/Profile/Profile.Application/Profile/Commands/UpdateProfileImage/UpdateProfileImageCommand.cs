@@ -66,7 +66,7 @@ namespace Profile.Application.Profile.Commands.UpdateProfileImage {
                     Data = imageUrl
                 };
             } catch (Exception e) {
-                _logger.LogError("Error uploading user image", e);
+                _logger.LogError(e, "Error uploading user image");
 
                 // @@TODO: Since here it's unclear what exactly caused uploading to fail (it could be just a MassTransit
                 // error for all we know), we should not rely on FileHostingGateway deleting the file. Need to ensure that
@@ -75,7 +75,7 @@ namespace Profile.Application.Profile.Commands.UpdateProfileImage {
                 try {
                     _fileReceiver.DeleteFile(filePath);
                 } catch (Exception ex) {
-                    _logger.LogError("Error deleting user image", ex);
+                    _logger.LogError(ex, "Error deleting user image");
                 }
 
                 return new HandleResult<string> {

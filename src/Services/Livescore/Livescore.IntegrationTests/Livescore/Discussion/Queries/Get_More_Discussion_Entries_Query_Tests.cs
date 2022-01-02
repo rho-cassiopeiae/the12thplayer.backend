@@ -8,6 +8,7 @@ using Livescore.Application.Livescore.Discussion.Commands.PostDiscussionEntry;
 using Livescore.Application.Livescore.Discussion.Queries.GetDiscussionsForFixture;
 using Livescore.Application.Livescore.Discussion.Queries.GetMoreDiscussionEntries;
 using Livescore.Application.Livescore.Worker.Commands.ActivateFixture;
+using Livescore.Application.Common.Dto;
 
 namespace Livescore.IntegrationTests.Livescore.Discussion.Queries {
     [Collection(nameof(LivescoreTestCollection))]

@@ -23,15 +23,11 @@ namespace Worker.Application.Jobs.OneOff {
 
             _logger.LogInformation("Job finished");
 
-            if (
-                context.MergedJobDataMap.TryGetValue(
-                    "NEXT ==>", out object value
-                )
-            ) {
+            if (context.MergedJobDataMap.TryGetValue("NEXT ==>", out object value)) {
                 var nextJobNames = ((string) value).Split(',');
-                foreach (var nextJobName in nextJobNames) {
+                foreach (var jobName in nextJobNames) {
                     var triggerBuilder = TriggerBuilder.Create()
-                        .ForJob(nextJobName)
+                        .ForJob(jobName)
                         .StartNow();
 
                     if (nextJobDataMap != null) {
@@ -47,7 +43,6 @@ namespace Worker.Application.Jobs.OneOff {
 
         protected abstract Task<IDictionary<string, object>> _execute();
 
-        protected bool _isCanceled =>
-            _context.CancellationToken.IsCancellationRequested;
+        protected bool _jobCanceled => _context.CancellationToken.IsCancellationRequested;
     }
 }

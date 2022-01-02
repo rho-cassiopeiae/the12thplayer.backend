@@ -35,10 +35,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
             _mapper = mapper;
 
             _baseUrl = new Uri(configuration["Sportmonks:BaseUrl"]);
-            _baseQueryString = QueryString.Create(
-                "api_token",
-                configuration["Sportmonks:ApiToken"]
-            );
+            _baseQueryString = QueryString.Create("api_token", configuration["Sportmonks:ApiToken"]);
 
             _jsonSerializerOptions = new JsonSerializerOptions {
                 PropertyNamingPolicy = new JsonSnakeCaseNamingPolicy()
@@ -52,9 +49,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
             return client;
         }
 
-        private async Task<T> _get<T>(
-            HttpClient client, string pathAndQuery
-        ) where T : ResponseDto {
+        private async Task<T> _get<T>(HttpClient client, string pathAndQuery) where T : ResponseDto {
             using var responseStream = await client.GetStreamAsync(pathAndQuery);
 
             var response = await JsonSerializer.DeserializeAsync<T>(
@@ -78,15 +73,12 @@ namespace Worker.Infrastructure.FootballDataProvider {
             return response;
         }
 
-        public async Task<IEnumerable<CountryDto>> GetCountries(
-        ) {
+        public async Task<IEnumerable<CountryDto>> GetCountries() {
             using var client = _createClient();
 
             var queryString = _baseQueryString.Add("per_page", "100");
 
-            var response = await _get<GetCountriesResponseDto>(
-                client, $"countries{queryString}"
-            );
+            var response = await _get<GetCountriesResponseDto>(client, $"countries{queryString}");
             var responses = new List<GetCountriesResponseDto> { response };
 
             var pagination = response.Meta.Pagination;
@@ -100,18 +92,14 @@ namespace Worker.Infrastructure.FootballDataProvider {
                 }
             }
 
-            return _mapper.Map<CountryDto>(
-                responses.SelectMany(response => response.Data)
-            );
+            return _mapper.Map<CountryDto>(responses.SelectMany(response => response.Data));
         }
 
         public async Task<TeamDto> GetTeamDetails(long teamId) {
             using var client = _createClient();
 
             var queryString = _baseQueryString.Add("include", "coach,venue");
-            var response = await _get<GetTeamDetailsResponseDto>(
-                client, $"teams/{teamId}{queryString}"
-            );
+            var response = await _get<GetTeamDetailsResponseDto>(client, $"teams/{teamId}{queryString}");
 
             return _mapper.Map(response.Data);
         }
@@ -182,11 +170,10 @@ namespace Worker.Infrastructure.FootballDataProvider {
 
             var queryString = _baseQueryString.Add(
                 "include",
-                "upcoming.referee,upcoming.venue,upcoming.localTeam,upcoming.visitorTeam,upcoming.localCoach,upcoming.visitorCoach,upcoming.lineup,upcoming.bench,upcoming.stats,upcoming.events"
+                "upcoming.referee,upcoming.venue,upcoming.localTeam,upcoming.visitorTeam,upcoming.localCoach," +
+                "upcoming.visitorCoach,upcoming.lineup,upcoming.bench,upcoming.stats,upcoming.events"
             );
-            var response = await _get<GetTeamUpcomingFixturesResponseDto>(
-                client, $"teams/{teamId}{queryString}"
-            );
+            var response = await _get<GetTeamUpcomingFixturesResponseDto>(client, $"teams/{teamId}{queryString}");
 
             return _mapper.Map<FixtureDtoApp>(response.Data.Upcoming.Data, arg: teamId);
         }
@@ -215,9 +202,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
 
             if (emulateOngoing) {
                 var queryString = _baseQueryString.Add("include", includeBuilder.ToString());
-                var response = await _get<GetFixtureResponseDto>(
-                    client, $"fixtures/{fixtureId}{queryString}"
-                );
+                var response = await _get<GetFixtureResponseDto>(client, $"fixtures/{fixtureId}{queryString}");
 
                 return _mapper.Map(response.Data, teamId);
             } else {
@@ -227,9 +212,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
                         KeyValuePair.Create("include", includeBuilder.ToString())
                     })
                 );
-                var response = await _get<GetFixtureLivescoreResponseDto>(
-                    client, $"livescores{queryString}"
-                );
+                var response = await _get<GetFixtureLivescoreResponseDto>(client, $"livescores{queryString}");
 
                 return _mapper.Map(response.Data?.SingleOrDefault(), teamId);
             }

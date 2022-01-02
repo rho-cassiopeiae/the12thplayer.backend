@@ -9,7 +9,7 @@ namespace Livescore.Domain.Aggregates.Fixture {
         public long? SeasonId { get; private set; }
         public long OpponentTeamId { get; private set; }
         public bool HomeStatus { get; private set; }
-        public long? StartTime { get; private set; }
+        public long StartTime { get; private set; }
         public string Status { get; private set; }
         public GameTime GameTime { get; private set; }
         public Score Score { get; private set; }
@@ -22,7 +22,7 @@ namespace Livescore.Domain.Aggregates.Fixture {
 
         public Fixture(
             long id, long teamId, long? seasonId, long opponentTeamId,
-            bool homeStatus, long? startTime, string status, GameTime gameTime,
+            bool homeStatus, long startTime, string status, GameTime gameTime,
             Score score, long? venueId, string refereeName, IEnumerable<TeamColor> colors,
             IEnumerable<TeamLineup> lineups, IEnumerable<TeamMatchEvents> events, IEnumerable<TeamStats> stats
         ) {

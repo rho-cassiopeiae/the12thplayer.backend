@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,18 +9,16 @@ using Livescore.Application.Common.Results;
 using Livescore.Application.Livescore.Common.Errors;
 
 namespace Livescore.Application.Livescore.VideoReaction.Queries.GetVideoReactionsForFixture {
-    public class GetVideoReactionsForFixtureQuery : IRequest<
-        HandleResult<IEnumerable<VideoReactionWithUserVoteDto>>
-    > {
+    public class GetVideoReactionsForFixtureQuery : IRequest<HandleResult<FixtureVideoReactionsDto>> {
         public long FixtureId { get; set; }
         public long TeamId { get; set; }
         public int Filter { get; set; }
-        public int Start { get; set; }
+        public int Page { get; set; }
     }
 
     public class GetVideoReactionsForFixtureQueryHandler : IRequestHandler<
         GetVideoReactionsForFixtureQuery,
-        HandleResult<IEnumerable<VideoReactionWithUserVoteDto>>
+        HandleResult<FixtureVideoReactionsDto>
     > {
         private readonly IAuthenticationContext _authenticationContext;
         private readonly IPrincipalDataProvider _principalDataProvider;
@@ -44,20 +41,20 @@ namespace Livescore.Application.Livescore.VideoReaction.Queries.GetVideoReaction
             _userVoteInMemQueryable = userVoteInMemQueryable;
         }
 
-        public async Task<HandleResult<IEnumerable<VideoReactionWithUserVoteDto>>> Handle(
+        public async Task<HandleResult<FixtureVideoReactionsDto>> Handle(
             GetVideoReactionsForFixtureQuery query, CancellationToken cancellationToken
         ) {
             bool active = await _fixtureLivescoreStatusInMemQueryable.CheckActive(
                 query.FixtureId, query.TeamId
             );
             if (!active) {
-                return new HandleResult<IEnumerable<VideoReactionWithUserVoteDto>> {
+                return new HandleResult<FixtureVideoReactionsDto> {
                     Error = new LivescoreError("Fixture is not active")
                 };
             }
 
-            var videoReactions = await _videoReactionInMemQueryable.GetAllFor(
-                query.FixtureId, query.TeamId, (VideoReactionFilter) query.Filter, query.Start
+            var (videoReactions, totalPages) = await _videoReactionInMemQueryable.GetFilteredAndPaginatedFor(
+                query.FixtureId, query.TeamId, (VideoReactionFilter) query.Filter, query.Page
             );
 
             var videoReactionsWithUserVote = videoReactions
@@ -66,8 +63,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Queries.GetVideoReaction
                     Title = vr.Title,
                     AuthorUsername = vr.AuthorUsername,
                     Rating = vr.Rating,
-                    VideoId = vr.VideoId,
-                    ThumbnailUrl = vr.ThumbnailUrl
+                    VideoId = vr.VideoId
                 })
                 .ToList();
 
@@ -87,8 +83,12 @@ namespace Livescore.Application.Livescore.VideoReaction.Queries.GetVideoReaction
                 }
             }
 
-            return new HandleResult<IEnumerable<VideoReactionWithUserVoteDto>> {
-                Data = videoReactionsWithUserVote
+            return new HandleResult<FixtureVideoReactionsDto> {
+                Data = new FixtureVideoReactionsDto {
+                    Page = query.Page,
+                    TotalPages = totalPages,
+                    VideoReactions = videoReactionsWithUserVote
+                }
             };
         }
     }

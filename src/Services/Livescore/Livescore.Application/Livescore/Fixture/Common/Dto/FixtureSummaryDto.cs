@@ -4,7 +4,7 @@ namespace Livescore.Application.Livescore.Fixture.Common.Dto {
     public class FixtureSummaryDto {
         public long Id { get; set; }
         public bool HomeStatus { get; set; }
-        public long? StartTime { get; set; }
+        public long StartTime { get; set; }
         public string Status { get; set; }
         public GameTimeDto GameTime { get; set; }
         public ScoreDto Score { get; set; }

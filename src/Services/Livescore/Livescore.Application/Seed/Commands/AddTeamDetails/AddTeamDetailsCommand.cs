@@ -97,8 +97,7 @@ namespace Livescore.Application.Seed.Commands.AddTeamDetails {
                         firstName: managerDto.FirstName,
                         lastName: managerDto.LastName,
                         birthDate: managerDto.BirthDate != null ?
-                            new DateTimeOffset(managerDto.BirthDate.Value)
-                                .ToUnixTimeMilliseconds() :
+                            new DateTimeOffset(managerDto.BirthDate.Value).ToUnixTimeMilliseconds() :
                             null,
                         countryId: managerDto.CountryId,
                         imageUrl: managerDto.ImageUrl

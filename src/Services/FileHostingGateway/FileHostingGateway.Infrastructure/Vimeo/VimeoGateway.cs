@@ -13,13 +13,11 @@ using Microsoft.Extensions.Configuration;
 using FileHostingGateway.Application.Common.Errors;
 using FileHostingGateway.Application.Common.Interfaces;
 using FileHostingGateway.Application.Common.Results;
-using FileHostingGateway.Application.Commands.UploadVideo;
 
 namespace FileHostingGateway.Infrastructure.Vimeo {
     public class VimeoGateway : IVimeoGateway {
         private readonly IHttpClientFactory _clientFactory;
 
-        private readonly string _vimeoApiBaseAddress;
         private readonly TimeSpan _pollInterval;
 
         public VimeoGateway(
@@ -27,20 +25,18 @@ namespace FileHostingGateway.Infrastructure.Vimeo {
             IHttpClientFactory clientFactory
         ) {
             _clientFactory = clientFactory;
-
-            _vimeoApiBaseAddress = configuration["Vimeo:BaseAddress"];
             _pollInterval = TimeSpan.FromSeconds(
                 configuration.GetValue<int>("Vimeo:PollIntervalSec")
             );
         }
 
         public async Task<Either<VimeoError, string>> AddProjectFor(long fixtureId, long teamId) {
-            var client = _clientFactory.CreateClient("vimeo");
+            using var client = _clientFactory.CreateClient("vimeo");
 
             // @@NOTE: Vimeo allows multiple projects with the same name.
             var projectName = $"f-{fixtureId}-t-{teamId}";
 
-            var request = new HttpRequestMessage(HttpMethod.Get, _vimeoApiBaseAddress + "/me/projects");
+            var request = new HttpRequestMessage(HttpMethod.Get, "/me/projects");
 
             var response = await client.SendAsync(request);
             if (!response.IsSuccessStatusCode) {
@@ -61,7 +57,7 @@ namespace FileHostingGateway.Infrastructure.Vimeo {
                 ""name"": ""{projectName}""
             }}";
 
-            request = new HttpRequestMessage(HttpMethod.Post, _vimeoApiBaseAddress + "/me/projects");
+            request = new HttpRequestMessage(HttpMethod.Post, "/me/projects");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
             response = await client.SendAsync(request);
@@ -78,12 +74,10 @@ namespace FileHostingGateway.Infrastructure.Vimeo {
             return projectId;
         }
 
-        public async Task<Either<VimeoError, VideoStreamingInfoDto>> UploadVideo(
-            string filePath, string projectId
-        ) {
+        public async Task<Either<VimeoError, string>> UploadVideo(string filePath, string projectId) {
             // wwwroot/user-files/video-reactions/f-123-t-789/random-name.ext
 
-            var client = _clientFactory.CreateClient("vimeo");
+            using var client = _clientFactory.CreateClient("vimeo");
 
             long fileSize = new FileInfo(filePath).Length;
             var body = $@"{{
@@ -94,7 +88,7 @@ namespace FileHostingGateway.Infrastructure.Vimeo {
                 ""name"": ""{Path.GetFileNameWithoutExtension(filePath)}""
             }}";
 
-            var request = new HttpRequestMessage(HttpMethod.Post, _vimeoApiBaseAddress + "/me/videos");
+            var request = new HttpRequestMessage(HttpMethod.Post, "/me/videos");
             request.Content = new StringContent(body, Encoding.UTF8, "application/json");
 
             var response = await client.SendAsync(request);
@@ -112,6 +106,8 @@ namespace FileHostingGateway.Infrastructure.Vimeo {
                 return new VimeoError($"Error uploading file to Vimeo (2): Invalid approach: {approach}");
             }
 
+            using var tusClient = _clientFactory.CreateClient("vimeo-tus");
+
             var uploadLink = uploadMap.GetProperty("upload_link").GetString();
             long uploadOffset = 0;
             using (var fs = File.OpenRead(filePath)) {
@@ -123,14 +119,11 @@ namespace FileHostingGateway.Infrastructure.Vimeo {
                         int n = await fs.ReadAsync(buffer, 0, chunkSize);
 
                         request = new HttpRequestMessage(HttpMethod.Patch, uploadLink);
-                        request.Headers.Add("Tus-Resumable", "1.0.0");
                         request.Headers.Add("Upload-Offset", uploadOffset.ToString());
+                        request.Content = new ByteArrayContent(buffer, 0, n);
+                        request.Content.Headers.Add("Content-Type", "application/offset+octet-stream");
 
-                        var content = new ByteArrayContent(buffer, 0, n);
-                        content.Headers.Add("Content-Type", "application/offset+octet-stream");
-                        request.Content = content;
-
-                        response = await client.SendAsync(request);
+                        response = await tusClient.SendAsync(request);
                         if (!response.IsSuccessStatusCode) {
                             return new VimeoError($"Error uploading file to Vimeo (3): {response.ReasonPhrase}");
                         }
@@ -149,10 +142,7 @@ namespace FileHostingGateway.Infrastructure.Vimeo {
             while (!transcodeComplete) {
                 await Task.Delay(_pollInterval);
 
-                request = new HttpRequestMessage(
-                    HttpMethod.Get,
-                    _vimeoApiBaseAddress + $"/videos/{videoId}?fields=transcode.status"
-                );
+                request = new HttpRequestMessage(HttpMethod.Get, $"/videos/{videoId}?fields=transcode.status");
 
                 response = await client.SendAsync(request);
                 if (!response.IsSuccessStatusCode) {
@@ -171,45 +161,19 @@ namespace FileHostingGateway.Infrastructure.Vimeo {
                 }
             }
 
-            request = new HttpRequestMessage(
-                HttpMethod.Put,
-                _vimeoApiBaseAddress + $"/me/projects/{projectId}/videos/{videoId}"
-            );
+            request = new HttpRequestMessage(HttpMethod.Put, $"/me/projects/{projectId}/videos/{videoId}");
 
             response = await client.SendAsync(request);
             if (!response.IsSuccessStatusCode) {
-                // @@NOTE: Means that the project no longer exists.
-                // @@TODO: Delete video.
+                // @@NOTE: Means the project no longer exists.
+
+                request = new HttpRequestMessage(HttpMethod.Delete, $"/videos/{videoId}");
+                await client.SendAsync(request);
+
                 return new VimeoError($"Error uploading file to Vimeo (6): {response.ReasonPhrase}");
             }
 
-            var oldClient = _clientFactory.CreateClient("vimeo-old");
-            JsonElement thumbnail;
-            while (true) {
-                request = new HttpRequestMessage(HttpMethod.Get, $"/video/{videoId}.json");
-
-                response = await oldClient.SendAsync(request);
-                if (response.IsSuccessStatusCode) {
-                    responseMap = JsonSerializer.Deserialize<IList<IDictionary<string, JsonElement>>>(
-                        await response.Content.ReadAsStringAsync()
-                    ).First();
-
-                    bool thumbnailReady =
-                        responseMap.TryGetValue("thumbnail_large", out thumbnail) ||
-                        responseMap.TryGetValue("thumbnail_medium", out thumbnail);
-
-                    if (thumbnailReady) {
-                        break;
-                    }
-                }
-
-                await Task.Delay(_pollInterval);
-            }
-
-            return new VideoStreamingInfoDto {
-                VideoId = videoId,
-                ThumbnailUrl = thumbnail.GetString()
-            };
+            return videoId;
         }
     }
 }

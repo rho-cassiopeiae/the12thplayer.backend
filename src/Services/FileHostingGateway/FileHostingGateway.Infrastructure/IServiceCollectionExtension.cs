@@ -25,12 +25,15 @@ namespace FileHostingGateway.Infrastructure {
             // @@TODO: Configure Polly.
             services.AddHttpClient("vimeo", (sp, client) => {
                 var configuration = sp.GetRequiredService<IConfiguration>();
+                client.BaseAddress = new Uri(configuration["Vimeo:BaseAddress"]);
                 client.DefaultRequestHeaders.Add("Accept", "application/vnd.vimeo.*+json;version=3.4");
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + configuration["Vimeo:ApiToken"]);
             });
-            services.AddHttpClient("vimeo-old", (sp, client) => {
+            services.AddHttpClient("vimeo-tus", (sp, client) => {
                 var configuration = sp.GetRequiredService<IConfiguration>();
-                client.BaseAddress = new Uri(configuration["Vimeo:BaseAddressOld"]);
+                client.DefaultRequestHeaders.Add("Accept", "application/vnd.vimeo.*+json;version=3.4");
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + configuration["Vimeo:ApiToken"]);
+                client.DefaultRequestHeaders.Add("Tus-Resumable", "1.0.0");
             });
 
             services.AddSingleton<IVimeoGateway, VimeoGateway>();

@@ -6,7 +6,7 @@ namespace Livescore.Application.Common.Dto {
         public long Id { get; set; }
         public long? SeasonId { get; set; }
         public bool HomeStatus { get; set; }
-        public DateTime? StartTime { get; set; }
+        public DateTime StartTime { get; set; }
         public string Status { get; set; }
         public GameTimeDto GameTime { get; set; }
         public ScoreDto Score { get; set; }

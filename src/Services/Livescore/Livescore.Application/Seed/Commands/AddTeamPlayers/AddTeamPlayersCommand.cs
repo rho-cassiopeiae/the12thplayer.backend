@@ -33,23 +33,30 @@ namespace Livescore.Application.Seed.Commands.AddTeamPlayers {
             var players = await _playerRepository.FindById(newPlayers.Select(p => p.Id));
 
             foreach (var newPlayer in newPlayers) {
-                if (!players.Any(p => p.Id == newPlayer.Id)) {
+                var player = players.FirstOrDefault(p => p.Id == newPlayer.Id);
+                if (player == null) {
                     _playerRepository.Create(new Player(
                         id: newPlayer.Id,
                         teamId: command.TeamId,
                         firstName: newPlayer.FirstName,
                         lastName: newPlayer.LastName,
+                        displayName: newPlayer.DisplayName,
                         birthDate: newPlayer.BirthDate != null ?
-                            new DateTimeOffset(newPlayer.BirthDate.Value)
-                                .ToUnixTimeMilliseconds() :
+                            new DateTimeOffset(newPlayer.BirthDate.Value).ToUnixTimeMilliseconds() :
                             null,
                         countryId: newPlayer.CountryId,
                         number: newPlayer.Number,
                         position: newPlayer.Position,
                         imageUrl: newPlayer.ImageUrl,
-                        lastLineupAt: new DateTimeOffset(newPlayer.LastLineupAt)
-                            .ToUnixTimeMilliseconds()
+                        lastLineupAt: new DateTimeOffset(newPlayer.LastLineupAt).ToUnixTimeMilliseconds()
                     ));
+                } else {
+                    if (player.TeamId != command.TeamId) {
+                        player.ChangeTeam(command.TeamId);
+                        player.ChangeNumber(newPlayer.Number);
+                        player.SetPosition(newPlayer.Position);
+                        player.SetLastLineupAt(new DateTimeOffset(newPlayer.LastLineupAt).ToUnixTimeMilliseconds());
+                    }
                 }
             }
 

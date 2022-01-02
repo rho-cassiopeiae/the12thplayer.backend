@@ -12,7 +12,7 @@ namespace Livescore.Domain.Aggregates.Discussion {
 
         void Create(Discussion discussion);
 
-        void Delete(long fixtureId, long teamId, List<Guid> discussionIds);
+        void DeleteAllFor(long fixtureId, long teamId, List<Guid> discussionIds);
 
         void PostEntries(Discussion discussion);
     }

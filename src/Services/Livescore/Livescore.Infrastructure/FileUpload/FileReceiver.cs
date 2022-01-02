@@ -19,20 +19,17 @@ namespace Livescore.Infrastructure.FileUpload {
         private readonly MultipartRequestHelper _multipartRequestHelper;
         private readonly ImageFileValidator _imageFileValidator;
         private readonly VideoFileValidator _videoFileValidator;
-        private readonly IRandomFileNameProvider _randomFileNameProvider;
         private readonly string _path;
 
         public FileReceiver(
             IConfiguration configuration,
             MultipartRequestHelper multipartRequestHelper,
             ImageFileValidator imageFileValidator,
-            VideoFileValidator videoFileValidator,
-            IRandomFileNameProvider randomFileNameProvider
+            VideoFileValidator videoFileValidator
         ) {
             _multipartRequestHelper = multipartRequestHelper;
             _imageFileValidator = imageFileValidator;
             _videoFileValidator = videoFileValidator;
-            _randomFileNameProvider = randomFileNameProvider;
 
             _path = configuration["UserFiles:Path"];
         }
@@ -86,7 +83,7 @@ namespace Livescore.Infrastructure.FileUpload {
                             return new ValidationError("Invalid file format");
                         }
 
-                        fileName = (fileName ?? _randomFileNameProvider.Get()) + ext;
+                        fileName = (fileName ?? Path.GetRandomFileName()) + ext;
                         var dir = $"{_path}/{filePrefix}";
                         Directory.CreateDirectory(dir);
                         filePath = $"{dir}/{fileName}";

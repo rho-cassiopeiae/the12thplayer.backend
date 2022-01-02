@@ -57,7 +57,7 @@ namespace Livescore.Application.Livescore.PlayerRating.Commands.RatePlayer {
 
             bool applied;
             do {
-                var active = await _fixtureLivescoreStatusInMemRepository.FindOutIfActive(
+                bool active = await _fixtureLivescoreStatusInMemRepository.FindOutIfActive(
                     command.FixtureId, command.TeamId
                 );
                 if (!active) {

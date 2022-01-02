@@ -6,6 +6,8 @@ using MediatR;
 
 using Livescore.Application.Common.Dto;
 using Livescore.Application.Common.Results;
+using Livescore.Application.Common.Interfaces;
+using Livescore.Application.Livescore.Worker.Common.Dto;
 using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Domain.Aggregates.PlayerRating;
 using PlayerRatingDm = Livescore.Domain.Aggregates.PlayerRating.PlayerRating;
@@ -23,12 +25,19 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
         private readonly IFixtureRepository _fixtureRepository;
         private readonly IPlayerRatingInMemRepository _playerRatingInMemRepository;
 
+        private readonly ISerializer _serializer;
+        private readonly IFixtureLivescoreBroadcaster _fixtureLivescoreBroadcaster;
+
         public UpdateFixtureLiveCommandHandler(
             IFixtureRepository fixtureRepository,
-            IPlayerRatingInMemRepository playerRatingInMemRepository
+            IPlayerRatingInMemRepository playerRatingInMemRepository,
+            ISerializer serializer,
+            IFixtureLivescoreBroadcaster fixtureLivescoreBroadcaster
         ) {
             _fixtureRepository = fixtureRepository;
             _playerRatingInMemRepository = playerRatingInMemRepository;
+            _serializer = serializer;
+            _fixtureLivescoreBroadcaster = fixtureLivescoreBroadcaster;
         }
 
         public async Task<VoidResult> Handle(
@@ -64,7 +73,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
             fixture.SetEvents(new[] {
                 new TeamMatchEvents(
                     teamId: command.TeamId,
-                    events: teamMatchEvents.Events?.Select(e => new TeamMatchEvents.MatchEvent(
+                    events: teamMatchEvents.Events.Select(e => new TeamMatchEvents.MatchEvent(
                         minute: e.Minute,
                         addedTimeMinute: e.AddedTimeMinute,
                         type: e.Type,
@@ -74,7 +83,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
                 ),
                 new TeamMatchEvents(
                     teamId: trackedFixture.OpponentTeam.Id,
-                    events: opponentTeamMatchEvents.Events?.Select(e => new TeamMatchEvents.MatchEvent(
+                    events: opponentTeamMatchEvents.Events.Select(e => new TeamMatchEvents.MatchEvent(
                         minute: e.Minute,
                         addedTimeMinute: e.AddedTimeMinute,
                         type: e.Type,
@@ -149,20 +158,35 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixtureLive {
 
             await _fixtureRepository.SaveChanges(cancellationToken);
 
-            var subs = teamMatchEvents.Events?.Where(e => e.Type.ToLowerInvariant() == "substitution");
-            if (subs != null) {
-                foreach (var sub in subs) {
-                    _playerRatingInMemRepository.CreateIfNotExists(new PlayerRatingDm(
-                        fixtureId: command.FixtureId,
-                        teamId: command.TeamId,
-                        participantKey: $"s:{sub.PlayerId}",
-                        totalRating: 0,
-                        totalVoters: 0
-                    ));
-                }
-
-                await _playerRatingInMemRepository.SaveChanges();
+            var subs = teamMatchEvents.Events.Where(e =>
+                e.Type.ToLowerInvariant() == "substitution" &&
+                e.PlayerId != null
+            );
+            foreach (var sub in subs) {
+                _playerRatingInMemRepository.CreateIfNotExists(new PlayerRatingDm(
+                    fixtureId: command.FixtureId,
+                    teamId: command.TeamId,
+                    participantKey: $"s:{sub.PlayerId.Value}",
+                    totalRating: 0,
+                    totalVoters: 0
+                ));
             }
+
+            await _playerRatingInMemRepository.SaveChanges();
+
+            var fixtureLivescoreUpdate = new FixtureLivescoreUpdateDto {
+                FixtureId = command.FixtureId,
+                TeamId = command.TeamId,
+                Status = trackedFixture.Status,
+                GameTime = trackedFixture.GameTime,
+                Score = trackedFixture.Score,
+                Events = trackedFixture.Events,
+                Stats = trackedFixture.Stats
+            };
+
+            string updateMessage = _serializer.Serialize(fixtureLivescoreUpdate);
+
+            await _fixtureLivescoreBroadcaster.BroadcastUpdate(command.FixtureId, command.TeamId, updateMessage);
 
             return VoidResult.Instance;
         }

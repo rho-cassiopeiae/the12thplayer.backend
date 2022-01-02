@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Livescore.Api.Services.FixtureDiscussionBroadcaster;
-using Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener;
+using Livescore.Application.Common.Dto;
+using Livescore.Application.Common.Interfaces;
 
 namespace Livescore.IntegrationTests.Livescore.Discussion.Mocks {
     public class FixtureDiscussionBroadcasterMock : IFixtureDiscussionBroadcaster {
@@ -13,8 +13,16 @@ namespace Livescore.IntegrationTests.Livescore.Discussion.Mocks {
             _updates.Clear();
         }
 
-        public Task BroadcastDiscussionUpdate(FixtureDiscussionUpdateDto fixtureDiscussionUpdate) {
-            _updates.Add(fixtureDiscussionUpdate);
+        public Task SubscribeToDiscussion(string connectionId, long fixtureId, long teamId, string discussionId) {
+            throw new System.NotImplementedException();
+        }
+
+        public Task UnsubscribeFromDiscussion(string connectionId, long fixtureId, long teamId, string discussionId) {
+            throw new System.NotImplementedException();
+        }
+
+        public Task BroadcastUpdate(FixtureDiscussionUpdateDto update) {
+            _updates.Add(update);
 
             return Task.CompletedTask;
         }

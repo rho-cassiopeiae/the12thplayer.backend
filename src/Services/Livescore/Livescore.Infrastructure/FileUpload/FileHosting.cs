@@ -16,9 +16,7 @@ namespace Livescore.Infrastructure.FileUpload {
             _uploadVideoClient = uploadVideoClient;
         }
 
-        public async Task<(string VideoId, string ThumbnailUrl)> UploadVideo(
-            string filePath, string vimeoProjectId
-        ) {
+        public async Task<string> UploadVideo(string filePath, string vimeoProjectId) {
             var response = await _uploadVideoClient.GetResponse<UploadVideoSuccess>(
                 new UploadVideo {
                     CorrelationId = Guid.NewGuid(),
@@ -27,7 +25,7 @@ namespace Livescore.Infrastructure.FileUpload {
                 }
             );
 
-            return (VideoId: response.Message.VideoId, ThumbnailUrl: response.Message.ThumbnailUrl);
+            return response.Message.VideoId;
         }
     }
 }

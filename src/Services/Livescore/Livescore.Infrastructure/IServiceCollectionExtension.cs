@@ -42,6 +42,7 @@ using Livescore.Domain.Aggregates.VideoReaction;
 using Livescore.Infrastructure.Identity;
 using Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener;
 using Livescore.Infrastructure.FileUpload;
+using Livescore.Infrastructure.Serializer;
 
 namespace Livescore.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -57,7 +58,7 @@ namespace Livescore.Infrastructure {
                     rsa.FromXmlString(configuration["Jwt:PublicKey"]);
 
                     options.MapInboundClaims = false;
-                    options.RequireHttpsMetadata = false;
+                    options.RequireHttpsMetadata = false; // @@TODO: Should depend on environment.
                     options.SaveToken = false;
                     options.TokenValidationParameters = new TokenValidationParameters {
                         ValidateIssuer = true,
@@ -70,7 +71,7 @@ namespace Livescore.Infrastructure {
                     };
                     options.Events = new JwtBearerEvents {
                         OnMessageReceived = context => {
-                            if (context.Request.Path.StartsWithSegments("/livescore")) {
+                            if (context.Request.Path.StartsWithSegments("/livescore/fanzone")) {
                                 var accessToken = context.Request.Query["access_token"];
                                 if (!string.IsNullOrEmpty(accessToken)) {
                                     context.Token = accessToken;
@@ -87,7 +88,7 @@ namespace Livescore.Infrastructure {
 
                             authenticationContext.User = context.Principal;
 
-                            if (context.Request.Path.StartsWithSegments("/livescore")) {
+                            if (context.Request.Path.StartsWithSegments("/livescore/fanzone")) {
                                 authenticationContext.Token = context.SecurityToken;
                             }
 
@@ -176,14 +177,19 @@ namespace Livescore.Infrastructure {
             services.AddSingleton<MultipartRequestHelper>();
             services.AddSingleton<ImageFileValidator>();
             services.AddSingleton<VideoFileValidator>();
-            services.TryAddSingleton<IRandomFileNameProvider, RandomFileNameProvider>();
             services.AddSingleton<IFileReceiver, FileReceiver>();
             services.TryAddScoped<IFileHosting, FileHosting>();
+
+            services.AddBrotliCompressor();
+            services.AddSingleton<ISerializer, JsonBrotliBase64Serializer>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
 
-                busCfg.AddRequestClient<UploadVideo>(new Uri("queue:file-hosting-gateway-livescore-upload-requests"));
+                busCfg.AddRequestClient<UploadVideo>(
+                    new Uri("queue:file-hosting-gateway-upload-requests"),
+                    timeout: TimeSpan.FromMinutes(5)
+                );
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
                     rabbitCfg.Host(configuration["RabbitMQ:Host"]);

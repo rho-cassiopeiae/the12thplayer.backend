@@ -6,6 +6,7 @@ using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
 namespace Worker.Application.Common.Interfaces {
     public interface IFootballDataProvider {
         Task<IEnumerable<CountryDto>> GetCountries();
+
         Task<TeamDto> GetTeamDetails(long teamId);
 
         Task<IEnumerable<SeasonDto>> GetSeasons(IEnumerable<long> seasonIds);

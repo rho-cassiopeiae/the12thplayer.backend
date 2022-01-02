@@ -21,6 +21,7 @@ namespace Livescore.Infrastructure.Seed {
     public class MappingProfile : Profile {
         public MappingProfile() {
             CreateMap<CountryDtoMsg, CountryDto>();
+
             CreateMap<TeamDtoMsg, TeamDto>();
             CreateMap<VenueDtoMsg, VenueDto>();
             CreateMap<ManagerDtoMsg, ManagerDto>();

@@ -48,20 +48,16 @@ namespace Identity.Application.Account.Commands.ConfirmEmail {
 
             if (user.IsConfirmed) {
                 return new VoidResult {
-                    Error = new AccountError(
-                        $"Account {command.Email} is already confirmed"
-                    )
+                    Error = new AccountError($"Account {command.Email} is already confirmed")
                 };
             }
 
-            var success = await _userService.VerifyEmailConfirmationCode(
+            bool success = await _userService.VerifyEmailConfirmationCode(
                 user, command.ConfirmationCode
             );
             if (!success) {
                 return new VoidResult {
-                    Error = new AccountError(
-                        $"Account {command.Email}: invalid confirmation code"
-                    )
+                    Error = new AccountError($"Account {command.Email}: invalid confirmation code")
                 };
             }
 

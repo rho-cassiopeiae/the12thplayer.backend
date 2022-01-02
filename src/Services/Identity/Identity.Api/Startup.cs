@@ -31,7 +31,7 @@ namespace Identity.Api {
 
             services
                 .AddControllers(options => {
-                    options.Filters.Add<ConvertHandleResultToMvcResponseFilter>();
+                    options.Filters.Add<ConvertHandleErrorToMvcResponseFilter>();
                 })
                 .AddJsonOptions(options => {
                     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;

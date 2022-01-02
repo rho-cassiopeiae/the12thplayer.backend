@@ -30,8 +30,7 @@ namespace Identity.Application.Account.DomainEvents.UserAccountConfirmed {
         }
 
         public async Task Handle(
-            UserAccountConfirmedDomainEvent @event,
-            CancellationToken cancellationToken
+            UserAccountConfirmedDomainEvent @event, CancellationToken cancellationToken
         ) {
             _integrationEventRepository.EnlistAsPartOf(_unitOfWork);
 

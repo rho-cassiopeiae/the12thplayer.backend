@@ -29,9 +29,7 @@ namespace Worker.Infrastructure.Livescore {
             });
         }
 
-        public async Task NotifyFixturePrematchUpdated(
-            long fixtureId, long teamId, FixtureDto fixture
-        ) {
+        public async Task NotifyFixturePrematchUpdated(long fixtureId, long teamId, FixtureDto fixture) {
             await _bus.Publish(new FixturePrematchUpdated {
                 CorrelationId = Guid.NewGuid(),
                 FixtureId = fixtureId,
@@ -40,14 +38,20 @@ namespace Worker.Infrastructure.Livescore {
             });
         }
 
-        public async Task NotifyFixtureLiveUpdated(
-            long fixtureId, long teamId, FixtureDto fixture
-        ) {
+        public async Task NotifyFixtureLiveUpdated(long fixtureId, long teamId, FixtureDto fixture) {
             await _bus.Publish(new FixtureLiveUpdated {
                 CorrelationId = Guid.NewGuid(),
                 FixtureId = fixtureId,
                 TeamId = teamId,
                 Fixture = _mapper.Map<FixtureDto, FixtureDtoMsg>(fixture)
+            });
+        }
+
+        public async Task NotifyFixtureFinished(long fixtureId, long teamId) {
+            await _bus.Publish(new FixtureFinished {
+                CorrelationId = Guid.NewGuid(),
+                FixtureId = fixtureId,
+                TeamId = teamId
             });
         }
 

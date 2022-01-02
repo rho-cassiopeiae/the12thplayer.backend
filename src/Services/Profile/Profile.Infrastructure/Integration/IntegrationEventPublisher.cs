@@ -60,8 +60,7 @@ namespace Profile.Infrastructure.Integration {
 
                 cmd.Parameters.Add(
                     new NpgsqlParameter<int>(
-                        nameof(IntegrationEvent.Status),
-                        (int) IntegrationEventStatus.Pending
+                        nameof(IntegrationEvent.Status), (int) IntegrationEventStatus.Pending
                     )
                 );
 
@@ -96,14 +95,11 @@ namespace Profile.Infrastructure.Integration {
 
                 cmd.Parameters.Add(
                     new NpgsqlParameter<int>(
-                        nameof(IntegrationEvent.Status),
-                        (int) IntegrationEventStatus.Published
+                        nameof(IntegrationEvent.Status), (int) IntegrationEventStatus.Published
                     )
                 );
                 cmd.Parameters.Add(
-                    new NpgsqlParameter<Guid[]>(
-                        "Ids", NpgsqlDbType.Array | NpgsqlDbType.Uuid
-                    ) {
+                    new NpgsqlParameter<Guid[]>("Ids", NpgsqlDbType.Array | NpgsqlDbType.Uuid) {
                         TypedValue = events.Select(e => e.Id).ToArray()
                     }
                 );
@@ -131,13 +127,10 @@ namespace Profile.Infrastructure.Integration {
             await using (var cmd = new NpgsqlCommand()) {
                 cmd.Connection = _connection;
                 
-                cmd.Parameters.Add(
-                    new NpgsqlParameter<Guid>(nameof(IntegrationEvent.Id), eventId)
-                );
+                cmd.Parameters.Add(new NpgsqlParameter<Guid>(nameof(IntegrationEvent.Id), eventId));
                 cmd.Parameters.Add(
                     new NpgsqlParameter<int>(
-                        nameof(IntegrationEvent.Status),
-                        (int) IntegrationEventStatus.Pending
+                        nameof(IntegrationEvent.Status), (int) IntegrationEventStatus.Pending
                     )
                 );
 
@@ -171,13 +164,10 @@ namespace Profile.Infrastructure.Integration {
                 await using var cmd = new NpgsqlCommand();
                 cmd.Connection = _connection;
 
-                cmd.Parameters.Add(
-                    new NpgsqlParameter<Guid>(nameof(IntegrationEvent.Id), eventId)
-                );
+                cmd.Parameters.Add(new NpgsqlParameter<Guid>(nameof(IntegrationEvent.Id), eventId));
                 cmd.Parameters.Add(
                     new NpgsqlParameter<int>(
-                        nameof(IntegrationEvent.Status),
-                        (int) IntegrationEventStatus.Published
+                        nameof(IntegrationEvent.Status), (int) IntegrationEventStatus.Published
                     )
                 );
 

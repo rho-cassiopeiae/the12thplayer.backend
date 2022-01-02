@@ -10,6 +10,8 @@ namespace Worker.Application.Common.Interfaces {
 
         Task NotifyFixtureLiveUpdated(long fixtureId, long teamId, FixtureDto fixture);
 
+        Task NotifyFixtureFinished(long fixtureId, long teamId);
+
         Task NotifyFixtureDeactivated(long fixtureId, long teamId, string vimeoProjectId);
     }
 }

@@ -2,12 +2,9 @@
 
 namespace Identity.Infrastructure.Account {
     public static class IdentityBuilderExtension {
-        public static IdentityBuilder AddConfirmationCodeProvider(
-            this IdentityBuilder builder
-        ) {
+        public static IdentityBuilder AddConfirmationCodeProvider(this IdentityBuilder builder) {
             var userType = builder.UserType;
-            var provider = typeof(ConfirmationCodeProvider<>)
-                .MakeGenericType(userType);
+            var provider = typeof(ConfirmationCodeProvider<>).MakeGenericType(userType);
 
             return builder.AddTokenProvider("ConfirmationCodeProvider", provider);
         }

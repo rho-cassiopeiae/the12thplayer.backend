@@ -155,17 +155,18 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
             }
         }
 
-        public void DeleteAllFor(
-            long fixtureId, long teamId,
-            List<string> fixtureParticipantKeys
-        ) {
+        public void DeleteAllFor(long fixtureId, long teamId, List<string> fixtureParticipantKeys) {
             _ensureTransaction();
 
             var keysToDelete = fixtureParticipantKeys.Select(
                 participantKey => (RedisKey) $"f:{fixtureId}.t:{teamId}.{participantKey}.user-votes"
             );
 
-            _transaction.KeyDeleteAsync(keysToDelete.ToArray());
+            //_transaction.KeyDeleteAsync(keysToDelete.ToArray());
+
+            foreach (var key in keysToDelete) {
+                _transaction.KeyExpireAsync(key, TimeSpan.FromMinutes(10));
+            }
         }
     }
 }

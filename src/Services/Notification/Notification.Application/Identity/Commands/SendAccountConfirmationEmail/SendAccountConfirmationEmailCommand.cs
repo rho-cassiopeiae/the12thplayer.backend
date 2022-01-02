@@ -9,9 +9,9 @@ using Notification.Application.Common.Results;
 
 namespace Notification.Application.Identity.Commands.SendAccountConfirmationEmail {
     public class SendAccountConfirmationEmailCommand : IRequest<VoidResult> {
-        public string Email { get; set; }
-        public string Username { get; set; }
-        public string ConfirmationCode { get; set; }
+        public string Email { get; init; }
+        public string Username { get; init; }
+        public string ConfirmationCode { get; init; }
     }
 
     public class SendAccountConfirmationEmailCommandHandler : IRequestHandler<
@@ -26,8 +26,7 @@ namespace Notification.Application.Identity.Commands.SendAccountConfirmationEmai
         }
 
         public async Task<VoidResult> Handle(
-            SendAccountConfirmationEmailCommand command,
-            CancellationToken cancellationToken
+            SendAccountConfirmationEmailCommand command, CancellationToken cancellationToken
         ) {
             _logger.LogTrace(
                 "Hello, {Username}! Welcome to The12thPlayer community!\nYour confirmation code is {Code}\n\nThanks for joining us.",

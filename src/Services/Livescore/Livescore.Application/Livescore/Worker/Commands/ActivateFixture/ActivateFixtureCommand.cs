@@ -56,6 +56,8 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
 
             _discussionInMemRepository.EnlistAsPartOf(_unitOfWork);
 
+            // @@TODO: Don't hardcode user.
+
             var prematchDiscussion = new DiscussionDm(
                 fixtureId: command.FixtureId,
                 teamId: command.TeamId,

@@ -8,27 +8,26 @@ namespace Livescore.Domain.Aggregates.Fixture {
             public long Id { get; private set; }
             public string FirstName { get; private set; }
             public string LastName { get; private set; }
+            public string DisplayName { get; private set; }
             public short Number { get; private set; }
             public bool IsCaptain { get; private set; }
             public string Position { get; private set; }
             public short? FormationPosition { get; private set; }
             public string ImageUrl { get; private set; }
-            public float? Rating { get; private set; }
             
             public Player(
-                long id, string firstName, string lastName, short number,
-                bool isCaptain, string position, short? formationPosition,
-                string imageUrl, float? rating
+                long id, string firstName, string lastName, string displayName, short number,
+                bool isCaptain, string position, short? formationPosition, string imageUrl
             ) {
                 Id = id;
                 FirstName = firstName;
                 LastName = lastName;
+                DisplayName = displayName;
                 Number = number;
                 IsCaptain = isCaptain;
                 Position = position;
                 FormationPosition = formationPosition;
                 ImageUrl = imageUrl;
-                Rating = rating;
             }
         }
 

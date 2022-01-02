@@ -34,7 +34,7 @@ namespace FileHostingGateway.Application.Commands.UploadImage {
                     Data = await _s3Gateway.UploadImage(command.FilePath)
                 };
             } finally {
-                if (_hostEnvironment.IsProduction()) {
+                if (!_hostEnvironment.IsDevelopment()) {
                     File.Delete(command.FilePath);
                 }
             }

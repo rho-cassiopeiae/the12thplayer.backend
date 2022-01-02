@@ -25,9 +25,7 @@ namespace Identity.Api.HostedServices {
             var timer = new Timer(
                 async _ => {
                     try {
-                        await using var publisher = _serviceProvider
-                            .GetRequiredService<IIntegrationEventPublisher>();
-
+                        await using var publisher = _serviceProvider.GetRequiredService<IIntegrationEventPublisher>();
                         await publisher.FetchAndPublishPendingEvents();
                     } catch (Exception e) {
                         _logger.LogWarning(
@@ -45,14 +43,12 @@ namespace Identity.Api.HostedServices {
 
             while (!stoppingToken.IsCancellationRequested) {
                 try {
-                    await using var tracker = _serviceProvider
-                        .GetRequiredService<IIntegrationEventTracker>();
-
+                    await using var tracker = _serviceProvider.GetRequiredService<IIntegrationEventTracker>();
                     await tracker.ListenForAndPublishNewEvents(stoppingToken);
                 } catch (Exception e) {
                     _logger.LogWarning(
                         e,
-                        "Error listening for new notifications; Connection closed or broken"
+                        "Error listening for new notifications: Connection closed or broken"
                     );
                 }
             }

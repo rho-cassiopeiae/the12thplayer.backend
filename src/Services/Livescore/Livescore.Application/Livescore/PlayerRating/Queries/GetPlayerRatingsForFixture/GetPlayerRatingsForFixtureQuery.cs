@@ -54,15 +54,19 @@ namespace Livescore.Application.Livescore.PlayerRating.Queries.GetPlayerRatingsF
                 query.FixtureId, query.TeamId
             );
 
-            var ratingsFinalized = true;
+            bool? readUserVotesFromMemory = null;
+            bool ratingsFinalized;
             IEnumerable<PlayerRatingDm> playerRatings;
+
             if (active) {
                 playerRatings = await _playerRatingInMemQueryable.GetAllFor(query.FixtureId, query.TeamId);
+                readUserVotesFromMemory = true;
                 ratingsFinalized = false;
 
+                // @@IRRELEVANT
                 // @@NOTE: It's theoretically possible but highly unlikely that in between checking for active status
                 // and retrieving player ratings the fixture gets finalized, and we get empty player rating list.
-                // It's not worth performing some additional checks, so we just assume that the fixture is still active
+                // It's not worth performing additional checks, so we just assume that the fixture is still active
                 // and carry on.
             } else {
                 playerRatings = await _playerRatingQueryable.GetAllFor(query.FixtureId, query.TeamId);
@@ -70,11 +74,30 @@ namespace Livescore.Application.Livescore.PlayerRating.Queries.GetPlayerRatingsF
                     // @@NOTE: If a fixture is not active and there aren't any player ratings for it in the db,
                     // it means one of two things: either the fixture is upcoming not yet active, or
                     // the fixture is being finalized at this very moment (the process is somewhere in between setting
-                    // the fixture as no longer active and saving its player ratings to the db). The latter is highly
-                    // unlikely. We can perform some additional checks and stuff, but it's not worth it, since it
-                    // doesn't impact user experience in all but very rare cases. So we just assume the former and carry on.
+                    // the fixture as no longer active and saving its player ratings to the db).
 
-                    ratingsFinalized = false;
+                    // If it's the latter, there should still be ratings for the fixture in redis, since we don't clean
+                    // them up right away.
+
+                    // If it's the former, there is also a possibility that after we check above for active status,
+                    // the tracking job for the fixture starts up and activates and prematch-updates it (adding player rating
+                    // entries to redis in the process). So can't rely on the presence of player ratings in redis as an
+                    // indicator whether the ratings should be set as finalized or not.
+
+                    playerRatings = await _playerRatingInMemQueryable.GetAllFor(query.FixtureId, query.TeamId);
+                    if (playerRatings.Any()) {
+                        readUserVotesFromMemory = true;
+                        ratingsFinalized = !await _fixtureLivescoreStatusInMemQueryable.CheckActive(
+                            query.FixtureId, query.TeamId
+                        );
+                    } else {
+                        // Not active, no player ratings in the db, no player ratings in redis – a sure sign that the fixture
+                        // is upcoming not yet active.
+                        ratingsFinalized = false;
+                    }
+                } else {
+                    readUserVotesFromMemory = false;
+                    ratingsFinalized = true;
                 }
             }
 
@@ -90,7 +113,7 @@ namespace Livescore.Application.Livescore.PlayerRating.Queries.GetPlayerRatingsF
                 long userId = _principalDataProvider.GetId(_authenticationContext.User);
 
                 UserVote userVote;
-                if (active) {
+                if (readUserVotesFromMemory.Value) {
                     userVote = await _userVoteInMemQueryable.GetPlayerRatingsFor(
                         userId, query.FixtureId, query.TeamId,
                         playerRatingsWithUserVote.Select(pr => pr.ParticipantKey).ToList()
@@ -103,7 +126,9 @@ namespace Livescore.Application.Livescore.PlayerRating.Queries.GetPlayerRatingsF
 
                 if (userVote != null) {
                     foreach (var participantKeyToRating in userVote.FixtureParticipantKeyToRating) {
-                        var playerRatingWithUserVote = playerRatingsWithUserVote.First(pr => pr.ParticipantKey == participantKeyToRating.Key);
+                        var playerRatingWithUserVote = playerRatingsWithUserVote.First(
+                            pr => pr.ParticipantKey == participantKeyToRating.Key
+                        );
                         playerRatingWithUserVote.UserRating = participantKeyToRating.Value.Value;
                     }
                 }

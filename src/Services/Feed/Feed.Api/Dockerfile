@@ -28,6 +28,10 @@ COPY ["Services/Livescore/Livescore.Application/Livescore.Application.csproj", "
 COPY ["Services/Livescore/Livescore.Domain/Livescore.Domain.csproj", "Services/Livescore/Livescore.Domain/"]
 COPY ["Services/Livescore/Livescore.Infrastructure/Livescore.Infrastructure.csproj", "Services/Livescore/Livescore.Infrastructure/"]
 
+COPY ["Services/FileHostingGateway/FileHostingGateway.Host/FileHostingGateway.Host.csproj", "Services/FileHostingGateway/FileHostingGateway.Host/"]
+COPY ["Services/FileHostingGateway/FileHostingGateway.Application/FileHostingGateway.Application.csproj", "Services/FileHostingGateway/FileHostingGateway.Application/"]
+COPY ["Services/FileHostingGateway/FileHostingGateway.Infrastructure/FileHostingGateway.Infrastructure.csproj", "Services/FileHostingGateway/FileHostingGateway.Infrastructure/"]
+
 COPY ["Services/Feed/Feed.Api/Feed.Api.csproj", "Services/Feed/Feed.Api/"]
 COPY ["Services/Feed/Feed.Application/Feed.Application.csproj", "Services/Feed/Feed.Application/"]
 COPY ["Services/Feed/Feed.Domain/Feed.Domain.csproj", "Services/Feed/Feed.Domain/"]

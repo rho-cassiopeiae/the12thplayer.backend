@@ -17,6 +17,7 @@ namespace Worker.Infrastructure.FootballDataProvider.Dto {
             public long PlayerId { get; set; }
             public string Firstname { get; set; }
             public string Lastname { get; set; }
+            public string DisplayName { get; set; }
             [JsonConverter(typeof(BirthDateJsonConverter))]
             public DateTime? Birthdate { get; set; }
             public long? CountryId { get; set; }

@@ -64,7 +64,7 @@ namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
                     b.Property<ScoreDto>("Score")
                         .HasColumnType("jsonb");
 
-                    b.Property<long?>("StartTime")
+                    b.Property<long>("StartTime")
                         .HasColumnType("bigint");
 
                     b.Property<IEnumerable<TeamStatsDto>>("Stats")
@@ -111,7 +111,7 @@ namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
                     b.Property<ScoreDto>("Score")
                         .HasColumnType("jsonb");
 
-                    b.Property<long?>("StartTime")
+                    b.Property<long>("StartTime")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Status")
@@ -183,7 +183,7 @@ namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
                     b.Property<long?>("SeasonId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("StartTime")
+                    b.Property<long>("StartTime")
                         .HasColumnType("bigint");
 
                     b.Property<IEnumerable<TeamStats>>("Stats")
@@ -245,7 +245,6 @@ namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -298,6 +297,9 @@ namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
 
                     b.Property<long?>("CountryId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("text");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("text");
@@ -399,6 +401,8 @@ namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
 
                     b.HasKey("UserId", "FixtureId", "TeamId");
 
+                    b.HasIndex("FixtureId", "TeamId");
+
                     b.ToTable("UserVotes");
                 });
 
@@ -499,6 +503,15 @@ namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
                     b.HasOne("Livescore.Domain.Aggregates.Country.Country", null)
                         .WithMany()
                         .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Livescore.Domain.Aggregates.UserVote.UserVote", b =>
+                {
+                    b.HasOne("Livescore.Domain.Aggregates.Fixture.Fixture", null)
+                        .WithMany()
+                        .HasForeignKey("FixtureId", "TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

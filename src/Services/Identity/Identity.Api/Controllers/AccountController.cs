@@ -13,7 +13,7 @@ using Identity.Application.Account.Commands.RefreshAccessToken;
 
 namespace Identity.Api.Controllers {
     [Route("identity/[controller]")]
-    public class AccountController : ControllerBase {
+    public class AccountController {
         private readonly ISender _mediator;
 
         public AccountController(ISender mediator) {

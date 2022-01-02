@@ -61,7 +61,7 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Commands {
 
             result.Data.Should().BeEquivalentTo(new VideoReactionRatingDto {
                 Rating = 2,
-                Vote = 1
+                UserVote = 1
             });
         }
 
@@ -69,14 +69,12 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Commands {
         public async Task Should_Reset_Video_Reaction_Rating_And_User_Vote_When_Upvote_Twice() {
             _sut.RunAs(userId: 2, username: "user-2");
 
-#pragma warning disable CS4014
-            _sut.SendRequest(new VoteForVideoReactionCommand {
+            await _sut.SendRequest(new VoteForVideoReactionCommand {
                 FixtureId = _fixtureId,
                 TeamId = _teamId,
                 AuthorId = _authorId,
                 Vote = 1
             });
-#pragma warning restore
 
             var result = await _sut.SendRequest(new VoteForVideoReactionCommand {
                 FixtureId = _fixtureId,
@@ -87,7 +85,7 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Commands {
 
             result.Data.Should().BeEquivalentTo(new VideoReactionRatingDto {
                 Rating = 1,
-                Vote = null
+                UserVote = null
             });
         }
     }

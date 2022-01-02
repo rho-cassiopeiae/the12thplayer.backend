@@ -117,7 +117,7 @@ namespace Profile.Infrastructure {
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
 
-                busCfg.AddRequestClient<UploadImage>(new Uri("queue:file-hosting-gateway-profile-upload-requests"));
+                busCfg.AddRequestClient<UploadImage>(new Uri("queue:file-hosting-gateway-upload-requests"));
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
                     rabbitCfg.Host(configuration["RabbitMQ:Host"]);

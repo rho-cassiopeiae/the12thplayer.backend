@@ -48,7 +48,7 @@ namespace Livescore.Application.Livescore.Discussion.Commands.PostDiscussionEntr
         public async Task<VoidResult> Handle(
             PostDiscussionEntryCommand command, CancellationToken cancellationToken
         ) {
-            var active = await _fixtureLivescoreStatusInMemRepository.FindOutIfActive(
+            bool active = await _fixtureLivescoreStatusInMemRepository.FindOutIfActive(
                 command.FixtureId, command.TeamId
             );
             if (!active) {

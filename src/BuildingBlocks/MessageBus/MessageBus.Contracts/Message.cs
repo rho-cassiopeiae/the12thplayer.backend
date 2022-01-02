@@ -14,9 +14,7 @@ namespace MessageBus.Contracts {
             doc.WriteTo(writer);
             writer.Flush();
 
-            var message = JsonSerializer.Deserialize<T>(
-                Encoding.UTF8.GetString(stream.ToArray())
-            );
+            var message = JsonSerializer.Deserialize<T>(Encoding.UTF8.GetString(stream.ToArray()));
             message.CorrelationId = correlationId;
 
             return message;

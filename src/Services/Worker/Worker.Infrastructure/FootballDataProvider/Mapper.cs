@@ -11,10 +11,7 @@ using SeasonDtoResponse = Worker.Infrastructure.FootballDataProvider.Dto.SeasonD
 
 namespace Worker.Infrastructure.FootballDataProvider {
     public class Mapper {
-        public CountryDto Map(
-            GetCountriesResponseDto.CountryDto dto,
-            Action<CountryDto> postMap = null
-        ) {
+        public CountryDto Map(GetCountriesResponseDto.CountryDto dto, Action<CountryDto> postMap = null) {
             if (dto == null) {
                 return null;
             }
@@ -30,10 +27,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
             return c;
         }
 
-        public TeamDto Map(
-            GetTeamDetailsResponseDto.TeamDto dto,
-            Action<TeamDto> postMap = null
-        ) {
+        public TeamDto Map(GetTeamDetailsResponseDto.TeamDto dto, Action<TeamDto> postMap = null) {
             if (dto == null) {
                 return null;
             }
@@ -138,6 +132,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
                 Id = dto.PlayerId,
                 FirstName = dto.Firstname,
                 LastName = dto.Lastname,
+                DisplayName = dto.DisplayName,
                 BirthDate = dto.Birthdate,
                 CountryId = dto.CountryId,
                 Position = dto.Position?.Data.Name,
@@ -158,7 +153,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
             var team = homeStatus ? dto.LocalTeam.Data : dto.VisitorTeam.Data;
             var opponentTeam = homeStatus ? dto.VisitorTeam.Data : dto.LocalTeam.Data;
 
-            var startTime = dto.MatchStatus.StartingAt?.DateTime?.DateTime;
+            var startTime = dto.MatchStatus.StartingAt?.DateTime?.DateTime ?? DateTime.MinValue;
 
             var f = new FixtureDtoApp {
                 Id = dto.Id,
@@ -239,9 +234,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
                     postMap: v => v.TeamId =
                         dto.Venue.Data.Id == team.VenueId ?
                             team.Id :
-                            dto.Venue.Data.Id == opponentTeam.VenueId ?
-                                opponentTeam.Id :
-                                null
+                            dto.Venue.Data.Id == opponentTeam.VenueId ? opponentTeam.Id : null
                 )
             };
 
@@ -312,8 +305,8 @@ namespace Worker.Infrastructure.FootballDataProvider {
 
             var p = new TeamLineupDto.PlayerDto {
                 Id = dto.PlayerId.Value,
-                Number = dto.Number,
-                IsCaptain = dto.Captain != null ? dto.Captain.Value : false,
+                Number = dto.Number.GetValueOrDefault(),
+                IsCaptain = dto.Captain.GetValueOrDefault(),
                 Position = dto.Position,
                 FormationPosition = dto.FormationPosition,
                 Rating = dto.Stats?.Rating != null ? float.Parse(dto.Stats.Rating) : null
@@ -357,7 +350,7 @@ namespace Worker.Infrastructure.FootballDataProvider {
                 Fouls = dto.Fouls,
                 Corners = dto.Corners,
                 Offsides = dto.Offsides,
-                BallPossession = dto.Possessiontime != null ? (short) dto.Possessiontime.Value : null,
+                BallPossession = (short?) dto.Possessiontime,
                 YellowCards = dto.Yellowcards,
                 RedCards = dto.Redcards,
                 Tackles = dto.Tackles

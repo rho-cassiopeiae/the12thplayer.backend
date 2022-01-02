@@ -29,10 +29,8 @@ using Livescore.Application.Common.Dto;
 using Livescore.Application.Seed.Commands.AddTeamDetails;
 using Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures;
 using Livescore.Application.Common.Interfaces;
-using Livescore.Api.Services.FixtureDiscussionBroadcaster;
 using Livescore.IntegrationTests.Livescore.VideoReaction.Mocks;
 using Livescore.IntegrationTests.Livescore.Discussion.Mocks;
-using Livescore.Infrastructure.FileUpload;
 
 namespace Livescore.IntegrationTests {
     public class Sut {
@@ -224,9 +222,11 @@ namespace Livescore.IntegrationTests {
             };
             SendRequest(addTeamDetailsCommand).Wait();
 
-            var fixture = JsonSerializer.Deserialize<IEnumerable<FixtureDto>>(
-                _getFileContent("DummyData/finished-fixtures.json")
-            ).First();
+            var fixture = JsonSerializer
+                .Deserialize<IEnumerable<FixtureDto>>(
+                    _getFileContent("DummyData/finished-fixtures.json")
+                )
+                .First();
 
             fixture.Status = "NS";
             fixture.GameTime = new GameTimeDto();
@@ -285,9 +285,11 @@ namespace Livescore.IntegrationTests {
         }
 
         public FixtureDto GetSeededFixtureWithDummyPrematchData() {
-            var fixture = JsonSerializer.Deserialize<IEnumerable<FixtureDto>>(
-                _getFileContent("DummyData/finished-fixtures.json")
-            ).First();
+            var fixture = JsonSerializer
+                .Deserialize<IEnumerable<FixtureDto>>(
+                    _getFileContent("DummyData/finished-fixtures.json")
+                )
+                .First();
 
             fixture.Status = "NS";
 

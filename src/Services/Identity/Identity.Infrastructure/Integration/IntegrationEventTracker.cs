@@ -25,8 +25,7 @@ namespace Identity.Infrastructure.Integration {
             _serviceProvider = serviceProvider;
             // @@NOTE: Connection idle lifetime is 300s by default. Add keep-alive
             // to the default connection string to keep connection open.
-            _connectionString = configuration.GetConnectionString("Identity") +
-                "KeepAlive=150";
+            _connectionString = configuration.GetConnectionString("Identity") + "KeepAlive=150";
         }
 
         private NpgsqlConnection _ensureConnection() =>
@@ -44,9 +43,7 @@ namespace Identity.Infrastructure.Integration {
             }
         }
 
-        public async Task ListenForAndPublishNewEvents(
-            CancellationToken stoppingToken
-        ) {
+        public async Task ListenForAndPublishNewEvents(CancellationToken stoppingToken) {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
             _ensureConnection();
@@ -56,18 +53,14 @@ namespace Identity.Infrastructure.Integration {
                 _fetchAndPublishEventById(Guid.Parse(eventArgs.Payload));
 
             _connection.StateChange += (_, eventArgs) => {
-                if (eventArgs.CurrentState is
-                    ConnectionState.Closed or ConnectionState.Broken
-                ) {
+                if (eventArgs.CurrentState is ConnectionState.Closed or ConnectionState.Broken) {
                     if (!cts.IsCancellationRequested) {
                         cts.Cancel();
                     }
                 }
             };
 
-            await using (var cmd = new NpgsqlCommand(
-                "LISTEN integration_event_channel", _connection
-            )) {
+            await using (var cmd = new NpgsqlCommand("LISTEN integration_event_channel", _connection)) {
                 await cmd.ExecuteNonQueryAsync();
             }
 
@@ -78,9 +71,7 @@ namespace Identity.Infrastructure.Integration {
 
         private async void _fetchAndPublishEventById(Guid eventId) {
             try {
-                await using var publisher =
-                    _serviceProvider.GetRequiredService<IIntegrationEventPublisher>();
-
+                await using var publisher = _serviceProvider.GetRequiredService<IIntegrationEventPublisher>();
                 await publisher.FetchAndPublishEventById(eventId);
             } catch (Exception e) {
                 _logger.LogError(

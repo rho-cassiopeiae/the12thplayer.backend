@@ -24,6 +24,15 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
             _getEntriesCount = configuration.GetValue<int>("Discussion:GetEntriesCount") + 1;
         }
 
+        public async Task<bool> CheckActive(long fixtureId, long teamId, Guid discussionId) {
+            var value = await _redis.GetDatabase().HashGetAsync(
+                $"f:{fixtureId}.t:{teamId}.discussions",
+                $"d:{discussionId}.{nameof(Discussion.Active)}"
+            );
+
+            return !value.IsNull && (int) value == 1;
+        }
+
         public async Task<IEnumerable<Discussion>> GetAllFor(long fixtureId, long teamId) {
             var entries = await _redis.GetDatabase().HashGetAllAsync(
                 $"f:{fixtureId}.t:{teamId}.discussions"
@@ -59,7 +68,7 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
         }
 
         public async Task<IEnumerable<DiscussionEntry>> GetEntriesFor(
-            long fixtureId, long teamId, Guid discussionId, string startFromEntryId
+            long fixtureId, long teamId, Guid discussionId, string startFromEntryId = null
         ) {
             var entries = await _redis.GetDatabase().StreamRangeAsync(
                 $"f:{fixtureId}.t:{teamId}.d:{discussionId}",

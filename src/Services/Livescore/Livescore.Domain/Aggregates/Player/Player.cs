@@ -6,23 +6,24 @@ namespace Livescore.Domain.Aggregates.Player {
         public long? TeamId { get; private set; }
         public string FirstName { get; private set; }
         public string LastName { get; private set; }
+        public string DisplayName { get; private set; }
         public long? BirthDate { get; private set; }
         public long? CountryId { get; private set; }
-        public short? Number { get; private set; }
+        public short? Number { get; private set; } // @@NOTE: Nullable so that we can manually NULL it for certain players if necessary.
         public string Position { get; private set; }
         public string ImageUrl { get; private set; }
         public long LastLineupAt { get; private set; }
         
         public Player(
-            long id, long? teamId, string firstName,
-            string lastName, long? birthDate, long? countryId,
-            short? number, string position, string imageUrl,
-            long lastLineupAt
+            long id, long? teamId, string firstName, string lastName,
+            string displayName, long? birthDate, long? countryId,
+            short? number, string position, string imageUrl, long lastLineupAt
         ) {
             Id = id;
             TeamId = teamId;
             FirstName = firstName;
             LastName = lastName;
+            DisplayName = displayName;
             BirthDate = birthDate;
             CountryId = countryId;
             Number = number;

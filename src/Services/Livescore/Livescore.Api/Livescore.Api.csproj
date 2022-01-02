@@ -2,10 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+	<UserSecretsId>e75a14c2-dd9b-42d0-b9d6-b60ed9753f98</UserSecretsId>
 	<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	<DockerfileContext>..\..\..</DockerfileContext>
 	<DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
+
+  <Target Name="CreateWebRoot" AfterTargets="AfterPublish">
+	<MakeDir Directories="$(PublishDir)wwwroot" Condition="!Exists('$(PublishDir)wwwroot')" />
+  </Target>
 
   <ItemGroup>
 	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">

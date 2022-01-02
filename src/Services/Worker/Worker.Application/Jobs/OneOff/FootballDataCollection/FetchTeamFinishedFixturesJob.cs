@@ -32,9 +32,8 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                 endDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
             }
 
-            var fixtures = (await _footballDataProvider.GetTeamFinishedFixtures(
-                teamId, startDate, endDate
-            )).ToList();
+            var fixtures = (await _footballDataProvider.GetTeamFinishedFixtures(teamId, startDate, endDate))
+                .ToList();
 
             var seasonIds = fixtures
                 .Where(fixture => fixture.SeasonId != null)
@@ -49,7 +48,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                     return (lineup.StartingXI ?? new List<TeamLineupDto.PlayerDto>())
                         .Concat(lineup.Subs ?? new List<TeamLineupDto.PlayerDto>());
                 })
-                .Reverse()
+                .Reverse() // most recent first
                 .ToList();
 
             var playerIds = playerLineupEntries
@@ -61,13 +60,14 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
             foreach (var player in players) {
                 var lastPlayerLineupEntry = playerLineupEntries.First(p => p.Id == player.Id);
                 player.Number = lastPlayerLineupEntry.Number;
-                player.LastLineupAt = lastPlayerLineupEntry.FixtureStartTime.Value;
+                player.LastLineupAt = lastPlayerLineupEntry.FixtureStartTime;
             }
 
             foreach (var playerLineupEntry in playerLineupEntries) {
                 var player = players.First(p => p.Id == playerLineupEntry.Id);
                 playerLineupEntry.FirstName = player.FirstName;
                 playerLineupEntry.LastName = player.LastName;
+                playerLineupEntry.DisplayName = player.DisplayName;
                 playerLineupEntry.ImageUrl = player.ImageUrl;
             }
 
@@ -89,6 +89,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                 var player = opponentPlayers.First(p => p.Id == opponentPlayerLineupEntry.Id);
                 opponentPlayerLineupEntry.FirstName = player.FirstName;
                 opponentPlayerLineupEntry.LastName = player.LastName;
+                opponentPlayerLineupEntry.DisplayName = player.DisplayName;
                 opponentPlayerLineupEntry.ImageUrl = player.ImageUrl;
             }
 

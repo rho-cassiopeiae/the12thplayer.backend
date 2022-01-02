@@ -7,7 +7,6 @@ namespace Livescore.Application.Livescore.VideoReaction.Queries.GetVideoReaction
         public string AuthorUsername { get; init; }
         public int Rating { get; init; }
         public string VideoId { get; init; }
-        public string ThumbnailUrl { get; init; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public short? UserVote { get; set; }
     }

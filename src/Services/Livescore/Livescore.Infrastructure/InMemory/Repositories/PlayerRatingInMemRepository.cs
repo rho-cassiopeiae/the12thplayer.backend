@@ -142,7 +142,8 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
         public void DeleteAllFor(long fixtureId, long teamId) {
             _ensureTransaction();
 
-            _transaction.KeyDeleteAsync($"f:{fixtureId}.t:{teamId}.player-ratings");
+            //_transaction.KeyDeleteAsync($"f:{fixtureId}.t:{teamId}.player-ratings");
+            _transaction.KeyExpireAsync($"f:{fixtureId}.t:{teamId}.player-ratings", TimeSpan.FromMinutes(10));
         }
     }
 }

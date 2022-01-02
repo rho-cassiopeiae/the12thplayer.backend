@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 services:
   #postgres:
@@ -111,6 +111,15 @@ services:
     - rabbit
     - redis
 
+  file-hosting-gateway:
+    environment:
+    - DOTNET_ENVIRONMENT=Development
+    volumes:
+    - "${UserSecretsPath}:/root/.microsoft/usersecrets:ro"
+    - "user_files_data:/app/wwwroot"
+    depends_on:
+    - rabbit
+
   feed:
     environment:
     - ASPNETCORE_ENVIRONMENT=Development
@@ -137,6 +146,8 @@ services:
 
 volumes:
   pgdata:
+    driver: local
   pgreport:
+    driver: local
   user_files_data:
     driver: local

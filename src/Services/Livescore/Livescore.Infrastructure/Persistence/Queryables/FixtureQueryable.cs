@@ -19,13 +19,18 @@ namespace Livescore.Infrastructure.Persistence.Queryables {
         public async Task<IEnumerable<FixtureSummaryDto>> GetFixturesForTeamInBetween(
             long teamId, long startTime, long endTime
         ) {
-            var teamIdParameter = new NpgsqlParameter<long>("TeamId", teamId);
-            var startTimeParameter = new NpgsqlParameter<long>("StartTime", startTime);
-            var endTimeParameter = new NpgsqlParameter<long>("EndTime", endTime);
+            var teamIdParameter = new NpgsqlParameter<long>(nameof(teamId), teamId);
+            var startTimeParameter = new NpgsqlParameter<long>(nameof(startTime), startTime);
+            var endTimeParameter = new NpgsqlParameter<long>(nameof(endTime), endTime);
 
             var fixtures = await _livescoreDbContext.FixtureSummaries
                 .FromSqlRaw(
-                    $"SELECT * FROM livescore.get_fixtures_for_team_in_between (@{teamIdParameter.ParameterName}, @{startTimeParameter.ParameterName}, @{endTimeParameter.ParameterName})",
+                    $@"
+                        SELECT *
+                        FROM livescore.get_fixtures_for_team_in_between (
+                            @{teamIdParameter.ParameterName}, @{startTimeParameter.ParameterName}, @{endTimeParameter.ParameterName}
+                        )
+                    ",
                     teamIdParameter, startTimeParameter, endTimeParameter
                 )
                 .ToListAsync();
@@ -34,12 +39,17 @@ namespace Livescore.Infrastructure.Persistence.Queryables {
         }
 
         public async Task<FixtureFullDto> GetFixtureForTeam(long fixtureId, long teamId) {
-            var fixtureIdParameter = new NpgsqlParameter<long>("FixtureId", fixtureId);
-            var teamIdParameter = new NpgsqlParameter<long>("TeamId", teamId);
+            var fixtureIdParameter = new NpgsqlParameter<long>(nameof(fixtureId), fixtureId);
+            var teamIdParameter = new NpgsqlParameter<long>(nameof(teamId), teamId);
 
             var fixture = await _livescoreDbContext.FixtureFullViews
                 .FromSqlRaw(
-                    $"SELECT * FROM livescore.get_fixture_for_team (@{fixtureIdParameter.ParameterName}, @{teamIdParameter.ParameterName})",
+                    $@"
+                        SELECT *
+                        FROM livescore.get_fixture_for_team (
+                            @{fixtureIdParameter.ParameterName}, @{teamIdParameter.ParameterName}
+                        )
+                    ",
                     fixtureIdParameter, teamIdParameter
                 )
                 .SingleAsync();

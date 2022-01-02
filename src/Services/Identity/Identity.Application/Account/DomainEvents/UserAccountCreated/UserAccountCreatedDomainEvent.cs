@@ -30,8 +30,7 @@ namespace Identity.Application.Account.DomainEvents.UserAccountCreated {
         }
 
         public async Task Handle(
-            UserAccountCreatedDomainEvent @event,
-            CancellationToken cancellationToken
+            UserAccountCreatedDomainEvent @event, CancellationToken cancellationToken
         ) {
             _integrationEventRepository.EnlistAsPartOf(_unitOfWork);
 

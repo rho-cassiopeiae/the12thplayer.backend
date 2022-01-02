@@ -38,13 +38,19 @@ namespace Livescore.Infrastructure.Persistence.Repositories {
             var teamIdParam = new NpgsqlParameter<long>("TeamId", NpgsqlDbType.Bigint) {
                 TypedValue = userVotes.First().TeamId
             };
-            var playerRatingsParam = new NpgsqlParameter<IReadOnlyDictionary<string, float?>[]>("PlayerRatings", NpgsqlDbType.Array | NpgsqlDbType.Jsonb) {
+            var playerRatingsParam = new NpgsqlParameter<IReadOnlyDictionary<string, float?>[]>(
+                "PlayerRatings", NpgsqlDbType.Array | NpgsqlDbType.Jsonb
+            ) {
                 TypedValue = userVotes.Select(uv => uv.FixtureParticipantKeyToRating).ToArray()
             };
-            var liveCommentaryVotesParam = new NpgsqlParameter<IReadOnlyDictionary<string, short?>[]>("LiveCommentaryVotes", NpgsqlDbType.Array | NpgsqlDbType.Jsonb) {
+            var liveCommentaryVotesParam = new NpgsqlParameter<IReadOnlyDictionary<string, short?>[]>(
+                "LiveCommentaryVotes", NpgsqlDbType.Array | NpgsqlDbType.Jsonb
+            ) {
                 TypedValue = userVotes.Select(uv => uv.LiveCommentaryAuthorIdToVote).ToArray()
             };
-            var videoReactionVotesParam = new NpgsqlParameter<IReadOnlyDictionary<string, short?>[]>("VideoReactionVotes", NpgsqlDbType.Array | NpgsqlDbType.Jsonb) {
+            var videoReactionVotesParam = new NpgsqlParameter<IReadOnlyDictionary<string, short?>[]>(
+                "VideoReactionVotes", NpgsqlDbType.Array | NpgsqlDbType.Jsonb
+            ) {
                 TypedValue = userVotes.Select(uv => uv.VideoReactionAuthorIdToVote).ToArray()
             };
 

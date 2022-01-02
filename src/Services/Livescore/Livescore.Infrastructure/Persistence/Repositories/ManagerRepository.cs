@@ -17,13 +17,7 @@ namespace Livescore.Infrastructure.Persistence.Repositories {
             await _livescoreDbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<Manager> FindById(long id) {
-            var manager = await _livescoreDbContext.Managers.SingleOrDefaultAsync(
-                m => m.Id == id
-            );
-
-            return manager;
-        }
+        public Task<Manager> FindById(long id) => _livescoreDbContext.Managers.SingleOrDefaultAsync(m => m.Id == id);
 
         public void Create(Manager manager) {
             _livescoreDbContext.Managers.Add(manager);

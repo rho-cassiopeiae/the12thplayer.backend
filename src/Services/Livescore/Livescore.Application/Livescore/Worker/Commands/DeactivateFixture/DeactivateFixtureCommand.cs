@@ -102,7 +102,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.DeactivateFixture {
             _userVoteInMemRepository.DeleteAllFor(command.FixtureId, command.TeamId, fixtureParticipantKeys);
 
             _discussionInMemRepository.EnlistAsPartOf(_inMemUnitOfWork);
-            _discussionInMemRepository.Delete(
+            _discussionInMemRepository.DeleteAllFor(
                 command.FixtureId, command.TeamId, discussions.Select(d => d.Id).ToList()
             );
 

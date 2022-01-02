@@ -58,7 +58,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.VoteForVideoRea
             bool applied;
             UserVote userVote;
             do {
-                var active = await _fixtureLivescoreStatusInMemRepository.FindOutIfActive(
+                bool active = await _fixtureLivescoreStatusInMemRepository.FindOutIfActive(
                     command.FixtureId, command.TeamId
                 );
                 if (!active) {
@@ -96,7 +96,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.VoteForVideoRea
             return new HandleResult<VideoReactionRatingDto> {
                 Data = new VideoReactionRatingDto {
                     Rating = updatedRating,
-                    Vote = userVote.VideoReactionAuthorIdToVote[command.AuthorId.ToString()]
+                    UserVote = userVote.VideoReactionAuthorIdToVote[command.AuthorId.ToString()]
                 }
             };
         }

@@ -5,6 +5,7 @@ namespace Livescore.Application.Common.Dto {
         public long Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string DisplayName { get; set; }
         public DateTime? BirthDate { get; set; }
         public long? CountryId { get; set; }
         public short Number { get; set; }

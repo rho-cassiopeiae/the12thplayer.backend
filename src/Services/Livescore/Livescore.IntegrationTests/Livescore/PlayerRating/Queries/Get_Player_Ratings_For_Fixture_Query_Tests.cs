@@ -9,6 +9,7 @@ using Livescore.Application.Livescore.Worker.Commands.ActivateFixture;
 using Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch;
 using Livescore.Application.Livescore.PlayerRating.Queries.GetPlayerRatingsForFixture;
 using Livescore.Application.Livescore.Worker.Commands.DeactivateFixture;
+using Livescore.Application.Livescore.Worker.Commands.FinishFixture;
 
 namespace Livescore.IntegrationTests.Livescore.PlayerRating.Queries {
     [Collection(nameof(LivescoreTestCollection))]
@@ -71,6 +72,7 @@ namespace Livescore.IntegrationTests.Livescore.PlayerRating.Queries {
                 TeamId = _teamId
             });
 
+            result.Data.RatingsFinalized.Should().BeFalse();
             result.Data.PlayerRatings.First(pr => pr.ParticipantKey == _participantKey).Should().BeEquivalentTo(
                 new PlayerRatingWithUserVoteDto {
                     ParticipantKey = _participantKey,
@@ -103,6 +105,11 @@ namespace Livescore.IntegrationTests.Livescore.PlayerRating.Queries {
 
             _sut.RunAsGuest();
 
+            await _sut.SendRequest(new FinishFixtureCommand {
+                FixtureId = _fixtureId,
+                TeamId = _teamId
+            });
+
             await _sut.SendRequest(new DeactivateFixtureCommand {
                 FixtureId = _fixtureId,
                 TeamId = _teamId
@@ -115,6 +122,7 @@ namespace Livescore.IntegrationTests.Livescore.PlayerRating.Queries {
                 TeamId = _teamId
             });
 
+            result.Data.RatingsFinalized.Should().BeTrue();
             result.Data.PlayerRatings.First(pr => pr.ParticipantKey == _participantKey).Should().BeEquivalentTo(
                 new PlayerRatingWithUserVoteDto {
                     ParticipantKey = _participantKey,

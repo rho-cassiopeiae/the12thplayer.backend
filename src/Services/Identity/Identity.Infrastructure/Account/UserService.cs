@@ -79,7 +79,7 @@ namespace Identity.Infrastructure.Account {
             if (includeRefreshTokensAndClaims) {
                 userPm = await _userDbContext.Users
                     .Include(u => u.RefreshTokens)
-                    .FirstOrDefaultAsync(u => u.Email == email);
+                    .SingleOrDefaultAsync(u => u.Email == email);
             } else {
                 userPm = await _userManager.FindByEmailAsync(email);
             }
@@ -126,7 +126,7 @@ namespace Identity.Infrastructure.Account {
             if (includeRefreshTokensAndClaims) {
                 userPm = await _userDbContext.Users
                     .Include(u => u.RefreshTokens)
-                    .FirstOrDefaultAsync(u => u.Id == id);
+                    .SingleOrDefaultAsync(u => u.Id == id);
             } else {
                 userPm = await _userManager.FindByIdAsync(id.ToString());
             }
@@ -175,7 +175,7 @@ namespace Identity.Infrastructure.Account {
             var result = await _userManager.CreateAsync(userPm, password);
             if (!result.Succeeded) {
                 // @@NOTE: Since auto-saving is enabled by default, a possible
-                // error is detected right away.
+                // error (like duplicate email/username) is detected right away.
                 return new AccountError(result.ToErrorDictionary());
             }
 

@@ -63,19 +63,17 @@ namespace Identity.Application.Account.Commands.SignIn {
                 deviceId: command.DeviceId,
                 value: _securityTokenProvider.GenerateRefreshToken(),
                 isActive: true,
-                expiresAt: DateTimeOffset.UtcNow.AddDays(30) // @@TODO: Config.
+                expiresAt: DateTimeOffset.UtcNow.AddDays(60) // @@TODO: Config.
             );
 
             user.AddRefreshToken(refreshToken);
 
             await _userService.FinalizeSignIn(user);
 
-            var claims = user.Claims.ToList();
-
             return new HandleResult<SecurityCredentialsDto> {
                 Data = new SecurityCredentialsDto {
                     Username = user.Username,
-                    AccessToken = _securityTokenProvider.GenerateJwt(user.Id, claims),
+                    AccessToken = _securityTokenProvider.GenerateJwt(user.Id, user.Claims.ToList()),
                     RefreshToken = refreshToken.Value
                 }
             };

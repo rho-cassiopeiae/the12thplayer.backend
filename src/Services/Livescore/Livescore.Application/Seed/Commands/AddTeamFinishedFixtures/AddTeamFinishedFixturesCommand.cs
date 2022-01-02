@@ -108,11 +108,7 @@ namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
                         logoUrl: fixtureLeague.LogoUrl
                     );
 
-                    foreach (
-                        var fixtureSeason in command.Seasons.Where(
-                            s => s.League.Id == league.Id
-                        )
-                    ) {
+                    foreach (var fixtureSeason in command.Seasons.Where(s => s.League.Id == league.Id)) {
                         league.AddSeason(new Season(
                             id: fixtureSeason.Id,
                             name: fixtureSeason.Name,
@@ -122,11 +118,7 @@ namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
 
                     _leagueRepository.Create(league);
                 } else {
-                    foreach (
-                        var fixtureSeason in command.Seasons.Where(
-                            s => s.League.Id == league.Id
-                        )
-                    ) {
+                    foreach (var fixtureSeason in command.Seasons.Where(s => s.League.Id == league.Id)) {
                         if (!league.Seasons.Any(s => s.Id == fixtureSeason.Id)) {
                             // @@TODO: Check that EF Core detects this season addition.
                             // Do we need to track league for this or AsNoTracking is fine? Most likely have to track.
@@ -152,20 +144,18 @@ namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
                         teamId: teamId,
                         firstName: fixturePlayer.FirstName,
                         lastName: fixturePlayer.LastName,
+                        displayName: fixturePlayer.DisplayName,
                         birthDate: fixturePlayer.BirthDate != null ?
-                            new DateTimeOffset(fixturePlayer.BirthDate.Value)
-                                .ToUnixTimeMilliseconds() :
+                            new DateTimeOffset(fixturePlayer.BirthDate.Value).ToUnixTimeMilliseconds() :
                             null,
                         countryId: fixturePlayer.CountryId,
                         number: fixturePlayer.Number,
                         position: fixturePlayer.Position,
                         imageUrl: fixturePlayer.ImageUrl,
-                        lastLineupAt: new DateTimeOffset(fixturePlayer.LastLineupAt)
-                            .ToUnixTimeMilliseconds()
+                        lastLineupAt: new DateTimeOffset(fixturePlayer.LastLineupAt).ToUnixTimeMilliseconds()
                     ));
                 } else {
-                    long lastLineupAt = new DateTimeOffset(fixturePlayer.LastLineupAt)
-                        .ToUnixTimeMilliseconds();
+                    long lastLineupAt = new DateTimeOffset(fixturePlayer.LastLineupAt).ToUnixTimeMilliseconds();
                     if (player.TeamId != teamId && player.LastLineupAt < lastLineupAt) {
                         player.ChangeTeam(teamId);
                         player.ChangeNumber(fixturePlayer.Number);
@@ -194,7 +184,7 @@ namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
                         seasonId: fixture.SeasonId,
                         opponentTeamId: fixture.OpponentTeam.Id,
                         homeStatus: fixture.HomeStatus,
-                        startTime: new DateTimeOffset(fixture.StartTime.Value).ToUnixTimeMilliseconds(),
+                        startTime: new DateTimeOffset(fixture.StartTime).ToUnixTimeMilliseconds(),
                         status: fixture.Status,
                         gameTime: new GameTime(
                             minute: fixture.GameTime.Minute,
@@ -232,27 +222,27 @@ namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
                                         imageUrl: teamLineup.Manager.ImageUrl
                                     ) :
                                     null,
-                                startingXI: teamLineup.StartingXI?.Select(p => new TeamLineup.Player(
+                                startingXI: teamLineup.StartingXI.Select(p => new TeamLineup.Player(
                                     id: p.Id,
                                     firstName: p.FirstName,
                                     lastName: p.LastName,
+                                    displayName: p.DisplayName,
                                     number: p.Number,
                                     isCaptain: p.IsCaptain,
                                     position: p.Position,
                                     formationPosition: p.FormationPosition,
-                                    imageUrl: p.ImageUrl,
-                                    rating: p.Rating
+                                    imageUrl: p.ImageUrl
                                 )),
-                                subs: teamLineup.Subs?.Select(p => new TeamLineup.Player(
+                                subs: teamLineup.Subs.Select(p => new TeamLineup.Player(
                                     id: p.Id,
                                     firstName: p.FirstName,
                                     lastName: p.LastName,
+                                    displayName: p.DisplayName,
                                     number: p.Number,
                                     isCaptain: p.IsCaptain,
                                     position: p.Position,
                                     formationPosition: p.FormationPosition,
-                                    imageUrl: p.ImageUrl,
-                                    rating: p.Rating
+                                    imageUrl: p.ImageUrl
                                 ))
                             ),
                             new TeamLineup(
@@ -265,34 +255,34 @@ namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
                                         imageUrl: opponentTeamLineup.Manager.ImageUrl
                                     ) :
                                     null,
-                                startingXI: opponentTeamLineup.StartingXI?.Select(p => new TeamLineup.Player(
+                                startingXI: opponentTeamLineup.StartingXI.Select(p => new TeamLineup.Player(
                                     id: p.Id,
                                     firstName: p.FirstName,
                                     lastName: p.LastName,
+                                    displayName: p.DisplayName,
                                     number: p.Number,
                                     isCaptain: p.IsCaptain,
                                     position: p.Position,
                                     formationPosition: p.FormationPosition,
-                                    imageUrl: p.ImageUrl,
-                                    rating: p.Rating
+                                    imageUrl: p.ImageUrl
                                 )),
-                                subs: opponentTeamLineup.Subs?.Select(p => new TeamLineup.Player(
+                                subs: opponentTeamLineup.Subs.Select(p => new TeamLineup.Player(
                                     id: p.Id,
                                     firstName: p.FirstName,
                                     lastName: p.LastName,
+                                    displayName: p.DisplayName,
                                     number: p.Number,
                                     isCaptain: p.IsCaptain,
                                     position: p.Position,
                                     formationPosition: p.FormationPosition,
-                                    imageUrl: p.ImageUrl,
-                                    rating: p.Rating
+                                    imageUrl: p.ImageUrl
                                 ))
                             )
                         },
                         events: new[] {
                             new TeamMatchEvents(
                                 teamId: teamId,
-                                events: teamMatchEvents.Events?.Select(e => new TeamMatchEvents.MatchEvent(
+                                events: teamMatchEvents.Events.Select(e => new TeamMatchEvents.MatchEvent(
                                     minute: e.Minute,
                                     addedTimeMinute: e.AddedTimeMinute,
                                     type: e.Type,
@@ -302,7 +292,7 @@ namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
                             ),
                             new TeamMatchEvents(
                                 teamId: fixture.OpponentTeam.Id,
-                                events: opponentTeamMatchEvents.Events?.Select(e => new TeamMatchEvents.MatchEvent(
+                                events: opponentTeamMatchEvents.Events.Select(e => new TeamMatchEvents.MatchEvent(
                                     minute: e.Minute,
                                     addedTimeMinute: e.AddedTimeMinute,
                                     type: e.Type,

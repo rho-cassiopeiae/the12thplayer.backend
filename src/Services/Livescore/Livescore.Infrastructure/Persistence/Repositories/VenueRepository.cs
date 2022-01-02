@@ -19,13 +19,7 @@ namespace Livescore.Infrastructure.Persistence.Repositories {
             await _livescoreDbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<Venue> FindById(long id) {
-            var venue = await _livescoreDbContext.Venues.SingleOrDefaultAsync(
-                v => v.Id == id
-            );
-
-            return venue;
-        }
+        public Task<Venue> FindById(long id) => _livescoreDbContext.Venues.SingleOrDefaultAsync(v => v.Id == id);
 
         public async Task<IEnumerable<Venue>> FindById(IEnumerable<long> ids) {
             var venues = await _livescoreDbContext.Venues

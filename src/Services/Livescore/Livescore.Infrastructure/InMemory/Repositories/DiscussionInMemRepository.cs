@@ -105,19 +105,19 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
 
             _transaction.HashSetAsync(
                 $"{fixtureIdentifier}.discussions",
-                new[] {
-                    new HashEntry($"d:{discussion.Id}.{nameof(Discussion.Name)}", discussion.Name),
-                    new HashEntry($"d:{discussion.Id}.{nameof(Discussion.Active)}", discussion.Active ? 1 : 0)
+                new HashEntry[] {
+                    new($"d:{discussion.Id}.{nameof(Discussion.Name)}", discussion.Name),
+                    new($"d:{discussion.Id}.{nameof(Discussion.Active)}", discussion.Active ? 1 : 0)
                 }
             );
 
             foreach (var entry in discussion.Entries) {
                 _transaction.StreamAddAsync(
                     $"{fixtureIdentifier}.d:{discussion.Id}",
-                    new[] {
-                        new NameValueEntry(nameof(DiscussionEntry.UserId), entry.UserId),
-                        new NameValueEntry(nameof(DiscussionEntry.Username), entry.Username),
-                        new NameValueEntry(nameof(DiscussionEntry.Body), entry.Body)
+                    new NameValueEntry[] {
+                        new(nameof(DiscussionEntry.UserId), entry.UserId),
+                        new(nameof(DiscussionEntry.Username), entry.Username),
+                        new(nameof(DiscussionEntry.Body), entry.Body)
                     },
                     messageId: entry.Id
                 );
@@ -125,14 +125,14 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
 
             _transaction.StreamAddAsync(
                 "discussions",
-                new[] {
-                    new NameValueEntry("identifier", $"{fixtureIdentifier}.d:{discussion.Id}"),
-                    new NameValueEntry("command", "sub")
+                new NameValueEntry[] {
+                    new("identifier", $"{fixtureIdentifier}.d:{discussion.Id}"),
+                    new("command", "sub")
                 }
             );
         }
 
-        public void Delete(long fixtureId, long teamId, List<Guid> discussionIds) {
+        public void DeleteAllFor(long fixtureId, long teamId, List<Guid> discussionIds) {
             _ensureTransaction();
 
             var fixtureIdentifier = $"f:{fixtureId}.t:{teamId}";
@@ -143,7 +143,11 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
 
             keysToDelete.Add($"{fixtureIdentifier}.discussions");
 
-            _transaction.KeyDeleteAsync(keysToDelete.ToArray());
+            //_transaction.KeyDeleteAsync(keysToDelete.ToArray());
+
+            foreach (var key in keysToDelete) {
+                _transaction.KeyExpireAsync(key, TimeSpan.FromMinutes(10));
+            }
 
             _transaction.StreamAddAsync(
                 "discussions",
@@ -157,24 +161,20 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
         public void PostEntries(Discussion discussion) {
             _ensureTransaction();
 
+            // @@NOTE: We only ever invoke this method with entries from a single user.
+            long authorId = discussion.Entries.First().UserId;
             var fixtureIdentifier = $"f:{discussion.FixtureId}.t:{discussion.TeamId}";
 
-            var first = true;
+            if (_postingIntervalSec > 0) {
+                _transaction.AddCondition(Condition.KeyNotExists($"{fixtureIdentifier}.dea:{authorId}"));
+                _transaction.StringSetAsync(
+                    $"{fixtureIdentifier}.dea:{authorId}",
+                    1,
+                    TimeSpan.FromSeconds(_postingIntervalSec)
+                );
+            }
+
             foreach (var entry in discussion.Entries) {
-                // @@NOTE: We only ever invoke this method with entries from /one/ user, so we need to add a single condition.
-                if (first && _postingIntervalSec > 0) {
-                    _transaction.AddCondition(
-                        Condition.KeyNotExists($"{fixtureIdentifier}.dea:{entry.UserId}")
-                    );
-                    _transaction.StringSetAsync(
-                        $"{fixtureIdentifier}.dea:{entry.UserId}",
-                        1,
-                        TimeSpan.FromSeconds(_postingIntervalSec)
-                    );
-
-                    first = false;
-                }
-
                 _transaction.StreamAddAsync(
                     $"{fixtureIdentifier}.d:{discussion.Id}",
                     new[] {

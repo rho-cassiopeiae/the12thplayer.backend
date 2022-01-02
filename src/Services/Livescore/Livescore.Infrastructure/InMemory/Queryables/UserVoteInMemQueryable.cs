@@ -42,7 +42,7 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
                 var participantKey = fixtureParticipantKeys[i];
                 var value = values[i];
                 if (!value.IsNull) {
-                    userVote = userVote ?? new UserVote(
+                    userVote ??= new UserVote(
                         userId: userId,
                         fixtureId: fixtureId,
                         teamId: teamId
@@ -81,7 +81,7 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
                 var authorId = authorIds[i];
                 var value = values[i];
                 if (!value.IsNull) {
-                    userVote = userVote ?? new UserVote(
+                    userVote ??= new UserVote(
                         userId: userId,
                         fixtureId: fixtureId,
                         teamId: teamId

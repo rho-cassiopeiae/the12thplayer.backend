@@ -21,7 +21,7 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
             ConnectionMultiplexer redis
         ) {
             _redis = redis;
-            _getCount = configuration.GetValue<int>("VideoReaction:GetCount") - 1;
+            _getCount = configuration.GetValue<int>("VideoReaction:GetCount");
         }
 
         public async Task<string> GetVimeoProjectIdFor(long fixtureId, long teamId) {
@@ -32,16 +32,20 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
             return result;
         }
 
-        public async Task<IEnumerable<VideoReaction>> GetAllFor(
-            long fixtureId, long teamId, VideoReactionFilter filter, int start
+        public async Task<(IEnumerable<VideoReaction> VideoReactions, int TotalPages)> GetFilteredAndPaginatedFor(
+            long fixtureId, long teamId, VideoReactionFilter filter, int page
         ) {
             var fixtureIdentifier = $"f:{fixtureId}.t:{teamId}";
             var db = _redis.GetDatabase();
 
             var videoReactions = new List<VideoReaction>();
             if (filter == VideoReactionFilter.Top) {
+                // @@NOTE: No error if out of range. Both are inclusive.
                 var entries = await db.SortedSetRangeByRankWithScoresAsync(
-                    $"{fixtureIdentifier}.video-reaction-author-ids.by-rating", start, start + _getCount, Order.Descending
+                    $"{fixtureIdentifier}.video-reaction-author-ids.by-rating",
+                    (page - 1) * _getCount,
+                    page * _getCount - 1,
+                    Order.Descending
                 );
                 foreach (var entry in entries) {
                     videoReactions.Add(
@@ -55,7 +59,10 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
                 }
             } else { // newest first
                 var authorIds = await db.SortedSetRangeByRankAsync(
-                    $"{fixtureIdentifier}.video-reaction-author-ids.by-date", start, start + _getCount, Order.Descending
+                    $"{fixtureIdentifier}.video-reaction-author-ids.by-date",
+                    (page - 1) * _getCount,
+                    page * _getCount - 1,
+                    Order.Descending
                 );
 
                 if (authorIds.Length > 0) {
@@ -78,26 +85,32 @@ namespace Livescore.Infrastructure.InMemory.Queryables {
             }
 
             if (videoReactions.Count > 0) {
-                var fields = new RedisValue[videoReactions.Count * 4];
-                for (int i = 0, j = 0; i < videoReactions.Count; ++i, j += 4) {
+                var fields = new RedisValue[videoReactions.Count * 3];
+                for (int i = 0, j = 0; i < videoReactions.Count; ++i, j += 3) {
                     var authorId = videoReactions[i].AuthorId;
                     fields[j] =     $"vra:{authorId}.{nameof(VideoReaction.Title)}";
                     fields[j + 1] = $"vra:{authorId}.{nameof(VideoReaction.AuthorUsername)}";
                     fields[j + 2] = $"vra:{authorId}.{nameof(VideoReaction.VideoId)}";
-                    fields[j + 3] = $"vra:{authorId}.{nameof(VideoReaction.ThumbnailUrl)}";
                 }
 
                 var values = await db.HashGetAsync($"{fixtureIdentifier}.video-reactions", fields);
-                for (int i = 0, j = 0; i < videoReactions.Count; ++i, j += 4) {
+                for (int i = 0, j = 0; i < videoReactions.Count; ++i, j += 3) {
                     var videoReaction = videoReactions[i];
                     videoReaction.SetTitle(values[j]);
                     videoReaction.SetAuthorUsername(values[j + 1]);
                     videoReaction.SetVideoId(values[j + 2]);
-                    videoReaction.SetThumbnail(values[j + 3]);
                 }
             }
 
-            return videoReactions;
+            var totalVideoReactionCount = (int) await db.SortedSetLengthAsync(
+                $"{fixtureIdentifier}.video-reaction-author-ids.by-rating"
+            );
+            var totalPages = totalVideoReactionCount / _getCount;
+            if (totalPages == 0 || totalVideoReactionCount % _getCount > 0) {
+                ++totalPages;
+            }
+
+            return (videoReactions, totalPages);
         }
 
         public async Task<int> GetRatingFor(long fixtureId, long teamId, long authorId) {

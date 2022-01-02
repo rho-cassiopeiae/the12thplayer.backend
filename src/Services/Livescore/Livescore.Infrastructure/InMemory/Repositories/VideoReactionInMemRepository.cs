@@ -89,8 +89,7 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                 new[] {
                     new HashEntry($"{authorIdentifier}.{nameof(VideoReaction.Title)}", videoReaction.Title),
                     new HashEntry($"{authorIdentifier}.{nameof(VideoReaction.AuthorUsername)}", videoReaction.AuthorUsername),
-                    new HashEntry($"{authorIdentifier}.{nameof(VideoReaction.VideoId)}", videoReaction.VideoId),
-                    new HashEntry($"{authorIdentifier}.{nameof(VideoReaction.ThumbnailUrl)}", videoReaction.ThumbnailUrl)
+                    new HashEntry($"{authorIdentifier}.{nameof(VideoReaction.VideoId)}", videoReaction.VideoId)
                 }
             );
         }
@@ -116,7 +115,11 @@ namespace Livescore.Infrastructure.InMemory.Repositories {
                 $"f:{fixtureId}.t:{teamId}.video-reaction-author-ids.by-date"
             };
 
-            _transaction.KeyDeleteAsync(keysToDelete);
+            //_transaction.KeyDeleteAsync(keysToDelete);
+
+            foreach (var key in keysToDelete) {
+                _transaction.KeyExpireAsync(key, TimeSpan.FromMinutes(10));
+            }
         }
     }
 }

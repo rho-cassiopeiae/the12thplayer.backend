@@ -47,10 +47,7 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Commands {
                 Request = preparedRequest.Request
             });
 
-            result.Data.Should().BeEquivalentTo(new VideoReactionStreamingInfoDto {
-                VideoId = FileHostingMock.VideoId,
-                ThumbnailUrl = FileHostingMock.ThumbnailUrl
-            });
+            result.Data.Should().Be(FileHostingMock.VideoId);
 
             var dirPath = Path.Combine(
                 _sut.GetConfigurationValue<string>("UserFiles:Path"),

@@ -25,6 +25,12 @@ services:
       context: .
       dockerfile: Services/Livescore/Livescore.Api/Dockerfile
 
+  file-hosting-gateway:
+    image: ${REGISTRY:-the12thplayer}/file-hosting-gateway.host:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/FileHostingGateway/FileHostingGateway.Host/Dockerfile
+
   feed:
     image: ${REGISTRY:-the12thplayer}/feed.api:${PLATFORM:-linux}-${TAG:-latest}
     build:

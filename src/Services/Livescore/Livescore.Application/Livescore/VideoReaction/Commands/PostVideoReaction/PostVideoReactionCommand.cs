@@ -13,20 +13,21 @@ using Livescore.Domain.Aggregates.FixtureLivescoreStatus;
 using Livescore.Application.Common.Attributes;
 using Livescore.Application.Common.Interfaces;
 using Livescore.Application.Livescore.Common.Errors;
+using Livescore.Application.Common.Errors;
 using Livescore.Domain.Base;
 using Livescore.Application.Livescore.VideoReaction.Common.Errors;
 using VideoReactionDm = Livescore.Domain.Aggregates.VideoReaction.VideoReaction;
 
 namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReaction {
     [RequireAuthorization]
-    public class PostVideoReactionCommand : IRequest<HandleResult<VideoReactionStreamingInfoDto>> {
-        public long FixtureId { get; set; }
-        public long TeamId { get; set; }
-        public HttpRequest Request { get; set; }
+    public class PostVideoReactionCommand : IRequest<HandleResult<string>> {
+        public long FixtureId { get; init; }
+        public long TeamId { get; init; }
+        public HttpRequest Request { get; init; }
     }
 
     public class PostVideoReactionCommandHandler : IRequestHandler<
-        PostVideoReactionCommand, HandleResult<VideoReactionStreamingInfoDto>
+        PostVideoReactionCommand, HandleResult<string>
     > {
         private readonly ILogger<PostVideoReactionCommandHandler> _logger;
         private readonly IAuthenticationContext _authenticationContext;
@@ -63,7 +64,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
             _videoReactionInMemQueryable = videoReactionInMemQueryable;
         }
 
-        public async Task<HandleResult<VideoReactionStreamingInfoDto>> Handle(
+        public async Task<HandleResult<string>> Handle(
             PostVideoReactionCommand command, CancellationToken cancellationToken
         ) {
             long userId = _principalDataProvider.GetId(_authenticationContext.User);
@@ -75,7 +76,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
                 command.FixtureId, command.TeamId
             );
             if (!active) {
-                return new HandleResult<VideoReactionStreamingInfoDto> {
+                return new HandleResult<string> {
                     Error = new LivescoreError("Fixture is no longer active")
                 };
             }
@@ -84,7 +85,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
                 command.FixtureId, command.TeamId, userId
             );
             if (!reserved) {
-                return new HandleResult<VideoReactionStreamingInfoDto> {
+                return new HandleResult<string> {
                     Error = new VideoReactionError("Can only post one video reaction per fixture")
                 };
             }
@@ -97,23 +98,23 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
                     filePrefix: $"video-reactions/f-{command.FixtureId}-t-{command.TeamId}"
                 );
                 if (outcome.IsError) {
-                    return new HandleResult<VideoReactionStreamingInfoDto> {
+                    return new HandleResult<string> {
                         Error = outcome.Error
                     };
                 }
                 if (!outcome.Data.ContainsKey("title")) { // @@TODO: Validate title.
                     _fileReceiver.DeleteFile(outcome.Data["filePath"]);
 
-                    return new HandleResult<VideoReactionStreamingInfoDto> {
-                        Error = new VideoReactionError("No title provided")
+                    return new HandleResult<string> {
+                        Error = new ValidationError("No title provided")
                     };
                 }
 
                 formValues = outcome.Data;
             } catch (Exception e) {
-                _logger.LogError("Error receiving user video", e);
+                _logger.LogError(e, "Error receiving user video");
 
-                return new HandleResult<VideoReactionStreamingInfoDto> {
+                return new HandleResult<string> {
                     Error = new VideoReactionError("Error uploading video reaction")
                 };
             } finally {
@@ -130,48 +131,52 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
                 command.FixtureId, command.TeamId
             );
             if (vimeoProjectId == null) {
+                // @@IRRELEVANT
                 // @@NOTE: Means that in between checking if fixture is still active and retrieving its vimeo
                 // project id, it has been finalized (fully).
 
+                // @@IRRELEVANT
                 // @@TODO??: There is a very small chance that the cleanup happened right in between the active
                 // status check and slot reservation. So by reserving a slot we affectively reintroduced the
                 // 'f:xxx.t:yyy.video-reaction-author-ids' set. Should nuke it here instead of just releasing?
                 try {
                     _fileReceiver.DeleteFile(filePath);
                 } catch (Exception ex) {
-                    _logger.LogError("Error deleting user video", ex);
+                    _logger.LogError(ex, "Error deleting user video");
                 }
 
                 await _videoReactionInMemRepository.ReleaseSlotFor__immediate(command.FixtureId, command.TeamId, userId);
 
-                return new HandleResult<VideoReactionStreamingInfoDto> {
+                return new HandleResult<string> {
                     Error = new LivescoreError("Fixture is no longer active")
                 };
             }
 
-            // @@NOTE: Means that even if the fixture is getting finalized at this very moment,
-            // the cleanup hasn't happened yet.
-
-            string videoId, thumbnailUrl;
+            string videoId;
             try {
-                (videoId, thumbnailUrl) = await _fileHosting.UploadVideo(filePath, vimeoProjectId);
+                videoId = await _fileHosting.UploadVideo(filePath, vimeoProjectId);
             } catch (Exception e) {
-                _logger.LogError("Error uploading user video", e);
+                _logger.LogError(e, "Error uploading user video");
 
-                // @@TODO: Since here it's unclear what exactly caused uploading to fail (it could be just a MassTransit
+                // @@NOTE: Since here it's unclear what exactly caused uploading to fail (it could be just a MassTransit
                 // error for all we know), we should not rely on FileHostingGateway deleting the file. Need to ensure that
                 // it gets properly deleted.
+
+                // One of the possible errors (6) is that the project no longer existed when FileHostingGateway tried to put
+                // the uploaded video into it.
 
                 try {
                     _fileReceiver.DeleteFile(filePath);
                 } catch (Exception ex) {
-                    _logger.LogError("Error deleting user video", ex);
+                    _logger.LogError(ex, "Error deleting user video");
                 }
 
                 await _videoReactionInMemRepository.ReleaseSlotFor__immediate(command.FixtureId, command.TeamId, userId);
 
-                return new HandleResult<VideoReactionStreamingInfoDto> {
-                    Error = new VideoReactionError("Error uploading video reaction")
+                return new HandleResult<string> {
+                    Error = e.Message.Contains("(6)") ?
+                        new LivescoreError("Fixture is no longer active") :
+                        new VideoReactionError("Error uploading video reaction")
                 };
             }
 
@@ -187,7 +192,6 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
                 authorUsername: username,
                 title: formValues["title"],
                 videoId: videoId,
-                thumbnailUrl: thumbnailUrl,
                 postedAt: postedAt,
                 rating: 1
             );
@@ -197,23 +201,18 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReacti
 
             bool applied = await _unitOfWork.Commit();
             if (!applied) { // @@NOTE: Means the fixture is no longer active.
-                // @@TODO: Should manually request file deletion from vimeo, since at this point it's unclear whether
-                // the file was uploaded and /then/ the entire vimeo folder was deleted, or the other way around.
-
-                // @@NOTE: Don't need to delete the file from the file system. Successful upload means it has already been deleted.
+                // If here, the video [has already been/will be] deleted from vimeo together with the project (since
+                // successful upload means the project still existed at that time).
                 
                 await _videoReactionInMemRepository.ReleaseSlotFor__immediate(command.FixtureId, command.TeamId, userId);
 
-                return new HandleResult<VideoReactionStreamingInfoDto> {
+                return new HandleResult<string> {
                     Error = new LivescoreError("Fixture is no longer active")
                 };
             }
 
-            return new HandleResult<VideoReactionStreamingInfoDto> {
-                Data = new VideoReactionStreamingInfoDto {
-                    VideoId = videoId,
-                    ThumbnailUrl = thumbnailUrl
-                }
+            return new HandleResult<string> {
+                Data = videoId
             };
         }
     }

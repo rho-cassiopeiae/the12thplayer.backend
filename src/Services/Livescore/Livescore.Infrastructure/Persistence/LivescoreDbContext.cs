@@ -101,7 +101,7 @@ namespace Livescore.Infrastructure.Persistence {
             modelBuilder.Entity<Season>(builder => {
                 builder.HasKey(s => s.Id);
                 builder.Property(s => s.Id).ValueGeneratedNever();
-                builder.Property(s => s.Name).IsRequired();
+                builder.Property(s => s.Name).IsRequired(false);
                 builder.Property(s => s.IsCurrent).IsRequired();
                 builder
                     .HasOne<League>()
@@ -115,6 +115,7 @@ namespace Livescore.Infrastructure.Persistence {
                 builder.Property(p => p.Id).ValueGeneratedNever();
                 builder.Property(p => p.FirstName).IsRequired(false);
                 builder.Property(p => p.LastName).IsRequired(false);
+                builder.Property(p => p.DisplayName).IsRequired(false);
                 builder.Property(p => p.BirthDate).IsRequired(false);
                 builder.Property(p => p.Number).IsRequired(false);
                 builder.Property(p => p.Position).IsRequired(false);
@@ -135,7 +136,7 @@ namespace Livescore.Infrastructure.Persistence {
             modelBuilder.Entity<Fixture>(builder => {
                 builder.HasKey(f => new { f.Id, f.TeamId });
                 builder.Property(f => f.HomeStatus).IsRequired();
-                builder.Property(f => f.StartTime).IsRequired(false);
+                builder.Property(f => f.StartTime).IsRequired();
                 builder.Property(f => f.Status).IsRequired();
                 builder.Property(f => f.GameTime)
                     .HasColumnType("jsonb")
@@ -208,7 +209,12 @@ namespace Livescore.Infrastructure.Persistence {
             });
 
             modelBuilder.Entity<UserVote>(builder => {
-                builder.HasKey(uv => new { uv.UserId, uv.FixtureId, uv.TeamId }); // @@TODO: Configure fk.
+                builder.HasKey(uv => new { uv.UserId, uv.FixtureId, uv.TeamId });
+                builder
+                    .HasOne<Fixture>()
+                    .WithMany()
+                    .HasForeignKey(uv => new { uv.FixtureId, uv.TeamId })
+                    .IsRequired();
                 builder
                     .Property(uv => uv.FixtureParticipantKeyToRating)
                     .HasColumnType("jsonb")

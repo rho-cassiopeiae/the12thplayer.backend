@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using ServiceStack.Redis;
 
 using Livescore.Domain.Aggregates.Discussion;
+using Livescore.Application.Common.Dto;
 
 namespace Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener {
     public class FixtureDiscussionListener : StreamListener, IFixtureDiscussionListener {
@@ -37,10 +38,7 @@ namespace Livescore.Infrastructure.InMemory.Listeners.FixtureDiscussionListener 
                         string.Join(", ", streamPositions.Select(streamPosition => streamPosition.Key))
                     );
 
-                    result = await client.CustomAsync(
-                        _populateCommandArgs(commandArgs, streamPositions),
-                        stoppingToken
-                    );
+                    result = await client.CustomAsync(_populateCommandArgs(commandArgs, streamPositions), stoppingToken);
                 } catch (OperationCanceledException) {
                     yield break;
                 }

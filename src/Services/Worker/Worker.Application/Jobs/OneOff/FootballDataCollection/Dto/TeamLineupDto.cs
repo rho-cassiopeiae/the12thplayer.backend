@@ -7,13 +7,14 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection.Dto {
             public long Id { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
+            public string DisplayName { get; set; }
             public short Number { get; set; }
             public bool IsCaptain { get; set; }
             public string Position { get; set; }
             public short? FormationPosition { get; set; }
             public string ImageUrl { get; set; }
             public float? Rating { get; set; }
-            public DateTime? FixtureStartTime { get; set; }
+            public DateTime FixtureStartTime { get; set; }
         }
 
         public class ManagerDto {

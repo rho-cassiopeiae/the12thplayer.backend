@@ -83,7 +83,9 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
 
             await _monitorLive();
 
-            // @@TODO: Send FixtureFinished event.
+            // @@TODO: Keep monitoring for some time after the final whistle.
+
+            await _fixtureLivescoreNotifier.NotifyFixtureFinished(_fixtureId, _teamId);
             
             _logger.LogInformation(
                 "Fixture {FixtureId} Team {TeamId}: Finished",
@@ -116,7 +118,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                 if (totalRepeats++ < maxRepeats) {
                     await Task.Delay(TimeSpan.FromMinutes(1));
                 } else {
-                    _logger.LogInformation(
+                    _logger.LogError(
                         "Fixture {FixtureId} Team {TeamId}: No livescore data",
                         _fixtureId, _teamId
                     );
@@ -158,7 +160,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                 // @@TODO: Schedule for later.
                 return null;
             }
-            if (startTime == null) {
+            if (startTime == DateTime.MinValue) {
                 _logger.LogInformation(
                     "Fixture {FixtureId} Team {TeamId}: No start time",
                     _fixtureId, _teamId
@@ -166,25 +168,21 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
 
                 return null;
             }
-            if (startTime.Value.Subtract(DateTime.UtcNow) > TimeSpan.FromMinutes(65)) {
+            if (startTime.Subtract(DateTime.UtcNow) > TimeSpan.FromMinutes(65)) {
                 _logger.LogInformation(
                     "Fixture {FixtureId} Team {TeamId}: Start time moved to {StartTime}",
-                    _fixtureId, _teamId, startTime.Value
+                    _fixtureId, _teamId, startTime
                 );
                 // @@TODO: Schedule for later.
                 return null;
             }
 
-            return startTime.Value;
+            return startTime;
         }
 
         private async Task _monitorPrematch(DateTime startTime) {
             _logger.LogInformation(
-                "Fixture {FixtureId} Team {TeamId}: Monitor pre-match",
-                _fixtureId, _teamId
-            );
-            _logger.LogInformation(
-                "Fixture {FixtureId} Team {TeamId}: Kick-off in {KickOffIn}",
+                "Fixture {FixtureId} Team {TeamId}: Monitor pre-match. Kick-off in {KickOffIn}",
                 _fixtureId, _teamId, startTime.Subtract(DateTime.UtcNow)
             );
 
@@ -192,7 +190,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
             var opponentTeamPlayers = new List<PlayerDto>();
 
             var finalPrematchUpdate = false;
-            while (!_isCanceled) {
+            while (!_jobCanceled) {
                 var fixture = await _footballDataProvider.GetFixtureLivescore(
                     _fixtureId,
                     _teamId,
@@ -223,7 +221,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                         foreach (var player in unknownPlayers) {
                             var playerLineupEntry = playerLineupEntries.First(p => p.Id == player.Id);
                             player.Number = playerLineupEntry.Number;
-                            player.LastLineupAt = playerLineupEntry.FixtureStartTime.Value;
+                            player.LastLineupAt = playerLineupEntry.FixtureStartTime;
                         }
 
                         try {
@@ -236,7 +234,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                         } catch (Exception e) {
                             _logger.LogError(
                                 e,
-                                "Fixture {FixtureId} Team {TeamId}: Error trying to add previously unknown players",
+                                "Fixture {FixtureId} Team {TeamId}: Error trying to add new players to the team",
                                 _fixtureId, _teamId
                             );
                         }
@@ -248,6 +246,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                         var player = teamPlayers.First(p => p.Id == playerLineupEntry.Id);
                         playerLineupEntry.FirstName = player.FirstName;
                         playerLineupEntry.LastName = player.LastName;
+                        playerLineupEntry.DisplayName = player.DisplayName;
                         playerLineupEntry.ImageUrl = player.ImageUrl;
                     }
 
@@ -267,9 +266,8 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                         .ToList();
 
                     if (unknownOpponentPlayerIds.Count > 0) {
-                        var unknownOpponentPlayers = (
-                            await _footballDataProvider.GetPlayers(unknownOpponentPlayerIds)
-                        ).ToList();
+                        var unknownOpponentPlayers = (await _footballDataProvider.GetPlayers(unknownOpponentPlayerIds))
+                            .ToList();
 
                         opponentTeamPlayers.AddRange(unknownOpponentPlayers);
                     }
@@ -278,11 +276,12 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                         var player = opponentTeamPlayers.First(p => p.Id == opponentPlayerLineupEntry.Id);
                         opponentPlayerLineupEntry.FirstName = player.FirstName;
                         opponentPlayerLineupEntry.LastName = player.LastName;
+                        opponentPlayerLineupEntry.DisplayName = player.DisplayName;
                         opponentPlayerLineupEntry.ImageUrl = player.ImageUrl;
                     }
 
                     _logger.LogInformation(
-                        "Fixture {FixtureId} Team {TeamId}: Notifying about a new pre-match update",
+                        "Fixture {FixtureId} Team {TeamId}: New pre-match update",
                         _fixtureId, _teamId
                     );
 
@@ -295,14 +294,14 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                     return;
                 }
 
-                var sleepInterval = TimeSpan.FromMinutes(2);
+                var sleepInterval = TimeSpan.FromMinutes(2); // @@TODO: Config.
                 var now = DateTime.UtcNow;
                 var startsIn = startTime.Subtract(now);
-                if (startsIn <= TimeSpan.FromMinutes(3)) {
-                    sleepInterval = startsIn > TimeSpan.FromSeconds(90) ?
-                        startTime.Subtract(TimeSpan.FromMinutes(1)).Subtract(now) :
-                        TimeSpan.Zero
-                    ;
+                if (startsIn < sleepInterval + TimeSpan.FromSeconds(30)) {
+                    sleepInterval = startsIn > TimeSpan.FromSeconds(30) ?
+                        startTime.Subtract(TimeSpan.FromSeconds(30)).Subtract(now) :
+                        TimeSpan.Zero;
+
                     finalPrematchUpdate = true;
                 }
 
@@ -322,9 +321,6 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
             }
         }
 
-        private bool _isFixtureFinished(FixtureDto fixture) =>
-            fixture.Status == "FT" || fixture.Status == "AET" || fixture.Status == "FT_PEN";
-
         private async Task _monitorLive() {
             _logger.LogInformation(
                 "Fixture {FixtureId} Team {TeamId}: Monitor live",
@@ -332,7 +328,7 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
             );
 
             var fixtureFinished = false;
-            while (!_isCanceled && !fixtureFinished) {
+            while (!_jobCanceled) {
                 var fixture = await _footballDataProvider.GetFixtureLivescore(
                     _fixtureId,
                     _teamId,
@@ -343,18 +339,22 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
 
                 if (fixture != null) {
                     _logger.LogInformation(
-                        "Fixture {FixtureId} Team {TeamId}: Notifying about a new live update",
+                        "Fixture {FixtureId} Team {TeamId}: New live update",
                         _fixtureId, _teamId
                     );
 
                     await _fixtureLivescoreNotifier.NotifyFixtureLiveUpdated(_fixtureId, _teamId, fixture);
 
                     if (
-                        !_emulateOngoing && _isFixtureFinished(fixture) ||
+                        !_emulateOngoing && fixture.Status is ("FT" or "AET" or "FT_PEN") ||
                         _emulateOngoing && _emulateForMin == 0
                     ) {
                         fixtureFinished = true;
                     }
+                }
+
+                if (fixtureFinished) {
+                    return;
                 }
 
                 if (_emulateOngoing) {
@@ -375,14 +375,10 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
         private Task _scheduleFinalizeFixtureJob() {
             var trigger = TriggerBuilder.Create()
                 .ForJob("Finalize fixture")
-                .WithSimpleSchedule(
-                    scheduleBuilder => scheduleBuilder.WithRepeatCount(0)
-                )
-                .StartAt(
-                    DateTime.UtcNow.AddHours(double.Parse(
-                        _context.MergedJobDataMap.GetString("FinishedFixtureStaysActiveForHours")
-                    ))
-                )
+                .WithSimpleSchedule(scheduleBuilder => scheduleBuilder.WithRepeatCount(0))
+                .StartAt(DateTime.UtcNow.AddHours(double.Parse(
+                    _context.MergedJobDataMap.GetString("FinishedFixtureStaysActiveForHours")
+                )))
                 .UsingJobData(new JobDataMap(
                     (IDictionary<string, object>)
                     new Dictionary<string, object> {

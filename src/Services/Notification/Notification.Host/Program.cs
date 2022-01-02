@@ -25,13 +25,11 @@ namespace Notification.Host {
                         busCfg.AddConsumer<UserAccountEventsConsumer>();
 
                         busCfg.UsingRabbitMq((context, rabbitCfg) => {
-                            rabbitCfg.Host("rabbit");
+                            rabbitCfg.Host(hostContext.Configuration["RabbitMQ:Host"]);
 
                             rabbitCfg.ConfigureEndpoints(
                                 context,
-                                new KebabCaseEndpointNameFormatter(
-                                    "notification", false
-                                )
+                                new KebabCaseEndpointNameFormatter("notification", false)
                             );
                         });
                     });

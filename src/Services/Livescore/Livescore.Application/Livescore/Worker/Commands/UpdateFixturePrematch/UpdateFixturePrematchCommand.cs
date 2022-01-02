@@ -7,6 +7,8 @@ using MediatR;
 
 using Livescore.Application.Common.Dto;
 using Livescore.Application.Common.Results;
+using Livescore.Application.Common.Interfaces;
+using Livescore.Application.Livescore.Worker.Common.Dto;
 using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Domain.Aggregates.PlayerRating;
 using PlayerRatingDm = Livescore.Domain.Aggregates.PlayerRating.PlayerRating;
@@ -24,12 +26,19 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch 
         private readonly IFixtureRepository _fixtureRepository;
         private readonly IPlayerRatingInMemRepository _playerRatingInMemRepository;
 
+        private readonly ISerializer _serializer;
+        private readonly IFixtureLivescoreBroadcaster _fixtureLivescoreBroadcaster;
+
         public UpdateFixturePrematchCommandHandler(
             IFixtureRepository fixtureRepository,
-            IPlayerRatingInMemRepository playerRatingInMemRepository
+            IPlayerRatingInMemRepository playerRatingInMemRepository,
+            ISerializer serializer,
+            IFixtureLivescoreBroadcaster fixtureLivescoreBroadcaster
         ) {
             _fixtureRepository = fixtureRepository;
             _playerRatingInMemRepository = playerRatingInMemRepository;
+            _serializer = serializer;
+            _fixtureLivescoreBroadcaster = fixtureLivescoreBroadcaster;
         }
 
         public async Task<VoidResult> Handle(
@@ -39,9 +48,7 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch 
 
             var fixture = await _fixtureRepository.FindByKey(command.FixtureId, command.TeamId);
 
-            fixture.SetStartTime(
-                new DateTimeOffset(trackedFixture.StartTime.Value).ToUnixTimeMilliseconds()
-            );
+            fixture.SetStartTime(new DateTimeOffset(trackedFixture.StartTime).ToUnixTimeMilliseconds());
             fixture.SetStatus(trackedFixture.Status);
             fixture.SetReferee(trackedFixture.RefereeName);
 
@@ -70,27 +77,27 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch 
                             imageUrl: teamLineup.Manager.ImageUrl
                         ) :
                         null,
-                    startingXI: teamLineup.StartingXI?.Select(p => new TeamLineup.Player(
+                    startingXI: teamLineup.StartingXI.Select(p => new TeamLineup.Player(
                         id: p.Id,
                         firstName: p.FirstName,
                         lastName: p.LastName,
+                        displayName: p.DisplayName,
                         number: p.Number,
                         isCaptain: p.IsCaptain,
                         position: p.Position,
                         formationPosition: p.FormationPosition,
-                        imageUrl: p.ImageUrl,
-                        rating: p.Rating
+                        imageUrl: p.ImageUrl
                     )),
-                    subs: teamLineup.Subs?.Select(p => new TeamLineup.Player(
+                    subs: teamLineup.Subs.Select(p => new TeamLineup.Player(
                         id: p.Id,
                         firstName: p.FirstName,
                         lastName: p.LastName,
+                        displayName: p.DisplayName,
                         number: p.Number,
                         isCaptain: p.IsCaptain,
                         position: p.Position,
                         formationPosition: p.FormationPosition,
-                        imageUrl: p.ImageUrl,
-                        rating: p.Rating
+                        imageUrl: p.ImageUrl
                     ))
                 ),
                 new TeamLineup(
@@ -103,27 +110,27 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch 
                             imageUrl: opponentTeamLineup.Manager.ImageUrl
                         ) :
                         null,
-                    startingXI: opponentTeamLineup.StartingXI?.Select(p => new TeamLineup.Player(
+                    startingXI: opponentTeamLineup.StartingXI.Select(p => new TeamLineup.Player(
                         id: p.Id,
                         firstName: p.FirstName,
                         lastName: p.LastName,
+                        displayName: p.DisplayName,
                         number: p.Number,
                         isCaptain: p.IsCaptain,
                         position: p.Position,
                         formationPosition: p.FormationPosition,
-                        imageUrl: p.ImageUrl,
-                        rating: p.Rating
+                        imageUrl: p.ImageUrl
                     )),
-                    subs: opponentTeamLineup.Subs?.Select(p => new TeamLineup.Player(
+                    subs: opponentTeamLineup.Subs.Select(p => new TeamLineup.Player(
                         id: p.Id,
                         firstName: p.FirstName,
                         lastName: p.LastName,
+                        displayName: p.DisplayName,
                         number: p.Number,
                         isCaptain: p.IsCaptain,
                         position: p.Position,
                         formationPosition: p.FormationPosition,
-                        imageUrl: p.ImageUrl,
-                        rating: p.Rating
+                        imageUrl: p.ImageUrl
                     ))
                 )
             });
@@ -140,19 +147,31 @@ namespace Livescore.Application.Livescore.Worker.Commands.UpdateFixturePrematch 
                 ));
             }
 
-            if (teamLineup.StartingXI != null) {
-                foreach (var player in teamLineup.StartingXI) {
-                    _playerRatingInMemRepository.CreateIfNotExists(new PlayerRatingDm(
-                        fixtureId: command.FixtureId,
-                        teamId: command.TeamId,
-                        participantKey: $"p:{player.Id}",
-                        totalRating: 0,
-                        totalVoters: 0
-                    ));
-                }
+            foreach (var player in teamLineup.StartingXI) {
+                _playerRatingInMemRepository.CreateIfNotExists(new PlayerRatingDm(
+                    fixtureId: command.FixtureId,
+                    teamId: command.TeamId,
+                    participantKey: $"p:{player.Id}",
+                    totalRating: 0,
+                    totalVoters: 0
+                ));
             }
 
             await _playerRatingInMemRepository.SaveChanges();
+
+            var fixtureLivescoreUpdate = new FixtureLivescoreUpdateDto {
+                FixtureId = command.FixtureId,
+                TeamId = command.TeamId,
+                StartTime = new DateTimeOffset(trackedFixture.StartTime).ToUnixTimeMilliseconds(),
+                Status = trackedFixture.Status,
+                RefereeName = trackedFixture.RefereeName,
+                Colors = trackedFixture.Colors,
+                Lineups = trackedFixture.Lineups
+            };
+
+            string updateMessage = _serializer.Serialize(fixtureLivescoreUpdate);
+
+            await _fixtureLivescoreBroadcaster.BroadcastUpdate(command.FixtureId, command.TeamId, updateMessage);
 
             return VoidResult.Instance;
         }

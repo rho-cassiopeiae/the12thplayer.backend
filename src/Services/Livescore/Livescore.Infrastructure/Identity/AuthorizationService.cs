@@ -36,9 +36,7 @@ namespace Livescore.Infrastructure.Identity {
             }
 
             if (authenticationContext.User == null) {
-                return new AuthorizationError(
-                    authenticationContext.GetFailureMessage()
-                );
+                return new AuthorizationError(authenticationContext.GetFailureMessage());
             }
 
             // @@NOTE: Token is set when SignalR hub path is requested, authentication is a success, and the

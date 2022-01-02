@@ -33,6 +33,7 @@ namespace Livescore.Application.Livescore.Worker.Queries.GetTeamPlayers {
                     Id = p.Id,
                     FirstName = p.FirstName,
                     LastName = p.LastName,
+                    DisplayName = p.DisplayName,
                     ImageUrl = p.ImageUrl
                 })
             };

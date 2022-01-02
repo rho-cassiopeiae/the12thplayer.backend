@@ -2,8 +2,6 @@
 
 namespace Livescore.Application.Common.Interfaces {
     public interface IFileHosting {
-        Task<(string VideoId, string ThumbnailUrl)> UploadVideo(
-            string filePath, string vimeoProjectId
-        );
+        Task<string> UploadVideo(string filePath, string vimeoProjectId);
     }
 }

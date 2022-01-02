@@ -24,13 +24,11 @@ namespace Livescore.Application.Seed.Commands.AddCountries {
         public async Task<VoidResult> Handle(
             AddCountriesCommand command, CancellationToken cancellationToken
         ) {
-            var countries = command.Countries.Select(c =>
-                new Country(
-                    id: c.Id,
-                    name: c.Name,
-                    flagUrl: c.FlagUrl
-                )
-            );
+            var countries = command.Countries.Select(c => new Country(
+                id: c.Id,
+                name: c.Name,
+                flagUrl: c.FlagUrl
+            ));
 
             _countryRepository.Create(countries);
 
