@@ -15,11 +15,14 @@ namespace Livescore.Infrastructure.Persistence.Repositories {
     public class PlayerRatingRepository : IPlayerRatingRepository {
         private readonly LivescoreDbContext _livescoreDbContext;
 
+        private IUnitOfWork _unitOfWork;
+
         public PlayerRatingRepository(LivescoreDbContext livescoreDbContext) {
             _livescoreDbContext = livescoreDbContext;
         }
 
         public void EnlistAsPartOf(IUnitOfWork unitOfWork) {
+            _unitOfWork = unitOfWork;
             _livescoreDbContext.Database.SetDbConnection(unitOfWork.Connection);
             _livescoreDbContext.Database.UseTransaction(unitOfWork.Transaction);
         }

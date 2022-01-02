@@ -12,6 +12,7 @@ using TeamDtoMsg = MessageBus.Contracts.Common.Dto.TeamDto;
 using FixtureDtoMsg = MessageBus.Contracts.Common.Dto.FixtureDto;
 using SeasonDtoMsg = MessageBus.Contracts.Common.Dto.SeasonDto;
 using PlayerDtoMsg = MessageBus.Contracts.Common.Dto.PlayerDto;
+using FixturePlayerRatingsDtoMsg = MessageBus.Contracts.Common.Dto.FixturePlayerRatingsDto;
 
 using Worker.Application.Common.Interfaces;
 using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
@@ -50,7 +51,8 @@ namespace Worker.Infrastructure.Livescore {
             long teamId,
             IEnumerable<FixtureDto> fixtures,
             IEnumerable<SeasonDto> seasons,
-            IEnumerable<PlayerDto> players
+            IEnumerable<PlayerDto> players,
+            IEnumerable<FixturePlayerRatingsDto> fixturePlayerRatings
         ) {
             var client = _bus.CreateRequestClient<AddTeamFinishedFixtures>(_destinationAddress);
 
@@ -59,7 +61,10 @@ namespace Worker.Infrastructure.Livescore {
                 TeamId = teamId,
                 Fixtures = _mapper.Map<IEnumerable<FixtureDto>, IEnumerable<FixtureDtoMsg>>(fixtures),
                 Seasons = _mapper.Map<IEnumerable<SeasonDto>, IEnumerable<SeasonDtoMsg>>(seasons),
-                Players = _mapper.Map<IEnumerable<PlayerDto>, IEnumerable<PlayerDtoMsg>>(players)
+                Players = _mapper.Map<IEnumerable<PlayerDto>, IEnumerable<PlayerDtoMsg>>(players),
+                FixturePlayerRatings = _mapper.Map<IEnumerable<FixturePlayerRatingsDto>, IEnumerable<FixturePlayerRatingsDtoMsg>>(
+                    fixturePlayerRatings
+                )
             });
         }
 

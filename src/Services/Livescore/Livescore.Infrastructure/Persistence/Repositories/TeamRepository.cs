@@ -6,13 +6,22 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 using Livescore.Domain.Aggregates.Team;
+using Livescore.Domain.Base;
 
 namespace Livescore.Infrastructure.Persistence.Repositories {
     public class TeamRepository : ITeamRepository {
         private readonly LivescoreDbContext _livescoreDbContext;
 
+        private IUnitOfWork _unitOfWork;
+
         public TeamRepository(LivescoreDbContext livescoreDbContext) {
             _livescoreDbContext = livescoreDbContext;
+        }
+
+        public void EnlistAsPartOf(IUnitOfWork unitOfWork) {
+            _unitOfWork = unitOfWork;
+            _livescoreDbContext.Database.SetDbConnection(unitOfWork.Connection);
+            _livescoreDbContext.Database.UseTransaction(unitOfWork.Transaction);
         }
 
         public async Task SaveChanges(CancellationToken cancellationToken) {

@@ -8,5 +8,6 @@ namespace MessageBus.Contracts.Requests.Worker {
         public IEnumerable<FixtureDto> Fixtures { get; set; }
         public IEnumerable<SeasonDto> Seasons { get; set; }
         public IEnumerable<PlayerDto> Players { get; set; }
+        public IEnumerable<FixturePlayerRatingsDto> FixturePlayerRatings { get; set; }
     }
 }

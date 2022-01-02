@@ -13,6 +13,7 @@ using TeamDtoMsg = MessageBus.Contracts.Common.Dto.TeamDto;
 using FixtureDtoMsg = MessageBus.Contracts.Common.Dto.FixtureDto;
 using SeasonDtoMsg = MessageBus.Contracts.Common.Dto.SeasonDto;
 using PlayerDtoMsg = MessageBus.Contracts.Common.Dto.PlayerDto;
+using FixturePlayerRatingsDtoMsg = MessageBus.Contracts.Common.Dto.FixturePlayerRatingsDto;
 
 using Livescore.Application.Common.Dto;
 using Livescore.Application.Seed.Commands.AddTeamDetails;
@@ -73,6 +74,9 @@ namespace Livescore.Api.Consumers.Worker {
                 ),
                 Players = _mapper.Map<IEnumerable<PlayerDtoMsg>, IEnumerable<PlayerDto>>(
                     context.Message.Players
+                ),
+                FixturePlayerRatings = _mapper.Map<IEnumerable<FixturePlayerRatingsDtoMsg>, IEnumerable<FixturePlayerRatingsDto>>(
+                    context.Message.FixturePlayerRatings
                 )
             };
 

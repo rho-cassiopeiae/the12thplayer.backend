@@ -13,6 +13,8 @@ using Livescore.Domain.Aggregates.Venue;
 using Livescore.Domain.Aggregates.League;
 using Livescore.Domain.Aggregates.Player;
 using Livescore.Domain.Aggregates.Fixture;
+using Livescore.Domain.Aggregates.PlayerRating;
+using Livescore.Domain.Base;
 
 namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
     public class AddTeamFinishedFixturesCommand : IRequest<VoidResult> {
@@ -20,34 +22,45 @@ namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
         public IEnumerable<FixtureDto> Fixtures { get; init; }
         public IEnumerable<SeasonDto> Seasons { get; init; }
         public IEnumerable<PlayerDto> Players { get; init; }
+        public IEnumerable<FixturePlayerRatingsDto> FixturePlayerRatings { get; init; }
     }
 
     public class AddTeamFinishedFixturesCommandHandler : IRequestHandler<
         AddTeamFinishedFixturesCommand, VoidResult
     > {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ITeamRepository _teamRepository;
         private readonly IVenueRepository _venueRepository;
         private readonly ILeagueRepository _leagueRepository;
         private readonly IPlayerRepository _playerRepository;
         private readonly IFixtureRepository _fixtureRepository;
+        private readonly IPlayerRatingRepository _playerRatingRepository;
 
         public AddTeamFinishedFixturesCommandHandler(
+            IUnitOfWork unitOfWork,
             ITeamRepository teamRepository,
             IVenueRepository venueRepository,
             ILeagueRepository leagueRepository,
             IPlayerRepository playerRepository,
-            IFixtureRepository fixtureRepository
+            IFixtureRepository fixtureRepository,
+            IPlayerRatingRepository playerRatingRepository
         ) {
+            _unitOfWork = unitOfWork;
             _teamRepository = teamRepository;
             _venueRepository = venueRepository;
             _leagueRepository = leagueRepository;
             _playerRepository = playerRepository;
             _fixtureRepository = fixtureRepository;
+            _playerRatingRepository = playerRatingRepository;
         }
 
         public async Task<VoidResult> Handle(
             AddTeamFinishedFixturesCommand command, CancellationToken cancellationToken
         ) {
+            await _unitOfWork.Begin();
+
+            _teamRepository.EnlistAsPartOf(_unitOfWork);
+
             long teamId = command.TeamId;
 
             var opponentTeams = command.Fixtures
@@ -368,6 +381,20 @@ namespace Livescore.Application.Seed.Commands.AddTeamFinishedFixtures {
             }
 
             await _fixtureRepository.SaveChanges(cancellationToken);
+
+            foreach (var fixturePlayerRatings in command.FixturePlayerRatings.Where(fpr => fpr.PlayerRatings.Any())) {
+                var playerRatings = fixturePlayerRatings.PlayerRatings.Select(pr => new PlayerRating(
+                    fixtureId: fixturePlayerRatings.FixtureId,
+                    teamId: fixturePlayerRatings.TeamId,
+                    participantKey: pr.ParticipantKey,
+                    totalRating: pr.TotalRating,
+                    totalVoters: pr.TotalVoters
+                ));
+
+                await _playerRatingRepository.Create(playerRatings);
+            }
+
+            await _unitOfWork.Commit();
 
             return VoidResult.Instance;
         }

@@ -32,6 +32,11 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                 endDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
             }
 
+            var addDummyPlayerRatings = false;
+            if (_context.MergedJobDataMap.TryGetValue("AddDummyPlayerRatings", out value)) {
+                addDummyPlayerRatings = bool.Parse((string) value);
+            }
+
             var fixtures = (await _footballDataProvider.GetTeamFinishedFixtures(teamId, startDate, endDate))
                 .ToList();
 
@@ -93,11 +98,71 @@ namespace Worker.Application.Jobs.OneOff.FootballDataCollection {
                 opponentPlayerLineupEntry.ImageUrl = player.ImageUrl;
             }
 
-            await _livescoreSeeder.AddTeamFinishedFixtures(teamId, fixtures, seasons, players);
+            IEnumerable<FixturePlayerRatingsDto> fixturePlayerRatings = null;
+            if (addDummyPlayerRatings) {
+                fixturePlayerRatings = _createDummyPlayerRatings(fixtures, teamId);
+            }
+
+            await _livescoreSeeder.AddTeamFinishedFixtures(teamId, fixtures, seasons, players, fixturePlayerRatings);
 
             return new Dictionary<string, object> {
                 ["TeamId"] = teamId.ToString()
             };
+        }
+
+        IEnumerable<FixturePlayerRatingsDto> _createDummyPlayerRatings(List<FixtureDto> fixtures, long teamId) {
+            return fixtures.Select(fixture => {
+                var lineup = fixture.Lineups.First(lineup => lineup.TeamId == teamId);
+                var playerRatings = (lineup.StartingXI?.ToList() ?? new List<TeamLineupDto.PlayerDto>())
+                    .Select(player => new PlayerRatingDto {
+                        ParticipantKey = $"p:{player.Id}",
+                        Rating = player.Rating
+                    })
+                    .ToList();
+
+                var events = fixture.Events.First(events => events.TeamId == teamId).Events;
+                if (events != null) {
+                    foreach (var @event in events.Where(e => e.Type == "substitution" && e.PlayerId != null)) {
+                        var player = lineup.Subs?.FirstOrDefault(player => player.Id == @event.PlayerId.Value);
+                        if (player != null) {
+                            playerRatings.Add(new PlayerRatingDto {
+                                ParticipantKey = $"s:{player.Id}",
+                                Rating = player.Rating
+                            });
+                        }
+                    }
+                }
+
+                var random = new Random();
+                int baseTotalVoters = random.Next(51, 107);
+
+                playerRatings.ForEach(pr => {
+                    var rating = pr.Rating ?? 0.0f;
+                    pr.TotalVoters = rating == 0.0f ? 0 : random.Next(baseTotalVoters - 7, baseTotalVoters + 7);
+                    pr.TotalRating = (int) (rating * pr.TotalVoters);
+                });
+
+                if (lineup.Manager != null) {
+                    int avgTotalRating = 0;
+                    int avgTotalVoters = 0;
+                    if (playerRatings.Count > 0) {
+                        avgTotalRating = (int) playerRatings.Average(pr => pr.TotalRating);
+                        avgTotalVoters = (int) playerRatings.Average(pr => pr.TotalVoters);
+                    }
+
+                    playerRatings.Add(new PlayerRatingDto {
+                        ParticipantKey = $"m:{lineup.Manager.Id}",
+                        TotalRating = avgTotalRating,
+                        TotalVoters = avgTotalVoters
+                    });
+                }
+
+                return new FixturePlayerRatingsDto {
+                    FixtureId = fixture.Id,
+                    TeamId = teamId,
+                    PlayerRatings = playerRatings
+                };
+            });
         }
     }
 }

@@ -13,7 +13,8 @@ namespace Worker.Application.Common.Interfaces {
             long teamId,
             IEnumerable<FixtureDto> fixtures,
             IEnumerable<SeasonDto> seasons,
-            IEnumerable<PlayerDto> players
+            IEnumerable<PlayerDto> players,
+            IEnumerable<FixturePlayerRatingsDto> fixturePlayerRatings
         );
 
         Task AddTeamUpcomingFixtures(

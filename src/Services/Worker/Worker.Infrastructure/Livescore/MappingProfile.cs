@@ -14,6 +14,8 @@ using TeamStatsDtoMsg = MessageBus.Contracts.Common.Dto.TeamStatsDto;
 using SeasonDtoMsg = MessageBus.Contracts.Common.Dto.SeasonDto;
 using LeagueDtoMsg = MessageBus.Contracts.Common.Dto.LeagueDto;
 using PlayerDtoMsg = MessageBus.Contracts.Common.Dto.PlayerDto;
+using FixturePlayerRatingsDtoMsg = MessageBus.Contracts.Common.Dto.FixturePlayerRatingsDto;
+using PlayerRatingDtoMsg = MessageBus.Contracts.Common.Dto.PlayerRatingDto;
 
 using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
 
@@ -45,6 +47,9 @@ namespace Worker.Infrastructure.Livescore {
 
             CreateMap<PlayerDto, PlayerDtoMsg>()
                 .ReverseMap();
+
+            CreateMap<FixturePlayerRatingsDto, FixturePlayerRatingsDtoMsg>();
+            CreateMap<PlayerRatingDto, PlayerRatingDtoMsg>();
         }
     }
 }
