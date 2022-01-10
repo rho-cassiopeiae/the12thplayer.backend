@@ -8,13 +8,9 @@ using Feed.Application.Common.Behaviors;
 
 namespace Feed.Application {
     public static class IServiceCollectionExtension {
-        public static IServiceCollection AddApplication(
-            this IServiceCollection services
-        ) {
+        public static IServiceCollection AddApplication(this IServiceCollection services) {
             services.AddMediatR(Assembly.GetExecutingAssembly());
-            services.AddTransient(
-                typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>)
-            );
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
 
             return services;
         }

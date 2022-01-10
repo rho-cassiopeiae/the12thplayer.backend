@@ -8,7 +8,7 @@ namespace Feed.Domain.Base {
         public IReadOnlyList<INotification> DomainEvents => _domainEvents;
 
         public void AddDomainEvent(INotification @event) {
-            _domainEvents = _domainEvents ?? new List<INotification>();
+            _domainEvents ??= new List<INotification>();
             _domainEvents.Add(@event);
         }
 

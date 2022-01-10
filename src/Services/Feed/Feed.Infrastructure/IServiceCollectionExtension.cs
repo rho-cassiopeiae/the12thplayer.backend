@@ -6,11 +6,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using MassTransit;
 using MassTransit.Definition;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
 
+using MessageBus.Contracts.Requests.Feed;
 using MessageBus.Components.HostedServices;
 
 using Feed.Infrastructure.Persistence;
@@ -23,6 +25,7 @@ using Feed.Domain.Aggregates.Comment;
 using Feed.Application.Common.Interfaces;
 using Feed.Infrastructure.Persistence.Queryables;
 using Feed.Infrastructure.Identity;
+using Feed.Infrastructure.FileUpload;
 
 namespace Feed.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -38,7 +41,7 @@ namespace Feed.Infrastructure {
                     rsa.FromXmlString(configuration["Jwt:PublicKey"]);
 
                     options.MapInboundClaims = false;
-                    options.RequireHttpsMetadata = false;
+                    options.RequireHttpsMetadata = false; // @@TODO: Depend on environment.
                     options.SaveToken = false;
                     options.TokenValidationParameters = new TokenValidationParameters {
                         ValidateIssuer = true,
@@ -50,6 +53,16 @@ namespace Feed.Infrastructure {
                         IssuerSigningKey = new RsaSecurityKey(rsa)
                     };
                     options.Events = new JwtBearerEvents {
+                        OnMessageReceived = context => {
+                            if (context.Request.Path.StartsWithSegments("/feed/hub")) {
+                                var accessToken = context.Request.Query["access_token"];
+                                if (!string.IsNullOrEmpty(accessToken)) {
+                                    context.Token = accessToken;
+                                }
+                            }
+
+                            return Task.CompletedTask;
+                        },
                         OnTokenValidated = context => {
                             var authenticationContext = context
                                 .HttpContext
@@ -57,6 +70,10 @@ namespace Feed.Infrastructure {
                                 .GetRequiredService<IAuthenticationContext>();
 
                             authenticationContext.User = context.Principal;
+
+                            if (context.Request.Path.StartsWithSegments("/feed/hub")) {
+                                authenticationContext.Token = context.SecurityToken;
+                            }
 
                             return Task.CompletedTask;
                         },
@@ -90,9 +107,17 @@ namespace Feed.Infrastructure {
 
             services.AddScoped<ICommentQueryable, CommentQueryable>();
             services.AddScoped<IArticleQueryable, ArticleQueryable>();
+            services.AddScoped<IUserVoteQueryable, UserVoteQueryable>();
+
+            services.AddSingleton<MultipartRequestHelper>();
+            services.AddSingleton<ImageFileValidator>();
+            services.AddSingleton<IFileReceiver, FileReceiver>();
+            services.TryAddScoped<IFileHosting, FileHosting>();
 
             services.AddMassTransit(busCfg => {
                 busCfgCallback(busCfg);
+
+                busCfg.AddRequestClient<UploadImage>(new Uri("queue:file-hosting-gateway-upload-requests"));
 
                 busCfg.UsingRabbitMq((context, rabbitCfg) => {
                     rabbitCfg.Host(configuration["RabbitMQ:Host"]);

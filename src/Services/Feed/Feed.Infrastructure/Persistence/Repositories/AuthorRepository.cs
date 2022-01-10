@@ -6,13 +6,22 @@ using Npgsql;
 using NpgsqlTypes;
 
 using Feed.Domain.Aggregates.Author;
+using Feed.Domain.Base;
 
 namespace Feed.Infrastructure.Persistence.Repositories {
     public class AuthorRepository : IAuthorRepository {
         private readonly FeedDbContext _feedDbContext;
 
+        private IUnitOfWork _unitOfWork;
+
         public AuthorRepository(FeedDbContext feedDbContext) {
             _feedDbContext = feedDbContext;
+        }
+
+        public void EnlistAsPartOf(IUnitOfWork unitOfWork) {
+            _unitOfWork = unitOfWork;
+            _feedDbContext.Database.SetDbConnection(unitOfWork.Connection);
+            _feedDbContext.Database.UseTransaction(unitOfWork.Transaction);
         }
 
         public Task SaveChanges(CancellationToken cancellationToken) => Task.CompletedTask;

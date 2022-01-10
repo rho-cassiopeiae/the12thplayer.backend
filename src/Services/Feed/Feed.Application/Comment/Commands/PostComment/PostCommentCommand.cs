@@ -50,6 +50,8 @@ namespace Feed.Application.Comment.Commands.PostComment {
                 body: command.Body
             );
 
+            // @@TODO: Deal with deleted root/parent comment.
+
             await _commentRepository.Create(comment);
 
             return new HandleResult<string> {

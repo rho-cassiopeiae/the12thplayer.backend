@@ -137,6 +137,7 @@ namespace Livescore.Infrastructure {
 
             services.AddScoped<IFixtureQueryable, FixtureQueryable>();
             services.AddScoped<IPlayerQueryable, PlayerQueryable>();
+            services.AddScoped<IManagerQueryable, ManagerQueryable>();
             services.AddScoped<IPlayerRatingQueryable, PlayerRatingQueryable>();
             services.AddScoped<IUserVoteQueryable, UserVoteQueryable>();
 

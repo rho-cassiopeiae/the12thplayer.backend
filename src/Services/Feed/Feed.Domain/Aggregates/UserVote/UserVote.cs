@@ -27,53 +27,20 @@ namespace Feed.Domain.Aggregates.UserVote {
             _commentIdToVote[commentId] = vote;
         }
 
-        public int ChangeArticleVote(short? vote) {
-            int incrementRatingBy;
-            if (ArticleVote == null) {
-                incrementRatingBy = vote.Value;
-            } else if (ArticleVote == 1) {
-                if (vote == 1) {
-                    incrementRatingBy = -1;
-                    vote = null;
-                } else {
-                    incrementRatingBy = -2;
-                }
-            } else {
-                if (vote == -1) {
-                    incrementRatingBy = 1;
-                    vote = null;
-                } else {
-                    incrementRatingBy = 2;
-                }
-            }
+        public void SetCommentVotes(IDictionary<string, short?> commentVotes) {
+            _commentIdToVote = new Dictionary<string, short?>(commentVotes);
+        }
 
-            ArticleVote = vote;
+        public int ChangeArticleVote(short? userVote) {
+            int incrementRatingBy = userVote.GetValueOrDefault() - ArticleVote.GetValueOrDefault();
+            ArticleVote = userVote;
 
             return incrementRatingBy;
         }
 
-        public int ChangeCommentVote(string commentId, short? vote) {
-            short? currentVote = _commentIdToVote[commentId];
-            int incrementRatingBy;
-            if (currentVote == null) {
-                incrementRatingBy = vote.Value;
-            } else if (currentVote == 1) {
-                if (vote == 1) {
-                    incrementRatingBy = -1;
-                    vote = null;
-                } else {
-                    incrementRatingBy = -2;
-                }
-            } else {
-                if (vote == -1) {
-                    incrementRatingBy = 1;
-                    vote = null;
-                } else {
-                    incrementRatingBy = 2;
-                }
-            }
-
-            _commentIdToVote[commentId] = vote;
+        public int ChangeCommentVote(string commentId, short? userVote) {
+            int incrementRatingBy = userVote.GetValueOrDefault() - _commentIdToVote[commentId].GetValueOrDefault();
+            _commentIdToVote[commentId] = userVote;
 
             return incrementRatingBy;
         }

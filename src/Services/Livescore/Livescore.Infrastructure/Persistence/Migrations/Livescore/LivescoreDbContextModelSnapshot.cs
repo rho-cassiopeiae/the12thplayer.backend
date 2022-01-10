@@ -126,6 +126,93 @@ namespace Livescore.Infrastructure.Persistence.Migrations.Livescore
                     b.ToView("FixtureSummaries");
                 });
 
+            modelBuilder.Entity("Livescore.Application.Team.Queries.GetPlayerRatingsForParticipant.FixturePlayerRatingDto", b =>
+                {
+                    b.Property<bool>("FixtureHomeStatus")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("FixtureStartTime")
+                        .HasColumnType("bigint");
+
+                    b.Property<short>("GuestTeamScore")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("HomeTeamScore")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("OpponentTeamLogoUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OpponentTeamName")
+                        .HasColumnType("text");
+
+                    b.Property<int>("TotalRating")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalVoters")
+                        .HasColumnType("integer");
+
+                    b.ToView("FixturePlayerRatings");
+                });
+
+            modelBuilder.Entity("Livescore.Application.Team.Queries.GetTeamSquad.Dto.ManagerDto", b =>
+                {
+                    b.Property<long?>("BirthDate")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CountryFlagUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CountryName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.ToView("ManagersWithCountry");
+                });
+
+            modelBuilder.Entity("Livescore.Application.Team.Queries.GetTeamSquad.Dto.PlayerDto", b =>
+                {
+                    b.Property<long?>("BirthDate")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CountryFlagUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CountryName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.Property<short>("Number")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Position")
+                        .HasColumnType("text");
+
+                    b.ToView("PlayersWithCountry");
+                });
+
             modelBuilder.Entity("Livescore.Domain.Aggregates.Country.Country", b =>
                 {
                     b.Property<long>("Id")

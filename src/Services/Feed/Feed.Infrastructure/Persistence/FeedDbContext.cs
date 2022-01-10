@@ -146,9 +146,7 @@ namespace Feed.Infrastructure.Persistence {
                 var migrationTypesToApply = Assembly.GetExecutingAssembly()
                     .GetTypes()
                     .Where(t => t.IsSubclassOf(typeof(Migration)))
-                    .Where(t =>
-                        lastAppliedMigrationName == null || t.Name.CompareTo(lastAppliedMigrationName) > 0
-                    )
+                    .Where(t => lastAppliedMigrationName == null || t.Name.CompareTo(lastAppliedMigrationName) > 0)
                     .OrderBy(t => t.Name)
                     .ToList();
 
@@ -188,6 +186,10 @@ namespace Feed.Infrastructure.Persistence {
 
         public FeedDbContext(IConfiguration configuration, ILoggerFactory loggerFactory) {
             _dbSession = new DbSession(configuration, loggerFactory.CreateLogger<DbSession>());
+        }
+
+        static FeedDbContext() {
+            NpgsqlConnection.GlobalTypeMapper.UseJsonNet();
         }
 
         public void Dispose() {

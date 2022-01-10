@@ -10,6 +10,8 @@ using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Application.Livescore.Fixture.Common.Dto;
 using Livescore.Domain.Aggregates.PlayerRating;
 using Livescore.Domain.Aggregates.UserVote;
+using Livescore.Application.Team.Queries.GetTeamSquad.Dto;
+using Livescore.Application.Team.Queries.GetPlayerRatingsForParticipant;
 
 namespace Livescore.Infrastructure.Persistence {
     public class LivescoreDbContext : DbContext {
@@ -25,6 +27,9 @@ namespace Livescore.Infrastructure.Persistence {
 
         public DbSet<FixtureSummaryDto> FixtureSummaries { get; set; }
         public DbSet<FixtureFullDto> FixtureFullViews { get; set; }
+        public DbSet<PlayerDto> PlayersWithCountry { get; set; }
+        public DbSet<ManagerDto> ManagersWithCountry { get; set; }
+        public DbSet<FixturePlayerRatingDto> FixturePlayerRatings { get; set; }
 
         public LivescoreDbContext(DbContextOptions<LivescoreDbContext> options)
             : base(options) { }
@@ -230,6 +235,21 @@ namespace Livescore.Infrastructure.Persistence {
                     .HasColumnType("jsonb")
                     .IsRequired(false)
                     .UsePropertyAccessMode(PropertyAccessMode.Field);
+            });
+
+            modelBuilder.Entity<PlayerDto>(builder => {
+                builder.HasNoKey();
+                builder.ToView(nameof(PlayersWithCountry));
+            });
+
+            modelBuilder.Entity<ManagerDto>(builder => {
+                builder.HasNoKey();
+                builder.ToView(nameof(ManagersWithCountry));
+            });
+
+            modelBuilder.Entity<FixturePlayerRatingDto>(builder => {
+                builder.HasNoKey();
+                builder.ToView(nameof(FixturePlayerRatings));
             });
         }
     }

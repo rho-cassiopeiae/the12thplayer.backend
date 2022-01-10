@@ -12,6 +12,7 @@ using Livescore.Domain.Aggregates.Team;
 using Livescore.Domain.Aggregates.Venue;
 using Livescore.Domain.Aggregates.League;
 using Livescore.Domain.Aggregates.Fixture;
+using TeamDm = Livescore.Domain.Aggregates.Team.Team;
 
 namespace Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures {
     public class AddTeamUpcomingFixturesCommand : IRequest<VoidResult> {
@@ -54,7 +55,7 @@ namespace Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures {
 
             foreach (var opponentTeam in opponentTeams) {
                 if (!teams.Any(t => t.Id == opponentTeam.Id)) {
-                    _teamRepository.Create(new Team(
+                    _teamRepository.Create(new TeamDm(
                         id: opponentTeam.Id,
                         name: opponentTeam.Name,
                         countryId: opponentTeam.CountryId,
@@ -107,7 +108,7 @@ namespace Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures {
                         league.AddSeason(new Season(
                             id: fixtureSeason.Id,
                             name: fixtureSeason.Name,
-                            isCurrent: false // @@NOTE: Have to set it manually from admin panel later.
+                            isCurrent: true // @@NOTE: Have to set it manually from admin panel later.
                         ));
                     }
 
@@ -120,7 +121,7 @@ namespace Livescore.Application.Seed.Commands.AddTeamUpcomingFixtures {
                             league.AddSeason(new Season(
                                 id: fixtureSeason.Id,
                                 name: fixtureSeason.Name,
-                                isCurrent: false
+                                isCurrent: true
                             ));
                         }
                     }

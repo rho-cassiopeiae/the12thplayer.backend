@@ -16,7 +16,7 @@ namespace Feed.Application.Comment.Commands.VoteForComment {
     public class VoteForCommentCommand : IRequest<HandleResult<CommentRatingDto>> {
         public long ArticleId { get; set; }
         public string CommentId { get; set; }
-        public short Vote { get; set; }
+        public short? UserVote { get; set; }
     }
 
     public class VoteForCommentCommandHandler : IRequestHandler<
@@ -53,10 +53,10 @@ namespace Feed.Application.Comment.Commands.VoteForComment {
                 _userVoteRepository.EnlistAsPartOf(_unitOfWork);
 
                 var userVote = await _userVoteRepository.UpdateOneAndGetOldForComment(
-                    userId, command.ArticleId, command.CommentId, command.Vote
+                    userId, command.ArticleId, command.CommentId, command.UserVote
                 );
 
-                int incrementRatingBy = userVote.ChangeCommentVote(command.CommentId, command.Vote);
+                int incrementRatingBy = userVote.ChangeCommentVote(command.CommentId, command.UserVote);
 
                 long updatedRating = await _commentRepository.UpdateRatingFor(
                     command.ArticleId, command.CommentId, incrementRatingBy
@@ -66,8 +66,7 @@ namespace Feed.Application.Comment.Commands.VoteForComment {
 
                 return new HandleResult<CommentRatingDto> {
                     Data = new CommentRatingDto {
-                        Rating = updatedRating,
-                        Vote = userVote.CommentIdToVote[command.CommentId]
+                        Rating = updatedRating
                     }
                 };
             } catch {

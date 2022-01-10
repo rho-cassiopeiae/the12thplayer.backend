@@ -9,6 +9,7 @@ using Livescore.Domain.Aggregates.Team;
 using Livescore.Domain.Aggregates.Venue;
 using Livescore.Domain.Aggregates.Manager;
 using Livescore.Application.Common.Dto;
+using TeamDm = Livescore.Domain.Aggregates.Team.Team;
 
 namespace Livescore.Application.Seed.Commands.AddTeamDetails {
     public class AddTeamDetailsCommand : IRequest<VoidResult> {
@@ -39,7 +40,7 @@ namespace Livescore.Application.Seed.Commands.AddTeamDetails {
 
             var team = await _teamRepository.FindById(teamDto.Id);
             if (team == null) {
-                team = new Team(
+                team = new TeamDm(
                     id: teamDto.Id,
                     name: teamDto.Name,
                     countryId: teamDto.CountryId,

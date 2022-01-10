@@ -15,7 +15,7 @@ namespace Feed.Application.Article.Commands.VoteForArticle {
     [RequireAuthorization]
     public class VoteForArticleCommand : IRequest<HandleResult<ArticleRatingDto>> {
         public long ArticleId { get; set; }
-        public short Vote { get; set; }
+        public short? UserVote { get; set; }
     }
 
     public class VoteForArticleCommandHandler : IRequestHandler<
@@ -52,10 +52,10 @@ namespace Feed.Application.Article.Commands.VoteForArticle {
                 _userVoteRepository.EnlistAsPartOf(_unitOfWork);
 
                 var userVote = await _userVoteRepository.UpdateOneAndGetOldForArticle(
-                    userId, command.ArticleId, command.Vote
+                    userId, command.ArticleId, command.UserVote
                 );
 
-                int incrementRatingBy = userVote.ChangeArticleVote(command.Vote);
+                int incrementRatingBy = userVote.ChangeArticleVote(command.UserVote);
 
                 long updatedRating = await _articleRepository.UpdateRatingFor(
                     command.ArticleId, incrementRatingBy
@@ -65,8 +65,7 @@ namespace Feed.Application.Article.Commands.VoteForArticle {
 
                 return new HandleResult<ArticleRatingDto> {
                     Data = new ArticleRatingDto {
-                        Rating = updatedRating,
-                        Vote = userVote.ArticleVote
+                        Rating = updatedRating
                     }
                 };
             } catch {

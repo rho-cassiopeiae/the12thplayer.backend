@@ -42,35 +42,16 @@ namespace Livescore.Domain.Aggregates.UserVote {
             return currentRating;
         }
 
-        public void AddVideoReactionVote(long authorId, short? vote) {
+        public void AddVideoReactionVote(long authorId, short? userVote) {
             _videoReactionAuthorIdToVote ??= new Dictionary<string, short?>();
-            _videoReactionAuthorIdToVote[authorId.ToString()] = vote;
+            _videoReactionAuthorIdToVote[authorId.ToString()] = userVote;
         }
 
-        public (short? OldVote, int IncrementRatingBy) ChangeVideoReactionVote(long authorId, short? vote) {
+        public (short? OldVote, int IncrementRatingBy) ChangeVideoReactionVote(long authorId, short? userVote) {
             var key = authorId.ToString();
-
             short? currentVote = _videoReactionAuthorIdToVote[key];
-            int incrementRatingBy;
-            if (currentVote == null) {
-                incrementRatingBy = vote.Value;
-            } else if (currentVote == 1) {
-                if (vote == 1) {
-                    incrementRatingBy = -1;
-                    vote = null;
-                } else {
-                    incrementRatingBy = -2;
-                }
-            } else {
-                if (vote == -1) {
-                    incrementRatingBy = 1;
-                    vote = null;
-                } else {
-                    incrementRatingBy = 2;
-                }
-            }
-
-            _videoReactionAuthorIdToVote[key] = vote;
+            int incrementRatingBy = userVote.GetValueOrDefault() - currentVote.GetValueOrDefault();
+            _videoReactionAuthorIdToVote[key] = userVote;
 
             return (currentVote, incrementRatingBy);
         }

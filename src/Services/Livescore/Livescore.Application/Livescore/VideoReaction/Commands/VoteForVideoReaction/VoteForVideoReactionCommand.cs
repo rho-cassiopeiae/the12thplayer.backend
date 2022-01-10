@@ -18,7 +18,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.VoteForVideoRea
         public long FixtureId { get; set; }
         public long TeamId { get; set; }
         public long AuthorId { get; set; }
-        public short Vote { get; set; }
+        public short? UserVote { get; set; }
     }
 
     public class VoteForVideoReactionCommandHandler : IRequestHandler<
@@ -71,7 +71,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.VoteForVideoRea
                     userId, command.FixtureId, command.TeamId, command.AuthorId
                 );
 
-                (short? oldVote, int incrementRatingBy) = userVote.ChangeVideoReactionVote(command.AuthorId, command.Vote);
+                (short? oldVote, int incrementRatingBy) = userVote.ChangeVideoReactionVote(command.AuthorId, command.UserVote);
 
                 _unitOfWork.Begin();
 
@@ -95,8 +95,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Commands.VoteForVideoRea
 
             return new HandleResult<VideoReactionRatingDto> {
                 Data = new VideoReactionRatingDto {
-                    Rating = updatedRating,
-                    UserVote = userVote.VideoReactionAuthorIdToVote[command.AuthorId.ToString()]
+                    Rating = updatedRating
                 }
             };
         }

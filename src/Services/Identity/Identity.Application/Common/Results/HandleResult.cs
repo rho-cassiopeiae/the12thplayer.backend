@@ -9,7 +9,7 @@ namespace Identity.Application.Common.Results {
     }
 
     public class HandleResult<T> : HandleResult {
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public T Data { get; init; }
     }
 

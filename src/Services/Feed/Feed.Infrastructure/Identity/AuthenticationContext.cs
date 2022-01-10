@@ -10,6 +10,7 @@ using Feed.Application.Common.Interfaces;
 namespace Feed.Infrastructure.Identity {
     public class AuthenticationContext : IAuthenticationContext {
         public ClaimsPrincipal User { get; set; }
+        public SecurityToken Token { get; set; }
         public Exception Failure { get; set; }
 
         public string GetFailureMessage() {

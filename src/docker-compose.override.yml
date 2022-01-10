@@ -126,6 +126,8 @@ services:
     - ASPNETCORE_URLS=http://0.0.0.0:80
     ports:
     - "9000:80"
+    volumes:
+    - "user_files_data:/app/wwwroot"
     depends_on:
     - migrator
     - rabbit

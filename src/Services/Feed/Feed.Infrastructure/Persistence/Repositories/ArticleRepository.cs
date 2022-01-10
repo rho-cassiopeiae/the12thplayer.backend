@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Npgsql;
@@ -90,11 +91,10 @@ namespace Feed.Infrastructure.Persistence.Repositories {
 
             cmd.Parameters.AddRange(parameters);
 
-            int i = 0;
             cmd.CommandText = $@"
                 UPDATE feed.""Articles""
-                SET ""Rating"" = ""Rating"" + @{parameters[i++].ParameterName}
-                WHERE ""Id"" = @{parameters[i++].ParameterName}
+                SET ""Rating"" = ""Rating"" + @{parameters.First().ParameterName}
+                WHERE ""Id"" = @{parameters.Last().ParameterName}
                 RETURNING ""Rating"";
             ";
 
