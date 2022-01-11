@@ -97,7 +97,9 @@ namespace Worker.Infrastructure.FootballDataProvider {
             var s = new SeasonDtoApp {
                 Id = dto.Id,
                 Name = dto.Name,
-                League = Map(dto.League.Data)
+                CurrentRoundId = dto.CurrentRoundId,
+                League = Map(dto.League.Data),
+                Rounds = Map<RoundDto>(dto.Rounds?.Data)
             };
 
             postMap?.Invoke(s);
@@ -121,6 +123,44 @@ namespace Worker.Infrastructure.FootballDataProvider {
             postMap?.Invoke(l);
 
             return l;
+        }
+
+        public RoundDto Map(SeasonDtoResponse.RoundsDataDto.RoundDto dto, Action<RoundDto> postMap = null) {
+            if (dto == null) {
+                return null;
+            }
+
+            var r = new RoundDto {
+                Id = dto.Id,
+                Name = dto.Name,
+                StartDate = dto.Start,
+                EndDate = dto.End,
+                Fixtures = Map<FixtureForMatchPredictionDto>(dto.Fixtures.Data, postMap: f => f.RoundId = dto.Id)
+            };
+
+            postMap?.Invoke(r);
+
+            return r;
+        }
+
+        public FixtureForMatchPredictionDto Map(FixtureDtoResponse dto, Action<FixtureForMatchPredictionDto> postMap = null) {
+            if (dto == null) {
+                return null;
+            }
+
+            var f = new FixtureForMatchPredictionDto {
+                Id = dto.Id,
+                StartTime = dto.MatchStatus.StartingAt?.DateTime?.DateTime ?? DateTime.MinValue,
+                Status = dto.MatchStatus.Status,
+                GameTime = Map(dto.MatchStatus),
+                Score = Map(dto.Scores ?? new FixtureDtoResponse.ScoreDto()),
+                HomeTeam = Map(dto.LocalTeam.Data),
+                GuestTeam = Map(dto.VisitorTeam.Data),
+            };
+
+            postMap?.Invoke(f);
+
+            return f;
         }
 
         public PlayerDto Map(GetPlayerResponseDto.PlayerDto dto, Action<PlayerDto> postMap = null) {

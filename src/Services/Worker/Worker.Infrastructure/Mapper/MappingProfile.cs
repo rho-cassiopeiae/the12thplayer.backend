@@ -13,13 +13,15 @@ using TeamMatchEventsDtoMsg = MessageBus.Contracts.Common.Dto.TeamMatchEventsDto
 using TeamStatsDtoMsg = MessageBus.Contracts.Common.Dto.TeamStatsDto;
 using SeasonDtoMsg = MessageBus.Contracts.Common.Dto.SeasonDto;
 using LeagueDtoMsg = MessageBus.Contracts.Common.Dto.LeagueDto;
+using RoundDtoMsg = MessageBus.Contracts.Common.Dto.RoundDto;
+using FixtureForMatchPredictionDtoMsg = MessageBus.Contracts.Common.Dto.FixtureForMatchPredictionDto;
 using PlayerDtoMsg = MessageBus.Contracts.Common.Dto.PlayerDto;
 using FixturePlayerRatingsDtoMsg = MessageBus.Contracts.Common.Dto.FixturePlayerRatingsDto;
 using PlayerRatingDtoMsg = MessageBus.Contracts.Common.Dto.PlayerRatingDto;
 
 using Worker.Application.Jobs.OneOff.FootballDataCollection.Dto;
 
-namespace Worker.Infrastructure.Livescore {
+namespace Worker.Infrastructure.Mapper {
     public class MappingProfile : Profile {
         public MappingProfile() {
             CreateMap<CountryDto, CountryDtoMsg>();
@@ -44,6 +46,8 @@ namespace Worker.Infrastructure.Livescore {
 
             CreateMap<SeasonDto, SeasonDtoMsg>();
             CreateMap<LeagueDto, LeagueDtoMsg>();
+            CreateMap<RoundDto, RoundDtoMsg>();
+            CreateMap<FixtureForMatchPredictionDto, FixtureForMatchPredictionDtoMsg>();
 
             CreateMap<PlayerDto, PlayerDtoMsg>()
                 .ReverseMap();

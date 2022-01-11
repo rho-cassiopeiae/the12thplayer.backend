@@ -132,6 +132,16 @@ services:
     - migrator
     - rabbit
 
+  match-predictions:
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://0.0.0.0:80
+    ports:
+    - "11000:80"
+    depends_on:
+    - migrator
+    - rabbit
+
   notification:
     environment:
     - DOTNET_ENVIRONMENT=Development

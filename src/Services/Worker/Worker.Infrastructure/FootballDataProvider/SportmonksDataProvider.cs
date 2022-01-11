@@ -217,5 +217,14 @@ namespace Worker.Infrastructure.FootballDataProvider {
                 return _mapper.Map(response.Data?.SingleOrDefault(), teamId);
             }
         }
+
+        public async Task<SeasonDtoApp> GetSeasonWithRoundsAndFixtures(long seasonId) {
+            using var client = _createClient();
+
+            var queryString = _baseQueryString.Add("include", "league,rounds.fixtures.localTeam,rounds.fixtures.visitorTeam");
+            var response = await _get<GetSeasonResponseDto>(client, $"seasons/{seasonId}{queryString}");
+
+            return _mapper.Map(response.Data);
+        }
     }
 }

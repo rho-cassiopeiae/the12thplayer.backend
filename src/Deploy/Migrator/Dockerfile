@@ -37,6 +37,11 @@ COPY ["Services/Feed/Feed.Application/Feed.Application.csproj", "Services/Feed/F
 COPY ["Services/Feed/Feed.Domain/Feed.Domain.csproj", "Services/Feed/Feed.Domain/"]
 COPY ["Services/Feed/Feed.Infrastructure/Feed.Infrastructure.csproj", "Services/Feed/Feed.Infrastructure/"]
 
+COPY ["Services/MatchPredictions/MatchPredictions.Api/MatchPredictions.Api.csproj", "Services/MatchPredictions/MatchPredictions.Api/"]
+COPY ["Services/MatchPredictions/MatchPredictions.Application/MatchPredictions.Application.csproj", "Services/MatchPredictions/MatchPredictions.Application/"]
+COPY ["Services/MatchPredictions/MatchPredictions.Domain/MatchPredictions.Domain.csproj", "Services/MatchPredictions/MatchPredictions.Domain/"]
+COPY ["Services/MatchPredictions/MatchPredictions.Infrastructure/MatchPredictions.Infrastructure.csproj", "Services/MatchPredictions/MatchPredictions.Infrastructure/"]
+
 COPY ["Services/Notification/Notification.Host/Notification.Host.csproj", "Services/Notification/Notification.Host/"]
 COPY ["Services/Notification/Notification.Application/Notification.Application.csproj", "Services/Notification/Notification.Application/"]
 

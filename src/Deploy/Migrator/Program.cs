@@ -5,9 +5,10 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using IdentitySvc  = Identity.Infrastructure.Persistence;
-using ProfileSvc   = Profile.Infrastructure.Persistence;
-using LivescoreSvc = Livescore.Infrastructure.Persistence;
+using IdentitySvc         = Identity.Infrastructure.Persistence;
+using ProfileSvc          = Profile.Infrastructure.Persistence;
+using LivescoreSvc        = Livescore.Infrastructure.Persistence;
+using MatchPredictionsSvc = MatchPredictions.Infrastructure.Persistence;
 
 using FeedSvc = Feed.Infrastructure.Persistence;
 using Feed.Domain.Aggregates.Author;
@@ -58,6 +59,16 @@ namespace Migrator {
                     .GetRequiredService<LivescoreSvc.LivescoreDbContext>();
 
                 livescoreDbContext.Database.Migrate();
+            }
+
+            host = MatchPredictions.Api.Program.CreateHostBuilder(args).Build();
+
+            using (var scope = host.Services.CreateScope()) {
+                var matchPredictionsDbContext = scope
+                    .ServiceProvider
+                    .GetRequiredService<MatchPredictionsSvc.MatchPredictionsDbContext>();
+
+                matchPredictionsDbContext.Database.Migrate();
             }
 
             host = Feed.Api.Program.CreateHostBuilder(args).Build();

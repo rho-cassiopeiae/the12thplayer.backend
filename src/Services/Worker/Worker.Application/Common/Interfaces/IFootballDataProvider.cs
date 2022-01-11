@@ -27,5 +27,7 @@ namespace Worker.Application.Common.Interfaces {
             bool includeLineups = false,
             bool includeEventsAndStats = false
         );
+
+        Task<SeasonDto> GetSeasonWithRoundsAndFixtures(long seasonId);
     }
 }

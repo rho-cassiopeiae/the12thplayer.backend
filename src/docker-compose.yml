@@ -37,6 +37,12 @@ services:
       context: .
       dockerfile: Services/Feed/Feed.Api/Dockerfile
 
+  match-predictions:
+    image: ${REGISTRY:-the12thplayer}/match-predictions.api:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Services/MatchPredictions/MatchPredictions.Api/Dockerfile
+
   notification:
     image: ${REGISTRY:-the12thplayer}/notification.host:${PLATFORM:-linux}-${TAG:-latest}
     build:

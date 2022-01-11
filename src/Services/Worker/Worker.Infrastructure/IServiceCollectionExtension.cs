@@ -14,6 +14,7 @@ using MessageBus.Contracts.Requests.Worker;
 using Worker.Application.Common.Interfaces;
 using Worker.Infrastructure.FootballDataProvider;
 using Worker.Infrastructure.Livescore;
+using Worker.Infrastructure.MatchPredictions;
 
 namespace Worker.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -22,13 +23,14 @@ namespace Worker.Infrastructure {
             IConfiguration configuration,
             Action<IServiceCollectionBusConfigurator> busCfgCallback
         ) {
-            services.AddSingleton<Mapper>();
+            services.AddSingleton<FootballDataProvider.Mapper>();
             services.AddSingleton<IFootballDataProvider, SportmonksDataProvider>();
 
             services.AddScoped<ILivescoreSeeder, LivescoreSeeder>();
             services.AddScoped<IFixtureLivescoreNotifier, FixtureLivescoreNotifier>();
             services.AddScoped<ILivescoreSvcQueryable, LivescoreSvcQueryable>();
             services.AddScoped<IFileHostingSeeder, FileHostingSeeder>();
+            services.AddScoped<IMatchPredictionsSeeder, MatchPredictionsSeeder>();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
