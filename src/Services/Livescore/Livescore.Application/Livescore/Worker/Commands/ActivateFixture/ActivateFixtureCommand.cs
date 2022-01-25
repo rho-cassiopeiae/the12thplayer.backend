@@ -91,6 +91,12 @@ namespace Livescore.Application.Livescore.Worker.Commands.ActivateFixture {
                     "Calling players useless dickheads and swearing at the referee is fine though :) " +
                     "You can post once every 30 seconds. Thank you."
             ));
+            matchDiscussion.AddEntry(new DiscussionEntry(
+                id: "0-2",
+                userId: 6,
+                username: "Hamster",
+                body: "Not a very good start, but we can still win it!"
+            ));
 
             var postmatchDiscussion = new DiscussionDm(
                 fixtureId: command.FixtureId,

@@ -166,6 +166,9 @@ namespace Feed.Infrastructure.Persistence.Queryables {
                 }
             );
 
+            // @@NOTE: Below doesn't work without the GROUP BY clause. Error: Column a."AuthorId" must appear
+            // in the GROUP BY clause or be used in an aggregate function.
+            
             cmd.CommandText = $@"
                 SELECT
                     a.""AuthorId"", a.""AuthorUsername"", a.""PostedAt"", a.""Type"", a.""Title"",
@@ -175,7 +178,8 @@ namespace Feed.Infrastructure.Persistence.Queryables {
                         LEFT JOIN
                     feed.""Comments"" AS c
                         ON (a.""Id"" = c.""ArticleId"")
-                WHERE a.""Id"" = @{cmd.Parameters.First().ParameterName};
+                WHERE a.""Id"" = @{cmd.Parameters.First().ParameterName}
+                GROUP BY a.""Id"";
             ";
 
             ArticleWithUserVoteDto article = null;

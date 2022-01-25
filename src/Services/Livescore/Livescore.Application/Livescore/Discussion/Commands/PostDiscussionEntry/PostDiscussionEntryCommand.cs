@@ -85,6 +85,8 @@ namespace Livescore.Application.Livescore.Discussion.Commands.PostDiscussionEntr
             if (!applied) {
                 // @@NOTE: Either the fixture is no longer active, or the discussion is no longer active (or it doesn't exist at all),
                 // or it's a rate-limit error.
+
+                // @@TODO: Distinct error message for rate-limit error.
                 return new VoidResult {
                     Error = new DiscussionError("Error trying to post a new discussion entry")
                 };
