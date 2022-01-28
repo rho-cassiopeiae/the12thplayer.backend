@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using MatchPredictions.Api.Consumers.Worker;
 using MatchPredictions.Application;
 using MatchPredictions.Infrastructure;
+using MatchPredictions.Api.Controllers.Filters;
 
 namespace MatchPredictions.Api {
     public class Startup {
@@ -24,6 +27,15 @@ namespace MatchPredictions.Api {
                     busCfg.AddConsumer<SeedRequestsConsumer>();
                 }
             );
+
+            services
+                .AddControllers(options => {
+                    options.Filters.Add<ConvertHandleErrorToMvcResponseFilter>();
+                })
+                .AddJsonOptions(options => {
+                    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
@@ -36,7 +48,7 @@ namespace MatchPredictions.Api {
             app.UseAuthentication();
 
             app.UseEndpoints(endpoints => {
-                
+                endpoints.MapControllers();
             });
         }
     }

@@ -5,6 +5,8 @@ using MatchPredictions.Domain.Aggregates.Fixture;
 using MatchPredictions.Domain.Aggregates.League;
 using MatchPredictions.Domain.Aggregates.Round;
 using MatchPredictions.Domain.Aggregates.Team;
+using MatchPredictions.Domain.Aggregates.UserPrediction;
+using MatchPredictions.Application.Playtime.Queries.GetActiveFixturesForTeam;
 
 namespace MatchPredictions.Infrastructure.Persistence {
     public class MatchPredictionsDbContext : DbContext {
@@ -13,6 +15,10 @@ namespace MatchPredictions.Infrastructure.Persistence {
         public DbSet<League> Leagues { get; set; }
         public DbSet<Round> Rounds { get; set; }
         public DbSet<Fixture> Fixtures { get; set; }
+        public DbSet<UserPrediction> UserPredictions { get; set; }
+
+        public DbSet<ActiveSeasonRoundWithFixturesDto> ActiveSeasonRounds { get; set; }
+        public DbSet<FixtureDto> ActiveFixtures { get; set; }
 
         public MatchPredictionsDbContext(DbContextOptions<MatchPredictionsDbContext> options) : base(options) { }
 
@@ -76,6 +82,16 @@ namespace MatchPredictions.Infrastructure.Persistence {
                     .IsRequired();
             });
 
+            modelBuilder.Entity<TeamActiveSeasons>(builder => {
+                builder.HasKey(tas => tas.TeamId);
+                builder.Property(tas => tas.ActiveSeasons).HasColumnType("jsonb").IsRequired();
+                builder
+                    .HasOne<Team>()
+                    .WithOne(t => t.ActiveSeasons)
+                    .HasForeignKey<TeamActiveSeasons>(tas => tas.TeamId)
+                    .IsRequired();
+            });
+
             modelBuilder.Entity<Fixture>(builder => {
                 builder.HasKey(f => f.Id);
                 builder.Property(f => f.Id).ValueGeneratedNever();
@@ -103,6 +119,40 @@ namespace MatchPredictions.Infrastructure.Persistence {
                     .WithMany()
                     .HasForeignKey(f => f.GuestTeamId)
                     .IsRequired();
+            });
+
+            modelBuilder.Entity<UserPrediction>(builder => {
+                builder.HasKey(up => new { up.UserId, up.SeasonId, up.RoundId });
+                builder
+                    .Property(up => up.FixtureIdToScore)
+                    .HasColumnType("jsonb")
+                    .IsRequired()
+                    .UsePropertyAccessMode(PropertyAccessMode.Field);
+                builder
+                    .HasOne<Season>()
+                    .WithMany()
+                    .HasForeignKey(up => up.SeasonId)
+                    .IsRequired();
+                builder
+                    .HasOne<Round>()
+                    .WithMany()
+                    .HasForeignKey(up => up.RoundId)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity<ActiveSeasonRoundWithFixturesDto>(builder => {
+                builder.HasNoKey();
+                builder.Ignore(sr => sr.Fixtures);
+                builder.ToView(nameof(ActiveSeasonRounds));
+            });
+
+            modelBuilder.Entity<FixtureDto>(builder => {
+                builder.HasNoKey();
+                builder.Property(f => f.GameTime).HasColumnType("jsonb");
+                builder.Property(f => f.Score).HasColumnType("jsonb");
+                builder.Ignore(f => f.PredictedHomeTeamScore);
+                builder.Ignore(f => f.PredictedGuestTeamScore);
+                builder.ToView(nameof(ActiveFixtures));
             });
         }
     }

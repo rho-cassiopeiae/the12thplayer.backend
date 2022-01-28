@@ -5,6 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Persistence\Migrations\MatchPredictions\Scripts\Functions\GetActiveSeasonsWithActiveRoundsForTeam\GetActiveSeasonsWithActiveRoundsForTeam.v0.sql" />
+    <None Remove="Persistence\Migrations\MatchPredictions\Scripts\Functions\GetFixturesBySeasonAndRoundId\GetFixturesBySeasonAndRoundId.v0.sql" />
+    <None Remove="Persistence\Migrations\MatchPredictions\Scripts\Functions\GetUserPredictionsBySeasonAndRoundId\GetUserPredictionsBySeasonAndRoundId.v0.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Persistence\Migrations\MatchPredictions\Scripts\Functions\GetActiveSeasonsWithActiveRoundsForTeam\GetActiveSeasonsWithActiveRoundsForTeam.v0.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\MatchPredictions\Scripts\Functions\GetFixturesBySeasonAndRoundId\GetFixturesBySeasonAndRoundId.v0.sql" />
+    <EmbeddedResource Include="Persistence\Migrations\MatchPredictions\Scripts\Functions\GetUserPredictionsBySeasonAndRoundId\GetUserPredictionsBySeasonAndRoundId.v0.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.10">
