@@ -7,6 +7,7 @@ using MatchPredictions.Domain.Aggregates.Round;
 using MatchPredictions.Domain.Aggregates.Team;
 using MatchPredictions.Domain.Aggregates.UserPrediction;
 using MatchPredictions.Application.Playtime.Queries.GetActiveFixturesForTeam;
+using MatchPredictions.Application.Playtime.Commands.SubmitMatchPredictions;
 
 namespace MatchPredictions.Infrastructure.Persistence {
     public class MatchPredictionsDbContext : DbContext {
@@ -19,6 +20,7 @@ namespace MatchPredictions.Infrastructure.Persistence {
 
         public DbSet<ActiveSeasonRoundWithFixturesDto> ActiveSeasonRounds { get; set; }
         public DbSet<FixtureDto> ActiveFixtures { get; set; }
+        public DbSet<NotStartedFixtureDto> NotStartedFixtures { get; set; }
 
         public MatchPredictionsDbContext(DbContextOptions<MatchPredictionsDbContext> options) : base(options) { }
 
@@ -153,6 +155,11 @@ namespace MatchPredictions.Infrastructure.Persistence {
                 builder.Ignore(f => f.PredictedHomeTeamScore);
                 builder.Ignore(f => f.PredictedGuestTeamScore);
                 builder.ToView(nameof(ActiveFixtures));
+            });
+
+            modelBuilder.Entity<NotStartedFixtureDto>(builder => {
+                builder.HasNoKey();
+                builder.ToView(nameof(NotStartedFixtures));
             });
         }
     }

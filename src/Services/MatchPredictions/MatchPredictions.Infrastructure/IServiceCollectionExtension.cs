@@ -26,6 +26,7 @@ using MatchPredictions.Domain.Aggregates.Round;
 using MatchPredictions.Application.Common.Interfaces;
 using MatchPredictions.Infrastructure.Identity;
 using MatchPredictions.Infrastructure.Persistence.Queryables;
+using MatchPredictions.Domain.Aggregates.UserPrediction;
 
 namespace MatchPredictions.Infrastructure {
     public static class IServiceCollectionExtension {
@@ -99,6 +100,7 @@ namespace MatchPredictions.Infrastructure {
             services.AddScoped<ILeagueRepository, LeagueRepository>();
             services.AddScoped<IRoundRepository, RoundRepository>();
             services.AddScoped<IFixtureRepository, FixtureRepository>();
+            services.AddScoped<IUserPredictionRepository, UserPredictionRepository>();
 
             services.AddScoped<ITeamActiveSeasonsQueryable, TeamActiveSeasonsQueryable>();
             services.AddScoped<IFixtureQueryable, FixtureQueryable>();
