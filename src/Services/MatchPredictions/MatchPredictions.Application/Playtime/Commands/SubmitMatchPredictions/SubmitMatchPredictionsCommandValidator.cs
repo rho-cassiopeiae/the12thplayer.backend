@@ -5,11 +5,13 @@ namespace MatchPredictions.Application.Playtime.Commands.SubmitMatchPredictions 
         public SubmitMatchPredictionsCommandValidator() {
             RuleFor(c => c.SeasonId).GreaterThan(0);
             RuleFor(c => c.RoundId).GreaterThan(0);
-            RuleForEach(c => c.FixtureIdToScore).Must(kv =>
-                long.TryParse(kv.Key, out _) &&
-                kv.Value.Length == 2 &&
-                short.TryParse(kv.Value, out _)
-            );
+            RuleForEach(c => c.FixtureIdToScore)
+                .NotEmpty()
+                .Must(kv =>
+                    long.TryParse(kv.Key, out _) &&
+                    kv.Value.Length == 2 &&
+                    short.TryParse(kv.Value, out _)
+                );
         }
     }
 }
