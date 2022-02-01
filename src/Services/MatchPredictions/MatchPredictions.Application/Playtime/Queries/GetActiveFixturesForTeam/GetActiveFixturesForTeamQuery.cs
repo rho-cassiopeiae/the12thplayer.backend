@@ -74,9 +74,8 @@ namespace MatchPredictions.Application.Playtime.Queries.GetActiveFixturesForTeam
                     foreach (var fixtureIdToScore in userPrediction.FixtureIdToScore) {
                         var fixtureId = long.Parse(fixtureIdToScore.Key);
                         var fixture = roundFixtures.First(f => f.Id == fixtureId);
-                        var predictedScoreSplit = fixtureIdToScore.Value.Split('-');
-                        fixture.PredictedHomeTeamScore = short.Parse(predictedScoreSplit.First());
-                        fixture.PredictedGuestTeamScore = short.Parse(predictedScoreSplit.Last());
+                        fixture.PredictedHomeTeamScore = short.Parse(fixtureIdToScore.Value.Substring(0, 1));
+                        fixture.PredictedGuestTeamScore = short.Parse(fixtureIdToScore.Value.Substring(1, 1));
                     }
                 }
             }
