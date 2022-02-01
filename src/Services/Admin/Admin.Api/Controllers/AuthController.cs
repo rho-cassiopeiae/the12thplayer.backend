@@ -17,7 +17,7 @@ namespace Admin.Api.Controllers {
         }
 
         [HttpPost("log-in")]
-        public Task<HandleResult<SecurityCredentials>> LogIn(
+        public Task<HandleResult<SecurityCredentialsDto>> LogIn(
             [FromBody] LogInToAdminPanelCommand command
         ) => _mediator.Send(command);
     }
