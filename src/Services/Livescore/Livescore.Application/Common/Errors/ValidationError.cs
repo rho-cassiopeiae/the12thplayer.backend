@@ -7,7 +7,7 @@ namespace Livescore.Application.Common.Errors {
     public class ValidationError : HandleError {
         internal ValidationError(IEnumerable<ValidationFailure> failures) : base(type: "Validation") {
             Errors = failures
-                .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
+                .GroupBy(f => f.PropertyName, f => f.ErrorMessage)
                 .ToDictionary(failureGroup => failureGroup.Key, failureGroup => failureGroup.ToArray());
         }
 

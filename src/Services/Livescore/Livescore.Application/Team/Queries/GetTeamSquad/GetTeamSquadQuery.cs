@@ -5,7 +5,6 @@ using MediatR;
 
 using Livescore.Application.Common.Interfaces;
 using Livescore.Application.Common.Results;
-using Livescore.Application.Team.Queries.GetTeamSquad.Dto;
 
 namespace Livescore.Application.Team.Queries.GetTeamSquad {
     public class GetTeamSquadQuery : IRequest<HandleResult<TeamSquadDto>> {

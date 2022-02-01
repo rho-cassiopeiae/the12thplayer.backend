@@ -12,7 +12,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Queries.GetVideoReaction
     public class GetVideoReactionsForFixtureQuery : IRequest<HandleResult<FixtureVideoReactionsDto>> {
         public long FixtureId { get; set; }
         public long TeamId { get; set; }
-        public int Filter { get; set; }
+        public VideoReactionFilter Filter { get; set; }
         public int Page { get; set; }
     }
 
@@ -54,7 +54,7 @@ namespace Livescore.Application.Livescore.VideoReaction.Queries.GetVideoReaction
             }
 
             var (videoReactions, totalPages) = await _videoReactionInMemQueryable.GetFilteredAndPaginatedFor(
-                query.FixtureId, query.TeamId, (VideoReactionFilter) query.Filter, query.Page
+                query.FixtureId, query.TeamId, query.Filter, query.Page
             );
 
             var videoReactionsWithUserVote = videoReactions

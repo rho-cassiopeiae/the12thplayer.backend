@@ -9,7 +9,7 @@ using NpgsqlTypes;
 
 using Livescore.Domain.Aggregates.Player;
 using Livescore.Application.Common.Interfaces;
-using Livescore.Application.Team.Queries.GetTeamSquad.Dto;
+using Livescore.Application.Team.Queries.GetTeamSquad;
 
 namespace Livescore.Infrastructure.Persistence.Queryables {
     public class PlayerQueryable : IPlayerQueryable {

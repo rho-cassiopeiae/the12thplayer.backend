@@ -10,7 +10,7 @@ using Livescore.Domain.Aggregates.Fixture;
 using Livescore.Application.Livescore.Fixture.Common.Dto;
 using Livescore.Domain.Aggregates.PlayerRating;
 using Livescore.Domain.Aggregates.UserVote;
-using Livescore.Application.Team.Queries.GetTeamSquad.Dto;
+using Livescore.Application.Team.Queries.GetTeamSquad;
 using Livescore.Application.Team.Queries.GetPlayerRatingsForParticipant;
 
 namespace Livescore.Infrastructure.Persistence {

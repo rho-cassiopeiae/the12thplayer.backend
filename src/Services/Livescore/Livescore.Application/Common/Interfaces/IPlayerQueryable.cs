@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Livescore.Application.Team.Queries.GetTeamSquad.Dto;
+using Livescore.Application.Team.Queries.GetTeamSquad;
 using Livescore.Domain.Aggregates.Player;
 
 namespace Livescore.Application.Common.Interfaces {

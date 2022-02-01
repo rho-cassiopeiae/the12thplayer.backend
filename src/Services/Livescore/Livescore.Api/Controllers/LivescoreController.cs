@@ -11,7 +11,6 @@ using Livescore.Application.Livescore.Fixture.Queries.GetFixturesForTeamInBetwee
 using Livescore.Application.Livescore.Fixture.Queries.GetFixtureForTeam;
 using Livescore.Api.Controllers.Filters;
 using Livescore.Application.Livescore.VideoReaction.Commands.PostVideoReaction;
-using Livescore.Application.Team.Queries.GetTeamSquad.Dto;
 using Livescore.Application.Team.Queries.GetTeamSquad;
 using Livescore.Application.Team.Queries.GetPlayerRatingsForParticipant;
 

@@ -9,10 +9,10 @@ using Livescore.Application.Common.Interfaces;
 using Livescore.Application.Common.Results;
 
 namespace Livescore.Application.Common.Behaviors {
-    public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<
-        TRequest, TResponse
-    > where TRequest : IRequest<TResponse>
-      where TResponse : HandleResult, new() {
+    public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IRequest<TResponse>
+        where TResponse : HandleResult, new() {
+
         private readonly IAuthenticationContext _authenticationContext;
         private readonly IAuthorizationService _authorizationService;
 

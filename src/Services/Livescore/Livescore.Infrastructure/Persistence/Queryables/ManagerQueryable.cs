@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 
-using Livescore.Application.Team.Queries.GetTeamSquad.Dto;
+using Livescore.Application.Team.Queries.GetTeamSquad;
 using Livescore.Domain.Aggregates.Manager;
 using Livescore.Application.Common.Interfaces;
 

@@ -9,9 +9,7 @@ using Livescore.Application.Common.Results;
 using Livescore.Application.Livescore.Fixture.Common.Dto;
 
 namespace Livescore.Application.Livescore.Fixture.Queries.GetFixturesForTeamInBetween {
-    public class GetFixturesForTeamInBetweenQuery : IRequest<
-        HandleResult<IEnumerable<FixtureSummaryDto>>
-    > {
+    public class GetFixturesForTeamInBetweenQuery : IRequest<HandleResult<IEnumerable<FixtureSummaryDto>>> {
         public long TeamId { get; set; }
         public long StartTime { get; set; }
         public long EndTime { get; set; }

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-using Livescore.Application.Team.Queries.GetTeamSquad.Dto;
+using Livescore.Application.Team.Queries.GetTeamSquad;
 
 namespace Livescore.Application.Common.Interfaces {
     public interface IManagerQueryable {
