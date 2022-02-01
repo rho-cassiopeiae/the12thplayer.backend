@@ -121,6 +121,7 @@ namespace Feed.Application.Article.Commands.PostVideoArticle {
         }
 
         private bool _validateForm(FormCollection formCollection) {
+            // @@TODO: Validation.
             return true;
         }
     }

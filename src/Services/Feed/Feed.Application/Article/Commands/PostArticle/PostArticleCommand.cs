@@ -14,7 +14,7 @@ namespace Feed.Application.Article.Commands.PostArticle {
     [RequireAuthorization]
     public class PostArticleCommand : IRequest<HandleResult<long>> {
         public long TeamId { get; set; }
-        public int Type { get; set; }
+        public ArticleType Type { get; set; }
         public string Title { get; set; }
         public string PreviewImageUrl { get; set; }
         public string Summary { get; set; }
@@ -45,10 +45,10 @@ namespace Feed.Application.Article.Commands.PostArticle {
                 authorId: _principalDataProvider.GetId(_authenticationContext.User),
                 authorUsername: _principalDataProvider.GetUsername(_authenticationContext.User),
                 postedAt: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                type: (ArticleType) command.Type,
+                type: command.Type,
                 title: command.Title,
                 previewImageUrl: command.PreviewImageUrl,
-                summary: command.Summary,
+                summary: !string.IsNullOrWhiteSpace(command.Summary) ? command.Summary : null,
                 content: command.Content,
                 rating: 0
             );

@@ -12,7 +12,7 @@ using Feed.Application.Article.Queries.Common.Dto;
 namespace Feed.Application.Article.Queries.GetArticlesForTeam {
     public class GetArticlesForTeamQuery : IRequest<HandleResult<IEnumerable<ArticleWithUserVoteDto>>> {
         public long TeamId { get; set; }
-        public int Filter { get; set; }
+        public ArticleFilter Filter { get; set; }
         public int Page { get; set; }
     }
 
@@ -41,7 +41,7 @@ namespace Feed.Application.Article.Queries.GetArticlesForTeam {
             GetArticlesForTeamQuery query, CancellationToken cancellationToken
         ) {
             var articles = await _articleQueryable.GetArticlesWithCommentCountFor(
-                query.TeamId, (ArticleFilter) query.Filter, query.Page
+                query.TeamId, query.Filter, query.Page
             );
 
             if (articles.Any() && _authenticationContext.User != null) {
