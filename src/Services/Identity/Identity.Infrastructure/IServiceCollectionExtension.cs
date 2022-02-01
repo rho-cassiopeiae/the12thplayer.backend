@@ -56,7 +56,7 @@ namespace Identity.Infrastructure {
                     options.Tokens.PasswordResetTokenProvider = "ConfirmationCodeProvider";
                     options.ClaimsIdentity.UserIdClaimType = JwtRegisteredClaimNames.Sub;
                     options.User.RequireUniqueEmail = true;
-                    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -._";
+                    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -_";
                     options.Password.RequiredLength = 8;
                     options.Password.RequireDigit = false;
                     options.Password.RequireUppercase = false;
