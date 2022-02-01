@@ -10,6 +10,7 @@ using NpgsqlTypes;
 using MatchPredictions.Application.Playtime.Queries.GetActiveFixturesForTeam;
 using MatchPredictions.Application.Common.Interfaces;
 using MatchPredictions.Application.Playtime.Commands.SubmitMatchPredictions;
+using MatchPredictions.Application.Common.Dto;
 
 namespace MatchPredictions.Infrastructure.Persistence.Queryables {
     public class FixtureQueryable : IFixtureQueryable {
@@ -65,12 +66,23 @@ namespace MatchPredictions.Infrastructure.Persistence.Queryables {
         public async Task<IEnumerable<AlreadyStartedFixtureDto>> GetById(IEnumerable<long> fixtureIds) {
             var fixtures = await _matchPredictionsDbContext.Fixtures
                 .Where(f => fixtureIds.Contains(f.Id))
-                .Select(f => new AlreadyStartedFixtureDto { // @@TODO: Test extracting individual properties from GameTime and Score.
+                .Select(f => new AlreadyStartedFixtureDto {
                     Id = f.Id,
                     StartTime = f.StartTime,
                     Status = f.Status,
-                    GameTimeEntity = f.GameTime,
-                    ScoreEntity = f.Score
+                    GameTime = new GameTimeDto {
+                        Minute = f.GameTime.Minute,
+                        ExtraTimeMinute = f.GameTime.ExtraTimeMinute,
+                        AddedTimeMinute = f.GameTime.AddedTimeMinute
+                    },
+                    Score = new ScoreDto {
+                        LocalTeam = f.Score.LocalTeam,
+                        VisitorTeam = f.Score.VisitorTeam,
+                        HT = f.Score.HT,
+                        FT = f.Score.FT,
+                        ET = f.Score.ET,
+                        PS = f.Score.PS
+                    }
                 })
                 .ToListAsync();
 

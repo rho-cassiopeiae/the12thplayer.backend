@@ -10,7 +10,6 @@ using MatchPredictions.Application.Common.Attributes;
 using MatchPredictions.Application.Common.Interfaces;
 using MatchPredictions.Application.Common.Results;
 using MatchPredictions.Domain.Aggregates.UserPrediction;
-using MatchPredictions.Application.Common.Dto;
 using MatchPredictions.Domain.Base;
 
 namespace MatchPredictions.Application.Playtime.Commands.SubmitMatchPredictions {
@@ -115,22 +114,6 @@ namespace MatchPredictions.Application.Playtime.Commands.SubmitMatchPredictions 
                     alreadyStartedFixtures = await _fixtureQueryable.GetById(
                         newPredictionsForAlreadyStartedFixtures.Select(p => long.Parse(p.Key)).ToList()
                     );
-
-                    foreach (var fixture in alreadyStartedFixtures) {
-                        fixture.GameTime = new GameTimeDto {
-                            Minute = fixture.GameTimeEntity.Minute,
-                            ExtraTimeMinute = fixture.GameTimeEntity.ExtraTimeMinute,
-                            AddedTimeMinute = fixture.GameTimeEntity.AddedTimeMinute
-                        };
-                        fixture.Score = new ScoreDto {
-                            LocalTeam = fixture.ScoreEntity.LocalTeam,
-                            VisitorTeam = fixture.ScoreEntity.VisitorTeam,
-                            HT = fixture.ScoreEntity.HT,
-                            FT = fixture.ScoreEntity.FT,
-                            ET = fixture.ScoreEntity.ET,
-                            PS = fixture.ScoreEntity.PS
-                        };
-                    }
                 }
             }
 
