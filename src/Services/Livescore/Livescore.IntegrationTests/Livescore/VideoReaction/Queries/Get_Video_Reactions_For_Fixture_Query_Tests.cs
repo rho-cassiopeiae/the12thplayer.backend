@@ -70,38 +70,25 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
         public async Task Should_Retrieve_Top_Video_Reactions_With_User_Votes() {
             _sut.RunAs(userId: 100, username: "user-100");
 
-            await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorIds[0],
-                Vote = 1
-            });
-
-            await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorIds[1],
-                Vote = 1
-            });
-
-            await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorIds[2],
-                Vote = -1
-            });
-
-            await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorIds[1],
-                Vote = 1
+            await Task.WhenAll(new[] {
+                _sut.SendRequest(new VoteForVideoReactionCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    AuthorId = _authorIds[1],
+                    UserVote = 1
+                }),
+                _sut.SendRequest(new VoteForVideoReactionCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    AuthorId = _authorIds[2],
+                    UserVote = -1
+                })
             });
 
             var result = await _sut.SendRequest(new GetVideoReactionsForFixtureQuery {
                 FixtureId = _fixtureId,
                 TeamId = _teamId,
-                Filter = (int) VideoReactionFilter.Top,
+                Filter = VideoReactionFilter.Top,
                 Page = 1
             });
 
@@ -113,9 +100,9 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
             videoReactions.Should().HaveCount(6);
 
             videoReactions.First().Should().BeEquivalentTo(new VideoReactionWithUserVoteDto {
-                AuthorId = _authorIds[0],
-                Title = $"test-title-{_authorIds[0]}",
-                AuthorUsername = _authorUsernames[0],
+                AuthorId = _authorIds[1],
+                Title = $"test-title-{_authorIds[1]}",
+                AuthorUsername = _authorUsernames[1],
                 Rating = 2,
                 VideoId = FileHostingMock.VideoId,
                 UserVote = 1
@@ -130,11 +117,11 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
                 UserVote = -1
             });
 
-            videoReactions.First(vr => vr.AuthorId == _authorIds[1]).Should().BeEquivalentTo(
+            videoReactions.First(vr => vr.AuthorId == _authorIds[0]).Should().BeEquivalentTo(
                 new VideoReactionWithUserVoteDto {
-                    AuthorId = _authorIds[1],
-                    Title = $"test-title-{_authorIds[1]}",
-                    AuthorUsername = _authorUsernames[1],
+                    AuthorId = _authorIds[0],
+                    Title = $"test-title-{_authorIds[0]}",
+                    AuthorUsername = _authorUsernames[0],
                     Rating = 1,
                     VideoId = FileHostingMock.VideoId,
                     UserVote = null
@@ -146,38 +133,25 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Queries {
         public async Task Should_Retrieve_Newest_Video_Reactions_With_User_Votes() {
             _sut.RunAs(userId: 100, username: "user-100");
 
-            await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorIds[5],
-                Vote = 1
-            });
-
-            await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorIds[4],
-                Vote = 1
-            });
-
-            await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorIds[3],
-                Vote = -1
-            });
-
-            await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorIds[4],
-                Vote = 1
+            await Task.WhenAll(new[] {
+                _sut.SendRequest(new VoteForVideoReactionCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    AuthorId = _authorIds[5],
+                    UserVote = 1
+                }),
+                _sut.SendRequest(new VoteForVideoReactionCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    AuthorId = _authorIds[3],
+                    UserVote = -1
+                })
             });
 
             var result = await _sut.SendRequest(new GetVideoReactionsForFixtureQuery {
                 FixtureId = _fixtureId,
                 TeamId = _teamId,
-                Filter = (int) VideoReactionFilter.Newest,
+                Filter = VideoReactionFilter.Newest,
                 Page = 1
             });
 

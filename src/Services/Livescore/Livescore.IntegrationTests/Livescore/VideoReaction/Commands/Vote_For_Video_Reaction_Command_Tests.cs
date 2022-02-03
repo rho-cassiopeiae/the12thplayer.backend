@@ -49,43 +49,39 @@ namespace Livescore.IntegrationTests.Livescore.VideoReaction.Commands {
         }
 
         [Fact]
-        public async Task Should_Increase_Video_Reaction_Rating_By_1_When_Upvote_For_The_First_Time() {
+        public async Task Should_Update_Video_Reaction_Rating_According_To_Last_User_Vote() {
             _sut.RunAs(userId: 2, username: "user-2");
+
+            await Task.WhenAll(new[] {
+                _sut.SendRequest(new VoteForVideoReactionCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    AuthorId = _authorId,
+                    UserVote = -1
+                }),
+                _sut.SendRequest(new VoteForVideoReactionCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    AuthorId = _authorId,
+                    UserVote = 1
+                }),
+                _sut.SendRequest(new VoteForVideoReactionCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    AuthorId = _authorId,
+                    UserVote = null
+                })
+            });
 
             var result = await _sut.SendRequest(new VoteForVideoReactionCommand {
                 FixtureId = _fixtureId,
                 TeamId = _teamId,
                 AuthorId = _authorId,
-                Vote = 1
-            });
-
-            result.Data.Should().BeEquivalentTo(new VideoReactionRatingDto {
-                Rating = 2,
                 UserVote = 1
             });
-        }
-
-        [Fact]
-        public async Task Should_Reset_Video_Reaction_Rating_And_User_Vote_When_Upvote_Twice() {
-            _sut.RunAs(userId: 2, username: "user-2");
-
-            await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorId,
-                Vote = 1
-            });
-
-            var result = await _sut.SendRequest(new VoteForVideoReactionCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                AuthorId = _authorId,
-                Vote = 1
-            });
 
             result.Data.Should().BeEquivalentTo(new VideoReactionRatingDto {
-                Rating = 1,
-                UserVote = null
+                Rating = 2
             });
         }
     }
