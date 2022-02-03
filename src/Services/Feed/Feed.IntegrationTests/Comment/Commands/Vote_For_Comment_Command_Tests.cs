@@ -8,6 +8,9 @@ using Feed.Application.Author.Commands.CreateAuthor;
 using Feed.Application.Comment.Commands.PostComment;
 using Feed.Application.Comment.Commands.VoteForComment;
 using Feed.Domain.Aggregates.Article;
+using Feed.Application.Author.Commands.AddPermissions;
+using Feed.Application.Author.Common.Dto;
+using Feed.Domain.Aggregates.Author;
 
 namespace Feed.IntegrationTests.Comment.Commands {
     [Collection(nameof(FeedTestCollection))]
@@ -34,14 +37,31 @@ namespace Feed.IntegrationTests.Comment.Commands {
                 }
             ).Wait();
 
+            _sut.SendRequest(
+                new AddPermissionsCommand {
+                    UserId = _authorId,
+                    Permissions = new[] {
+                        new AuthorPermissionDto {
+                            Scope = (short) PermissionScope.Article,
+                            Flags = (short) (
+                                ArticlePermissions.Publish |
+                                ArticlePermissions.Review |
+                                ArticlePermissions.Edit |
+                                ArticlePermissions.Delete
+                            )
+                        }
+                    }
+                }
+            ).Wait();
+
             _sut.RunAs(userId: _authorId, username: _authorUsername);
 
             _articleId = _sut.SendRequest(
                 new PostArticleCommand {
                     TeamId = 53,
-                    Type = (short) ArticleType.News,
+                    Type = ArticleType.News,
                     Title = "title",
-                    PreviewImageUrl = "previewImageUrl",
+                    PreviewImageUrl = "http://preview-image-url.com",
                     Summary = null,
                     Content = "content"
                 }
@@ -58,48 +78,40 @@ namespace Feed.IntegrationTests.Comment.Commands {
         }
 
         [Fact]
-        public async Task Should_Update_Comment_Rating_According_To_A_Sequence_Of_Vote_Commands() {
+        public async Task Should_Update_Comment_Rating_According_To_Last_User_Vote() {
             _sut.RunAs(userId: _authorId, username: _authorUsername);
 
-            await _sut.SendRequest(new VoteForCommentCommand {
-                ArticleId = _articleId,
-                CommentId = _commentId,
-                Vote = 1 // upvote
-            });
-
-            await _sut.SendRequest(new VoteForCommentCommand {
-                ArticleId = _articleId,
-                CommentId = _commentId,
-                Vote = 1 // revert upvote
-            });
-
-            await _sut.SendRequest(new VoteForCommentCommand {
-                ArticleId = _articleId,
-                CommentId = _commentId,
-                Vote = -1 // downvote
-            });
-
-            await _sut.SendRequest(new VoteForCommentCommand {
-                ArticleId = _articleId,
-                CommentId = _commentId,
-                Vote = 1 // revert downvote then upvote
-            });
-
-            await _sut.SendRequest(new VoteForCommentCommand {
-                ArticleId = _articleId,
-                CommentId = _commentId,
-                Vote = -1 // revert upvote then downnote
+            await Task.WhenAll(new[] {
+                _sut.SendRequest(new VoteForCommentCommand {
+                    ArticleId = _articleId,
+                    CommentId = _commentId,
+                    UserVote = -1
+                }),
+                _sut.SendRequest(new VoteForCommentCommand {
+                    ArticleId = _articleId,
+                    CommentId = _commentId,
+                    UserVote = 1
+                }),
+                _sut.SendRequest(new VoteForCommentCommand {
+                    ArticleId = _articleId,
+                    CommentId = _commentId,
+                    UserVote = null
+                }),
+                _sut.SendRequest(new VoteForCommentCommand {
+                    ArticleId = _articleId,
+                    CommentId = _commentId,
+                    UserVote = 1
+                })
             });
 
             var result = await _sut.SendRequest(new VoteForCommentCommand {
                 ArticleId = _articleId,
                 CommentId = _commentId,
-                Vote = 1 // revert downvote then upvote
+                UserVote = null
             });
 
             result.Data.Should().BeEquivalentTo(new CommentRatingDto {
-                Rating = 1,
-                Vote = 1
+                Rating = 0
             });
         }
     }

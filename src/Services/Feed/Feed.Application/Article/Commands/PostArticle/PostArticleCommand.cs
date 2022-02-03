@@ -40,6 +40,8 @@ namespace Feed.Application.Article.Commands.PostArticle {
         public async Task<HandleResult<long>> Handle(
             PostArticleCommand command, CancellationToken cancellationToken
         ) {
+            // @@TODO: Check permissions and decide whether publish the article or just save it for review.
+
             var article = new ArticleDm(
                 teamId: command.TeamId,
                 authorId: _principalDataProvider.GetId(_authenticationContext.User),

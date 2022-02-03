@@ -49,7 +49,7 @@ namespace Feed.Infrastructure.Persistence.Repositories {
             cmd.CommandText = $@"
                 INSERT INTO feed.""UserVotes"" (""UserId"", ""ArticleId"", ""ArticleVote"")
                 VALUES (@{parameters[i++].ParameterName}, @{parameters[i++].ParameterName}, @{parameters[i++].ParameterName})
-                ON CONFLICT (""UserId"", ""ArticleId"") DO
+                ON CONFLICT (""UserId"", ""ArticleId"") DO -- @@NOTE: We don't use PK constraint name since CockroachDB doesn't support it.
                     UPDATE
                     SET ""ArticleVote"" = EXCLUDED.""ArticleVote"",
                         ""OldVote"" = ""UserVotes"".""ArticleVote""
@@ -94,7 +94,7 @@ namespace Feed.Infrastructure.Persistence.Repositories {
             cmd.CommandText = $@"
                 INSERT INTO feed.""UserVotes"" (""UserId"", ""ArticleId"", ""CommentIdToVote"")
                 VALUES (@{parameters[i++].ParameterName}, @{parameters[i++].ParameterName}, jsonb_strip_nulls(@{parameters[i].ParameterName}))
-                ON CONFLICT (""UserId"", ""ArticleId"") DO
+                ON CONFLICT (""UserId"", ""ArticleId"") DO -- @@NOTE: We don't use PK constraint name since CockroachDB doesn't support it.
                     UPDATE
                     SET ""CommentIdToVote"" = jsonb_strip_nulls(""UserVotes"".""CommentIdToVote"" || @{parameters[i++].ParameterName}),
                         ""OldVote"" = (""UserVotes"".""CommentIdToVote"" ->> @{parameters[i++].ParameterName})::SMALLINT

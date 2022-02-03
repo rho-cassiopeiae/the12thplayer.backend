@@ -9,6 +9,9 @@ using Feed.Application.Author.Commands.CreateAuthor;
 using Feed.Domain.Aggregates.Article;
 using Feed.Application.Comment.Commands.PostComment;
 using Feed.Application.Comment.Queries.GetCommentsForArticle;
+using Feed.Application.Author.Commands.AddPermissions;
+using Feed.Application.Author.Common.Dto;
+using Feed.Domain.Aggregates.Author;
 
 namespace Feed.IntegrationTests.Comment.Queries {
     [Collection(nameof(FeedTestCollection))]
@@ -34,14 +37,31 @@ namespace Feed.IntegrationTests.Comment.Queries {
                 }
             ).Wait();
 
+            _sut.SendRequest(
+                new AddPermissionsCommand {
+                    UserId = _authorId,
+                    Permissions = new[] {
+                        new AuthorPermissionDto {
+                            Scope = (short) PermissionScope.Article,
+                            Flags = (short) (
+                                ArticlePermissions.Publish |
+                                ArticlePermissions.Review |
+                                ArticlePermissions.Edit |
+                                ArticlePermissions.Delete
+                            )
+                        }
+                    }
+                }
+            ).Wait();
+
             _sut.RunAs(userId: _authorId, username: _authorUsername);
 
             _articleId = _sut.SendRequest(
                 new PostArticleCommand {
                     TeamId = 53,
-                    Type = (short) ArticleType.News,
+                    Type = ArticleType.News,
                     Title = "title",
-                    PreviewImageUrl = "previewImageUrl",
+                    PreviewImageUrl = "http://preview-image-url.com",
                     Summary = null,
                     Content = "content"
                 }
@@ -49,7 +69,7 @@ namespace Feed.IntegrationTests.Comment.Queries {
         }
 
         [Fact]
-        public async Task Should_Retrieve_Top_Comments() {
+        public async Task Should_Retrieve_All_Article_Comments() {
             _sut.RunAs(userId: _authorId, username: _authorUsername);
 
             var commentId1 = (await _sut.SendRequest(new PostCommentCommand {
@@ -100,7 +120,6 @@ namespace Feed.IntegrationTests.Comment.Queries {
                 ParentCommentId = commentId1,
                 Body = "body"
             })).Data;
-
             var commentId2 = (await _sut.SendRequest(new PostCommentCommand {
                 ArticleId = _articleId,
                 ThreadRootCommentId = null,
@@ -125,7 +144,6 @@ namespace Feed.IntegrationTests.Comment.Queries {
                 ParentCommentId = commentId2,
                 Body = "body"
             })).Data;
-
             var commentId3 = (await _sut.SendRequest(new PostCommentCommand {
                 ArticleId = _articleId,
                 ThreadRootCommentId = null,
@@ -134,9 +152,7 @@ namespace Feed.IntegrationTests.Comment.Queries {
             })).Data;
 
             var result = await _sut.SendRequest(new GetCommentsForArticleQuery {
-                ArticleId = _articleId,
-                Filter = (int) CommentFilter.Top,
-                Page = 1
+                ArticleId = _articleId
             });
 
             var comments = result.Data;

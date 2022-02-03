@@ -39,36 +39,12 @@ namespace Feed.IntegrationTests.Article.Commands {
                     UserId = _authorId,
                     Permissions = new[] {
                         new AuthorPermissionDto {
-                            Scope = (short) PermissionScope.AdminPanel,
-                            Flags = (short) AdminPanelPermissions.LogIn
-                        },
-                        new AuthorPermissionDto {
                             Scope = (short) PermissionScope.Article,
                             Flags = (short) (
                                 ArticlePermissions.Publish |
+                                ArticlePermissions.Review |
+                                ArticlePermissions.Edit |
                                 ArticlePermissions.Delete
-                            )
-                        },
-                        new AuthorPermissionDto {
-                            Scope = (short) PermissionScope.Article,
-                            Flags = (short) (
-                                ArticlePermissions.Publish |
-                                ArticlePermissions.Review
-                            )
-                        },
-                    }
-                }
-            ).Wait();
-
-            _sut.SendRequest(
-                new AddPermissionsCommand {
-                    UserId = _authorId,
-                    Permissions = new[] {
-                        new AuthorPermissionDto {
-                            Scope = (short) PermissionScope.Article,
-                            Flags = (short) (
-                                ArticlePermissions.Publish |
-                                ArticlePermissions.Edit
                             )
                         }
                     }
@@ -77,53 +53,46 @@ namespace Feed.IntegrationTests.Article.Commands {
         }
 
         [Fact]
-        public async Task Should_Update_Article_Rating_According_To_A_Sequence_Of_Vote_Commands() {
+        public async Task Should_Update_Article_Rating_According_To_Last_User_Vote() {
             _sut.RunAs(userId: _authorId, username: _authorUsername);
 
             var postArticleResult = await _sut.SendRequest(new PostArticleCommand {
                 TeamId = 53,
-                Type = (short) ArticleType.News,
+                Type = ArticleType.News,
                 Title = "title",
-                PreviewImageUrl = "previewImageUrl",
+                PreviewImageUrl = "http://preview-image-url.com",
                 Summary = null,
                 Content = "content"
             });
 
             long articleId = postArticleResult.Data;
 
-            await _sut.SendRequest(new VoteForArticleCommand {
-                ArticleId = articleId,
-                Vote = 1 // upvote
-            });
-
-            await _sut.SendRequest(new VoteForArticleCommand {
-                ArticleId = articleId,
-                Vote = 1 // revert upvote
-            });
-
-            await _sut.SendRequest(new VoteForArticleCommand {
-                ArticleId = articleId,
-                Vote = -1 // downvote
-            });
-
-            await _sut.SendRequest(new VoteForArticleCommand {
-                ArticleId = articleId,
-                Vote = 1 // revert downvote then upvote
-            });
-
-            await _sut.SendRequest(new VoteForArticleCommand {
-                ArticleId = articleId,
-                Vote = -1 // revert upvote then downnote
+            await Task.WhenAll(new[] {
+                _sut.SendRequest(new VoteForArticleCommand {
+                    ArticleId = articleId,
+                    UserVote = 1
+                }),
+                _sut.SendRequest(new VoteForArticleCommand {
+                    ArticleId = articleId,
+                    UserVote = -1
+                }),
+                _sut.SendRequest(new VoteForArticleCommand {
+                    ArticleId = articleId,
+                    UserVote = null
+                }),
+                _sut.SendRequest(new VoteForArticleCommand {
+                    ArticleId = articleId,
+                    UserVote = 1
+                })
             });
 
             var result = await _sut.SendRequest(new VoteForArticleCommand {
                 ArticleId = articleId,
-                Vote = 1 // revert downvote then upvote
+                UserVote = -1
             });
 
             result.Data.Should().BeEquivalentTo(new ArticleRatingDto {
-                Rating = 1,
-                Vote = 1
+                Rating = -1
             });
         }
     }
