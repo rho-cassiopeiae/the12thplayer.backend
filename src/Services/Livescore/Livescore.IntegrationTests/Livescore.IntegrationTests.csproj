@@ -2,12 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-
     <IsPackable>false</IsPackable>
+	<IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="appsettings.Testing.json" />
+    <None Remove="appsettings.TestingCI.json" />
     <None Remove="DummyData\countries.json" />
     <None Remove="DummyData\finished-fixtures.json" />
     <None Remove="DummyData\seasons.json" />
@@ -18,6 +19,9 @@
 
   <ItemGroup>
     <Content Include="appsettings.Testing.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="appsettings.TestingCI.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="DummyData\countries.json">

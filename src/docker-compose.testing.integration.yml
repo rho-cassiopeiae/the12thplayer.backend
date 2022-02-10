@@ -16,6 +16,8 @@ services:
     - PG_PRIMARY_PORT=5432
     ports:
     - "5432:5432"
+    networks:
+    - test
 
   cockroach-test:
     image: cockroachdb/cockroach:v21.2.3
@@ -23,6 +25,8 @@ services:
     - "26257:26257"
     - "8080:8080"
     command: start-single-node --insecure
+    networks:
+    - test
 
   cockroach-init:
     image: cockroachdb-init:latest
@@ -33,12 +37,16 @@ services:
     - DATABASE_USER=The12thPlayerUser
     depends_on:
     - cockroach-test
+    networks:
+    - test
   
   rabbit-test:
     image: masstransit/rabbitmq:3.9.7
     ports:
     - "15672:15672"
     - "5672:5672"
+    networks:
+    - test
 
   redis-test:
     image: bitnami/redis:6.2.6
@@ -46,3 +54,8 @@ services:
     - ALLOW_EMPTY_PASSWORD=yes
     ports:
     - "6379:6379"
+    networks:
+    - test
+
+networks:
+  test:

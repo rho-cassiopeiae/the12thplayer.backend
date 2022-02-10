@@ -28,7 +28,11 @@ namespace Identity.IntegrationTests {
             _host = Program
                 .CreateHostBuilder(args: null)
                 .ConfigureAppConfiguration((hostContext, builder) => {
-                    builder.AddJsonFile("appsettings.Testing.json", optional: false);
+                    if (hostContext.HostingEnvironment.IsEnvironment("TestingCI")) {
+                        builder.AddJsonFile("appsettings.TestingCI.json", optional: false); // testing in CI pipeline
+                    } else {
+                        builder.AddJsonFile("appsettings.Testing.json", optional: false); // local testing
+                    }
                 })
                 .ConfigureLogging((hostContext, builder) => {
                     builder.Services.TryAddEnumerable(
