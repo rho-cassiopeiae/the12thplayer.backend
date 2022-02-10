@@ -29,7 +29,7 @@ services:
     - test
 
   cockroach-init:
-    image: cockroachdb-init:latest
+    image: chekhenkho/cockroachdb-init:latest
     environment:
     - COCKROACH_HOST=cockroach-test:26257
     - COCKROACH_INSECURE=true
@@ -59,3 +59,5 @@ services:
 
 networks:
   test:
+    driver: bridge
+    name: test

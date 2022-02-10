@@ -40,32 +40,32 @@ namespace Livescore.IntegrationTests.Livescore.Discussion.Queries {
                 }
             ).Result;
 
-            _discussionId = result.Data.First().Id;
+            _discussionId = result.Data.First(d => d.Name == "pre-match").Id;
         }
 
         [Fact]
         public async Task Should_Retrieve_Yet_Unretrieved_Discussion_Entries() {
             _sut.RunAs(userId: 2, username: "user-2");
 
-            await _sut.SendRequest(new PostDiscussionEntryCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                DiscussionId = _discussionId,
-                Body = "body-1"
-            });
-
-            await _sut.SendRequest(new PostDiscussionEntryCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                DiscussionId = _discussionId,
-                Body = "body-2"
-            });
-
-            await _sut.SendRequest(new PostDiscussionEntryCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                DiscussionId = _discussionId,
-                Body = "body-3"
+            await Task.WhenAll(new[] {
+                _sut.SendRequest(new PostDiscussionEntryCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    DiscussionId = _discussionId,
+                    Body = "body-1"
+                }),
+                _sut.SendRequest(new PostDiscussionEntryCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    DiscussionId = _discussionId,
+                    Body = "body-2"
+                }),
+                _sut.SendRequest(new PostDiscussionEntryCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    DiscussionId = _discussionId,
+                    Body = "body-3"
+                })
             });
 
             var result = await _sut.SendRequest(new GetMoreDiscussionEntriesQuery {
@@ -78,7 +78,6 @@ namespace Livescore.IntegrationTests.Livescore.Discussion.Queries {
             var entries = result.Data;
 
             entries.Should().HaveCount(4);
-            entries.First().Should().BeOfType<DiscussionEntryDto>().Which.Body.Should().Be("body-3");
         }
     }
 }

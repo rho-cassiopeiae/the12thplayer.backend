@@ -53,7 +53,7 @@ namespace Livescore.IntegrationTests.Livescore.Discussion.HostedServices {
                 }
             ).Result;
 
-            _discussionId = result.Data.First().Id;
+            _discussionId = result.Data.First(d => d.Name == "pre-match").Id;
         }
 
         public void Dispose() {
@@ -64,25 +64,25 @@ namespace Livescore.IntegrationTests.Livescore.Discussion.HostedServices {
         public async Task Should_Detect_Retrieve_And_Broadcast_New_Discussion_Entries() {
             _sut.RunAs(userId: 2, username: "user-2");
 
-            await _sut.SendRequest(new PostDiscussionEntryCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                DiscussionId = _discussionId,
-                Body = "body-1"
-            });
-
-            await _sut.SendRequest(new PostDiscussionEntryCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                DiscussionId = _discussionId,
-                Body = "body-2"
-            });
-
-            await _sut.SendRequest(new PostDiscussionEntryCommand {
-                FixtureId = _fixtureId,
-                TeamId = _teamId,
-                DiscussionId = _discussionId,
-                Body = "body-3"
+            await Task.WhenAll(new[] {
+                _sut.SendRequest(new PostDiscussionEntryCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    DiscussionId = _discussionId,
+                    Body = "body-1"
+                }),
+                _sut.SendRequest(new PostDiscussionEntryCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    DiscussionId = _discussionId,
+                    Body = "body-2"
+                }),
+                _sut.SendRequest(new PostDiscussionEntryCommand {
+                    FixtureId = _fixtureId,
+                    TeamId = _teamId,
+                    DiscussionId = _discussionId,
+                    Body = "body-3"
+                })
             });
 
             await Task.Delay(TimeSpan.FromMilliseconds(200));

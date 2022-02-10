@@ -1,0 +1,16 @@
+image: docker:latest
+services:
+- docker:dind
+
+stages:
+- build and test
+
+test:
+  stage: build and test
+  script:
+  - apk add --update docker-compose
+  - cd src/
+  - docker-compose -f docker-compose.testing.integration.yml up -d
+  - docker run --network test -v $PWD:/app -w /app -e "ASPNETCORE_ENVIRONMENT=TestingCI" -e "DOTNET_ENVIRONMENT=TestingCI" mcr.microsoft.com/dotnet/sdk:5.0-alpine dotnet test The12thPlayer.sln --filter FullyQualifiedName\!~FileHostingGateway
+  rules:
+  - if: '$CI_COMMIT_BRANCH == "dev"'
