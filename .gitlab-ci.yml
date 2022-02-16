@@ -1,16 +1,63 @@
-image: docker:latest
-services:
-- docker:dind
+image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+
+variables:
+  OBJECTS_DIRECTORY: "obj"
+  NUGET_PACKAGES_DIRECTORY: ".nuget"
+  SOURCE_CODE_PATH: "./src/"
+  MODE: "postgres"
+  PG_MODE: "primary"
+  PG_USER: "The12thPlayerUser"
+  PG_PASSWORD: "The12thPlayerPassword"
+  PG_DATABASE: "The12thPlayerTest"
+  PG_PRIMARY_USER: "PrimaryUser"
+  PG_PRIMARY_PASSWORD: "PrimaryPassword"
+  PG_ROOT_PASSWORD: "postgres"
+  PGHOST: "/tmp"
+  PG_PRIMARY_PORT: 5432
+  COCKROACH_HOST: "cockroach-test:26257"
+  COCKROACH_INSECURE: "true"
+  DATABASE_NAME: "The12thPlayerTest"
+  DATABASE_USER: "The12thPlayerUser"
+  ALLOW_EMPTY_PASSWORD: "yes"
+
+cache:
+  key: $CI_COMMIT_REF_SLUG
+  paths:
+  - $SOURCE_CODE_PATH$OBJECTS_DIRECTORY/project.assets.json
+  - $SOURCE_CODE_PATH$OBJECTS_DIRECTORY/*.csproj.nuget.*
+  - $SOURCE_CODE_PATH$NUGET_PACKAGES_DIRECTORY
+  policy: pull-push
 
 stages:
-- build and test
+- Build
+- Test
+
+before_script:
+- cd $SOURCE_CODE_PATH
+- dotnet restore The12thPlayer.sln --packages $NUGET_PACKAGES_DIRECTORY
+
+build:
+  stage: Build
+  script:
+  - dotnet build The12thPlayer.sln --no-restore
 
 test:
-  stage: build and test
+  stage: Test
+  variables:
+    FF_NETWORK_PER_BUILD: "true"
+    ASPNETCORE_ENVIRONMENT: "TestingCI"
+    DOTNET_ENVIRONMENT: "TestingCI"
+  services:
+  - name: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:centos8-13.4-4.7.3
+    alias: postgres-test
+  - name: cockroachdb/cockroach:v21.2.3
+    alias: cockroach-test
+    command: ["start-single-node", "--insecure"]
+  - name: chekhenkho/cockroachdb-init:latest
+    alias: cockroach-init
+  - name: masstransit/rabbitmq:3.9.7
+    alias: rabbit-test
+  - name: bitnami/redis:6.2.6
+    alias: redis-test
   script:
-  - apk add --update docker-compose
-  - cd src/
-  - docker-compose -f docker-compose.testing.integration.yml up -d
-  - docker run --network test -v $PWD:/app -w /app -e "ASPNETCORE_ENVIRONMENT=TestingCI" -e "DOTNET_ENVIRONMENT=TestingCI" mcr.microsoft.com/dotnet/sdk:5.0-alpine dotnet test The12thPlayer.sln --filter FullyQualifiedName\!~FileHostingGateway
-  rules:
-  - if: '$CI_COMMIT_BRANCH == "dev"'
+  - dotnet test The12thPlayer.sln --no-restore --filter FullyQualifiedName\!~FileHostingGateway
